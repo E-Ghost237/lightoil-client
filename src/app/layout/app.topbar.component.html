@@ -1,0 +1,174 @@
+
+
+
+
+
+<div class="layout-topbar">
+
+    <button #menubutton
+        pTooltip="Cliquez pour derouler le menu"
+        class="p-link layout-menu-button layout-topbar-button"
+        label="Menu"
+        (click)="layoutService.onMenuToggle()">
+        <i class="pi pi-bars"></i>
+    </button>
+
+    <button class="col-2 img2"
+        routerLink=""
+        (click)="backToDashboard()"
+        pTooltip="Retourner au dashboard station service"
+        >
+        <img width="80%" src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'lightoil.svg' : 'LightOil_Final-05.jpg'}}" alt="logo">
+    </button>
+
+    <!-- <a class="layout-topbar-logo ml-4" routerLink="">
+        <img  src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'LightOil_Final-04' : 'LightOil_Final-04'}}.png" alt="logo">
+        <span>SAKAI</span>
+    </a> -->
+
+    <span class="mx-4" *ngIf="serviceStationData?.length" tooltipPosition="bottom" pTooltip="Ville de la station service">
+        {{serviceStationData[0]?.city}}
+    </span>
+
+    <span class="mx-4" *ngIf="serviceStationData?.length" tooltipPosition="bottom" pTooltip="Nom de la station service">
+        {{serviceStationData[0]?.name}}
+    </span>
+
+    <button #topbarmenubutton 
+        class="p-link layout-topbar-menu-button layout-topbar-button" 
+        (click)="layoutService.showProfileSidebar()">
+        <i class="pi pi-ellipsis-v"></i>
+    </button>
+
+    <div #topbarmenu class="layout-topbar-menu" 
+        [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+
+        <button class="p-link layout-topbar-button" tooltipPosition="bottom" pTooltip="Vos propositions d'amelioration">
+            <i class="pi pi-envelope"></i>
+            <span>Suggestions</span>
+        </button>
+
+        <button class="p-link layout-topbar-button"
+            tooltipPosition="bottom"
+            pTooltip="Accedez aux dernieres notifications"
+            (click)="onClickShowListNoti()"
+            >
+            <i class="pi pi-fw pi-bell text-3xl" pBadge value="75" severity="danger">
+            </i>
+            <span>Notifications</span>
+        </button>
+
+
+        <p-menu #menu [model]="itemUser" [popup]="true" [appendTo]="topbarmenu"></p-menu>
+        <button class="p-link layout-topbar-button" tooltipPosition="bottom" 
+            pTooltip="{{user?.first_name+' '+user?.last_name+''}} Cliquez si vous souhaitez vous déconnecter" 
+            (click)="logout()">
+            <i class="pi pi-fw pi-sign-out text-red-300"></i>
+            <span class="pi pi-fw pi-sign-out">Se déconnecter</span>
+        </button>
+        <!-- <button 
+            class="p-link layout-topbar-button" 
+                tooltipPosition="bottom" 
+                pTooltip="{{user?.user_name+' '}} Deconnectez vous" 
+                (click)="menu.toggle($event)">
+            <i class="pi pi-fw pi-user"></i>
+            <span>Deconnexion</span>
+        </button> -->
+
+
+
+        <span class="p-float-label mx-4">
+            <p-dropdown
+                [options]="listTank"
+                [(ngModel)]="selectedTank"
+                placeholder="Selectionnez une cuve"
+                optionLabel="name"
+                (onChange)="onChangeSelectedTank($event)"
+                pTooltip="Accedez au dashboard d'une cuve"
+                tooltipPosition="left">
+
+                <ng-template pTemplate="selectedItem">
+                    <div class="flex align-items-center gap-2" *ngIf="selectedTank">
+                        <div *ngIf="selectedTank?.sensor_reference=='Dashboard'">
+                            {{ selectedTank?.sensor_reference }}
+                        </div>
+                        <div *ngIf="selectedTank?.sensor_reference != 'Dashboard'">
+                            {{ 'Cuve '+selectedTank?.sensor_reference }}
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template let-tank pTemplate="item">
+                    <ng-container *ngIf="tank?.sensor_reference=='Dashboard'; else elseTemplate">
+                        <div class="flex justify-content-between align-items-center gap-2">
+                            <div>{{ tank?.sensor_reference+' '+tank?.product }}</div>
+                            <i class="pi pi-fw pi-arrow-right mx-4"></i>
+                        </div>
+                    </ng-container>
+                    <ng-template #elseTemplate>
+                        <div class="flex justify-content-between align-items-center gap-2">
+                            <div>{{ 'Cuve '+tank?.sensor_reference+' '+tank?.product }}</div>
+                            <i class="pi pi-fw pi-arrow-right mx-4"></i>
+                        </div>
+                    </ng-template>
+
+
+                </ng-template>
+
+            </p-dropdown>
+        </span>
+
+        <span class="p-float-label mx-4">
+            <p-dropdown
+                [options]="languages"
+                [(ngModel)]="selectedLanguage"
+                placeholder="Selectionnez une langue"
+                optionLabel="name"
+                pTooltip="Quelle langue preferez vous ?"
+                tooltipPosition="bottom">
+            </p-dropdown>
+        </span>
+    </div>
+
+
+    <p-sidebar [(visible)]="sidebarVisible"
+        styleClass="p-sidebar-md"
+        [blockScroll]="true"
+        [modal]="false"
+
+        >
+        <ng-template pTemplate="header" >
+            <div class="mx-auto">
+                <span class="h4 mr-1">{{'Notifications '+selectedTank?.sensor_reference}}</span>
+                <span>
+                    <p-badge value="{{listNoti?.length??'0'}}"
+                            size="large" severity="info"
+                            >
+                    </p-badge>
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="content">
+
+            <ng-container *ngIf="listNoti.length > 0; else elseTemplate">
+
+                <div class="mx-auto" *ngFor="let noti of listNoti; let i=index">
+                    <app-notification [notiData]="noti" [index]="i" > </app-notification>
+                </div>
+            </ng-container>
+            <ng-template #elseTemplate>
+                <span class="h5 mx-auto">
+                    Aucune notification disponible
+                </span>
+            </ng-template>
+
+
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <div class="layout-footer">
+                <img src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'Capture2' : 'Capture'}}.PNG" alt="Light Oil" height="20" class="mr-2"/>
+                <span class="font-medium ml-2">Light Group</span>
+            </div>
+        </ng-template>
+    </p-sidebar>
+
+</div>

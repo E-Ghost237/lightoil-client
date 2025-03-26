@@ -1,0 +1,162 @@
+<!-- Show message -->
+<p-toast key="tst"></p-toast>
+
+<!-- Page header -->
+<div class="card pb-0 mb-5">
+    <div class="card-body align-content-center justify-content-between pt-0">
+        <div class="text-center align-content-center text-xl text-uppercase">
+            <h1 class="font-bold">Liste des points de vente de l'entreprise</h1>
+        </div>
+    </div>
+</div>
+
+<ng-container *ngIf="loading_logo == false; else elseTemplate">
+    <!-- Table -->
+    <div class="card p-2 pb-3">
+        <p-table #dt [value]="points_of_sale" [(selection)]="selected_point_of_sale" [rowHover]="true" dataKey="id"
+            styleClass="p-datatable-striped mt-5" [scrollable]="true" scrollHeight="30rem" [paginator]="true"
+            [rows]="10" [first]="first_page" [showCurrentPageReport]="true" (onPage)="onPageChange($event)"
+            currentPageReportTemplate="Affichage de {first} à {last} élement(s) sur {totalRecords}"
+            [rowsPerPageOptions]="[10, 15, 25]" responsiveLayout="stack" [breakpoint]="'960px'"
+            [globalFilterFields]="['sale_point_type.name', 'name', 'town.name']">
+            <ng-template pTemplate="caption">
+                <div class="flex align-items-center justify-content-between">
+                    <p-button (click)="loadData()" styleClass="font-semibold align-content-center mr-2"
+                        label="Actualiser" severity="primary" icon="pi pi-refresh" iconPos="right"
+                        [loading]="loading_icon" loadingIcon="pi pi-spin pi-refresh" />
+
+                    <span class="block p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..."
+                            class="w-full sm:w-auto" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header" let-columns>
+                <tr class="table-dark font-bold text-lg">
+                    <th scope="col" class="text-center">#</th>
+                    <th scope="col">Réseau</th>
+                    <th scope="col">Point de vente</th>
+                    <th scope="col">Ville</th>
+                    <th scope="col">Coord. Géo.</th>
+                    <th scope="col"></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>
+                        <p-columnFilter field="sale_point_type.name" matchMode="in" [showMenu]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="selected_point_of_sale_types" [options]="point_of_sale_types"
+                                    [maxselectedLabels]="1" placeholder="Sélectionner"
+                                    [selectAll]="select_all_point_of_sale_types"
+                                    (onChange)="filter(onPointsOfSaleTypesChange($event.value))"
+                                    (onSelectAllChange)="filter(onSelectAllPointsOfSaleTypesChange($event.checked))"
+                                    (onClear)="filter([])" showClear="true" optionLabel="name">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="mt-1">
+                                                {{ option.name }}
+                                            </span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </th>
+                    <th>
+                        <p-columnFilter field="name" matchMode="in" [showMenu]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="selected_points_of_sale" [options]="points_of_sale"
+                                    [maxselectedLabels]="1" placeholder="Sélectionner" [selectAll]="select_all_points_of_sale"
+                                    (onChange)="filter(onPointsOfSaleChange($event.value))"
+                                    (onSelectAllChange)="filter(onSelectAllPointsOfSaleChange($event.checked))"
+                                    (onClear)="filter([])" showClear="true" optionLabel="name">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="mt-1">
+                                                {{ option.name }}
+                                            </span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </th>
+                    <th>
+                        <p-columnFilter type="text" field="town.name" placeholder="Rechercher par ville"
+                            ariaLabel="Ville" />
+                    </th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-point_of_sale let-rowIndex="rowIndex" let-columns="columns">
+                <tr>
+                    <td class="font-bold text-center">
+                        <span class="p-column-title">#</span>{{ rowIndex + 1 }}
+                    </td>
+
+                    <td>
+                        <span class="p-column-title">Réseau</span>
+                        <span class="font-medium">{{ point_of_sale.sale_point_type.name }}</span>
+                    </td>
+
+                    <td>
+                        <span class="p-column-title">Point de vente</span>
+                        <div>
+                            <span class="block font-medium">{{ point_of_sale.name }}</span>
+
+                        </div>
+                    </td>
+
+                    <td class="font-medium">
+                        <span class="p-column-title">Ville</span>{{ point_of_sale.town.name }}
+                    </td>
+
+                    <td>
+                        <span class="p-column-title">Coord. Géo.</span>
+                        <div class="text-base">
+                            <span class="block font-medium">Latitude : {{ point_of_sale.latitude }}</span>
+                            <span class="block font-medium">Longitude : {{ point_of_sale.longitude }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <!-- <p-button (onClick)="editPriceOfProduct(product)" icon="pi pi-pencil" [rounded]="true"
+                            [outlined]="true" [text]="true" severity="primary"iconPos="right" [loading]="loading_icon"
+                            loadingIcon="pi pi-spin pi-spinner-dotted" pTooltip="Cliquez pour mettre à jour les infos du point de vente."
+                            tooltipPosition="left" [raised]="true" styleClass="font-bold mr-2" /> -->
+
+                        <p-button (onClick)="goToPointOfSaleSpace(point_of_sale.id)" label="Aller vers" [text]="true"
+                            severity="success" iconPos="right" [loading]="loading_icon"
+                            loadingIcon="pi pi-spin pi-spinner-dotted"
+                            pTooltip="Cliquez pour aller vers le point de vente." tooltipPosition="left"
+                            styleClass="" />
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6">Aucune corespondance trouvée.</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="summary">
+                <div class="align-content-center">
+                    Il y a au total <b>{{ points_of_sale ? points_of_sale.length : 0 }}</b> point{{ (points_of_sale ?
+                    points_of_sale.length : 0) > 1 ? 's' : '' }} de vente.
+                </div>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Chatbot -->
+    <app-chatbot></app-chatbot>
+</ng-container>
+<ng-template #elseTemplate>
+    <div class="relative flex flex-column align-items-center justify-content-center mt-5">
+        <div class="absolute top-100 flex align-items-center justify-content-center mt-5">
+            <img src="../../../../../../../assets/img/logos/loading-oil-logo.gif" width="150rem"
+                style="margin-top: 70%;" alt="Loading...">
+        </div>
+    </div>
+</ng-template>

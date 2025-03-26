@@ -1,0 +1,173 @@
+
+<p-toast></p-toast>
+<p-table
+    #dt
+    [value]="listReconciliations"
+    styleClass="p-datatable-striped"
+    [rows]="50"
+    [scrollable]="true"
+    scrollHeight="30rem"
+    [paginator]="true"
+    [globalFilterFields]="['initial_stock', 'depotage', 'output', 'loss_on_stock']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedReconciliation"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[50, 100, 200]"
+    [paginator]="true"
+>
+    <ng-template pTemplate="caption">
+        <div class="flex align-items-center justify-content-between">
+            <h5 class="m-0">Gestion des reconciliations</h5>
+            <span class="p-input-icon-right">
+                <i class="pi pi-search"></i>
+                <input 
+                    pInputText 
+                    type="text" 
+                    (input)="dt.filterGlobal($event.target.value, 'contains')" 
+                    placeholder="Search..." />
+            </span>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="width: 4rem">
+                
+            </th>
+            <th  style="min-width: 4rem">
+                Date 
+            </th>
+            <th >
+                Produit 
+            </th>
+            <th>
+                Type de perte
+            </th>
+            <th >
+                Stock initial
+            </th>
+            <th >
+                Dépotage
+            </th>
+            <th >
+                Sorties 
+            </th>
+            <th >
+                Pertes 
+            </th>
+            <th>
+                Détails
+            </th>
+            <th></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-reconciliation let-i="rowIndex">
+        <tr>
+            <td [rowSpan]="2">
+                {{(i+1)+""}}
+            </td>
+            <td [rowSpan]="2">
+                {{ "Du "+getToLocalDateTime(reconciliation.start)+" au "+getToLocalDateTime(reconciliation.end) }}
+            </td>
+            <td [rowSpan]="2">
+                {{reconciliation.product.name}} 
+            </td>
+            <td>
+                {{"Stock"}}
+            </td>
+            <td [rowSpan]="2">
+                {{reconciliation.initialStock | number: '2.1-3'}}
+            </td>
+            <td [rowSpan]="2">
+                {{reconciliation.input | number: '2.1-3'}}
+            </td>
+            <td >
+                {{reconciliation.outputTank | number: '2.1-3'}} 
+            </td>
+            <td >
+                {{reconciliation.lossTank | number: '2.1-3'}} 
+            </td>
+            <td class="flex justify-content-center"> 
+                <button type="button" 
+                    (click)="showStockGraph(reconciliation)" 
+                    pButton 
+                    icon="pi pi-external-link" 
+                    label="Voir">
+                </button>
+            </td>
+            <td></td> 
+        </tr>
+        <tr>
+            <td>
+                {{"Index"}}
+            </td>
+            <!-- <td >
+                {{reconciliation.initialStock}}
+            </td>
+            <td >
+                {{reconciliation.input}}
+            </td> -->
+            <td >
+                {{reconciliation.outputIndices | number: '2.1-3'}} 
+            </td>
+            <td >
+                {{reconciliation.lossIndex | number: '2.1-3'}} 
+            </td>
+            <td class="flex justify-content-center"> 
+                <button type="button" 
+                    (click)="showIndexGraph(reconciliation)" 
+                    pButton 
+                    icon="pi pi-external-link" 
+                    [disabled]="true"
+                    label="Voir">
+                </button>
+            </td>
+            <td></td> 
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+        <div class="flex align-items-center justify-content-between">
+            Au total, il y'a {{ listReconciliations ? listReconciliations.length : 0 }} reconciliations.
+        </div>
+    </ng-template>
+</p-table>
+
+
+<p-dialog header="Les details du stock sous forme de graphe" 
+    [resizable]="false" 
+    [modal]="true" 
+    [maximizable]="true" 
+    appendTo="body" 
+    [(visible)]="dialogVisible" 
+    [style]="{width: '75vw'}" 
+    [contentStyle]="{height: '300px'}">
+
+    <div *ngIf="listDataForGraph.length > 0">
+        <div *ngFor="let dataForGraph of listDataForGraph; index as i">
+            <app-reconciliation-details-graph [listRecord] = "dataForGraph"
+                                                [sensorReference] = "dataForGraph.sensorReference">
+
+            </app-reconciliation-details-graph>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button type="button" 
+            pButton pRipple 
+            icon="pi pi-times" 
+            (click)="dialogVisible=false" 
+            label="Fermer" 
+            class="p-button-text">
+        </button>
+    </ng-template>
+</p-dialog>
+
+
+
+
+
+
+
+

@@ -1,0 +1,59 @@
+<div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+    <div class="flex flex-column align-items-center justify-content-center">
+        <p-toast key="tst"></p-toast>  <!-- Show message -->
+
+        <a (click)="router.navigate(['/'], {fragment: 'home'})" class="flex align-items-center cursor-pointer">
+            <img src="assets/img/logos/{{layoutService.config().colorScheme === 'light' ? 'lightoil-logo-black' : 'lightoil-logo-white'}}.png" 
+                alt="lightoil-logo" height="70" class="mb-5"/>
+        </a>
+        
+        <div class="w-25rem xl:w-30rem lg:w-30rem md:w-30rem" 
+            style="border-radius:46px; padding:0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);">
+            <div *ngIf="!hideFirstBlock" class="card w-full p-4" style="border-radius:43px">
+                <div class="text-center mt-2 mb-5">
+                    <p class="font-semibold text-dark text-xl">
+                        <i>Cocher la case ci-desous si vous souhaiter vous déconnecter de tout vos appareils.</i>
+                    </p>
+                </div>
+                
+                <div class="flex align-items-center justify-content-start p-3 mb-5">
+                    <p-checkbox [(ngModel)]="checked" [binary]="true" name="allDevices" id="allDevices" styleClass="mr-2" />
+                    <label for="allDevices" class="font-medium text-dark text-lg">Me déconnecter de tout mes appareils.</label>
+                </div>
+                    
+                <div class="flex flex-wrap gap-3 justify-content-end pr-3 mb-2">
+                    <p-button label="Annuler" [outlined]="true" severity="secondary" routerLink="/pages/dashboard" />
+                    <p-button type="button" label="Se déconnecter" 
+                        (onClick)="logout()" 
+                        styleClass="align-content-center font-bold" 
+                        severity="primary" 
+                        [loading]="loading" 
+                        loadingIcon="pi pi-refresh" iconPos="right" />
+                </div>
+            </div>
+
+            <div *ngIf="!hideSecondBlock" class="card w-full p-5" style="border-radius:43px">
+                <div class="text-center mt-2 mb-4">
+                    <div class="flex justify-content-center mb-5">
+                        <p-avatar icon="pi pi-check" size="xlarge" shape="circle" 
+                            [style]="{ 'background-color': 'black', color: 'white' }" />
+                    </div>
+                    
+                    <p class="font-semibold text-dark text-2xl">
+                        Vous êtes actuellement déconnecté de votre compte LightOil.
+                        <i class="block font-medium text-dark text-xl mt-1">Connectez-vous pour continuer.</i>
+                    </p>
+                </div>
+                
+                <div class="flex flex-column justify-content-center mb-3">
+                    <p-button type="button" label="Se connecter" 
+                        routerLink="/auth/login" 
+                        styleClass="w-full align-content-center font-bold text-xl mt-3" 
+                        [raised]="true" 
+                        severity="primary" 
+                        loadingIcon="pi pi-refresh" iconPos="right" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

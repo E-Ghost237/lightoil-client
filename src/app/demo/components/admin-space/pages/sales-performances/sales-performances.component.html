@@ -1,0 +1,135 @@
+<!-- Show message -->
+<p-toast key="tst"></p-toast>
+
+<!-- Header bloc -->
+<div class="card pb-0 mb-5">
+    <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
+        <div
+            class="col-12 xl:col-7 lg:col-7 md:col-7 text-center align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
+            <h1 class="font-bold">Performances de ventes</h1>
+        </div>
+        <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
+            <label for="sale-point-types" class="block font-bold text-lg">Réseau :</label>
+            <p-dropdown (onChange)="onPointOfSaleTypeChange($event)"
+                styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase" inputId="sale-point-types"
+                [options]="point_of_sale_types" [(ngModel)]="selected_point_of_sale_type" optionLabel="name"
+                [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un réseau" />
+        </div>
+    </div>
+</div>
+
+<div class="card p-2 pb-2 mb-5">
+    <div class="card-header font-bold text-xl pt-0">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs nav-justified card-header-tabs" role="tablist" id="performance-tab">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active text-uppercase" id="daily-tab" data-bs-toggle="tab"
+                    data-bs-target="#daily-tab-pane" type="button" role="tab" aria-controls="daily-tab-pane"
+                    aria-selected="true" (click)="showCalendar('daily')">
+                    Journalières
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-uppercase" id="weekly-tab" data-bs-toggle="tab"
+                    data-bs-target="#weekly-tab-pane" type="button" role="tab" aria-controls="weekly-tab-pane"
+                    aria-selected="false" (click)="showCalendar('weekly')">
+                    Hebdomadaires
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-uppercase" id="monthly-tab" data-bs-toggle="tab"
+                    data-bs-target="#monthly-tab-pane" type="button" role="tab" aria-controls="monthly-tab-pane"
+                    aria-selected="false" (click)="showCalendar('monthly')">
+                    Mensuelles
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-uppercase" id="annual-tab" data-bs-toggle="tab"
+                    data-bs-target="#annual-tab-pane" type="button" role="tab" aria-controls="annual-tab-pane"
+                    aria-selected="false" (click)="showCalendar('annual')">
+                    Annuelles
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body justify-content-center">
+        <div class="grid mt-1">
+            <!-- Filters section -->
+            <div class="col-12 xl:col-4 lg:col-4 md:col-4">
+                <!-- Daily calendar -->
+                <div *ngIf="is_daily_performances">
+                    <label for="daily_date" class="block font-bold mb-1"> Journée du : </label>
+                    <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="daily_date"
+                        dateFormat="dd/mm/yy" [(ngModel)]="daily_date" [readonlyInput]="true" [showClear]="true"
+                        placeholder="Sélectionner un jour" [maxDate]="max_date" />
+                </div>
+
+                <!-- Weekly calendar -->
+                <div *ngIf="is_weekly_performances">
+                    <label for="weekly_date" class="block font-bold mb-1"> Semaine du : </label>
+                    <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="weekly_date"
+                        dateFormat="dd/mm/yy" selectionMode="range" [(ngModel)]="weekly_date" [maxDate]="max_date"
+                        [readonlyInput]="true" [showClear]="true" placeholder="Sélectionner une période" />
+                </div>
+
+                <!-- Monthly calendar -->
+                <div *ngIf="is_monthly_performances">
+                    <label for="monthly_date" class="block font-bold mb-1"> Mois de : </label>
+                    <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="monthly_date"
+                        dateFormat="mm-yy" view="month" [(ngModel)]="monthly_date" [readonlyInput]="true"
+                        [showClear]="true" placeholder="Sélectionner un mois" [maxDate]="max_date" />
+                </div>
+
+                <!-- Yearly calendar -->
+                <div *ngIf="is_annual_performances">
+                    <label for="annual_date" class="block font-bold mb-1"> Année : </label>
+                    <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="annual_date"
+                        dateFormat="yy" view="year" [showClear]="true" [(ngModel)]="annual_date"
+                        placeholder="Sélectionner une année" [maxDate]="max_date" />
+                </div>
+            </div>
+
+            <!-- Buttons section -->
+            <div class="col-12 xl:col-2 lg:col-2 md:col-2">
+                <span class="block font-bold mb-1">Exporter : </span>
+                <!-- Export performances to PDF format -->
+                <p-button (onClick)="exportPerformancesToPDFFormat()"
+                    styleClass="w-full align-content-center text-lg" label="PDF" [raised]="true"
+                    severity="danger" [disabled]="!can_export_performances">
+                    <img src="assets/img/pdf.png" class="mr-2 pdf-icon" alt="PDF" />
+                </p-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab panes -->
+<div class="tab-content" id="performance-tab-content">
+    <!-- Daily performances -->
+    <div class="tab-pane fade show active" id="daily-tab-pane" role="tabpanel" aria-labelledby="daily-tab"
+        tabindex="0">
+        <admin-sales-performances-charts [point_of_sale_type]="selected_point_of_sale_type?.name"
+            [sales_performances]="daily_sales_performances" period="daily" [loading]="lightoil_loading">
+        </admin-sales-performances-charts>
+    </div>
+
+    <!-- Weekly performances -->
+    <div class="tab-pane fade" id="weekly-tab-pane" role="tabpanel" aria-labelledby="weekly-tab" tabindex="0">
+        <admin-sales-performances-charts [point_of_sale_type]="selected_point_of_sale_type?.name"
+            [sales_performances]="weekly_sales_performances" period="weekly" [loading]="lightoil_loading">
+        </admin-sales-performances-charts>
+    </div>
+
+    <!-- Monthly performances -->
+    <div class="tab-pane fade" id="monthly-tab-pane" role="tabpanel" aria-labelledby="monthly-tab" tabindex="0">
+        <!-- <admin-sales-performances-charts></admin-sales-performances-charts> -->
+    </div>
+
+    <!-- Annual performances -->
+    <div class="tab-pane fade" id="annual-tab-pane" role="tabpanel" aria-labelledby="annual-tab" tabindex="0">
+        <!-- <admin-sales-performances-charts></admin-sales-performances-charts> -->
+    </div>
+</div>
+
+<!-- Chatbot -->
+<app-chatbot></app-chatbot>

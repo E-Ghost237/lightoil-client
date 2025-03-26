@@ -1,0 +1,135 @@
+
+<ng-container >
+    <div class="row ">
+        <span class="text-center h4" >
+            Historiques des donnees du débitmètre {{flowMeter?.sensor_reference+'-'+flowMeter?.product_service_station?.product?.name}}
+        </span>
+    </div>
+    <div class="row mt-1">
+        <p-table [value]="listOutputs?.periodRecord"
+            [scrollable]="true"
+            styleClass="p-datatable-striped"
+            scrollHeight="40rem"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            [rowsPerPageOptions]="[50, 100, 200]"
+            [paginator]="true" [rows]="50"
+            >
+            <ng-template pTemplate="caption">
+                <div class="flex">
+                    {{
+                        "Du "+getToLocalDate(listOutputs?.dateStart)+
+                        " au "+getToLocalDate(listOutputs?.dateEnd)+
+                        " entre "+getToLocalTime(listOutputs?.dateStart)+
+                        " et "+getToLocalTime(listOutputs?.dateEnd)
+                    }}
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header" let-columns>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th pTooltip="en litres par seconde">Débit de depart</th>
+                    <th pTooltip="en litres">Volume transitant</th>
+                    <th pTooltip="en litres par seconde">Débit de fin</th>
+                    <th pTooltip="Voir le graphe de la portion">Graphe</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-output let-rowData let-columns="columns" let-rowIndex="rowIndex">
+                <tr *ngIf="! output?.isTheLast">
+                    <td>{{(rowIndex+1)}}</td>
+                    <td>
+                        <div class="row justify-content-center">
+                            <span class="text-left ">{{getToLocalDate(output.start)}}</span>
+                        </div>
+                        <div class="row">
+                            <span class="text-left">
+                                {{"de "+getToLocalTime(output.start)+' à '+getToLocalTime(output.end)}}
+                            </span>
+                        </div>
+                    </td>
+                    <td pTooltip="en litres par seconde" tooltipPosition="bottom">
+                        <div class="row justify-content-center" *ngIf="output?.firstPeriodRecord">
+                            <span class="text-left">
+                                {{getRoundValue(output?.firstPeriodRecord?.volume)}}
+                            </span>
+                        </div>
+                        <div class="row justify-content-center" *ngIf="output?.firstPeriodRecord">
+                            <span class="text-left">
+                                {{getToLocalDateTime(output?.firstPeriodRecord?.updated_at)}}
+                            </span>
+                        </div>
+                    </td>
+                    <td pTooltip="en litres" tooltipPosition="bottom">
+                        {{getRoundValue(output?.outputs)}}
+                    </td>
+                    <td pTooltip="en litres par seconde" tooltipPosition="bottom">
+                        <div class="row justify-content-center" *ngIf="output?.lastPeriodRecord">
+                            <span class="text-left ">
+                                {{getRoundValue(output?.lastPeriodRecord?.volume)}}
+                            </span>
+                        </div>
+                        <div class="row justify-content-center" *ngIf="output?.lastPeriodRecord">
+                            <span class="text-left">
+                                {{getToLocalDateTime(output?.lastPeriodRecord?.updated_at)}}
+                            </span>
+                        </div>
+                    </td>
+    
+                    <td pTooltip="Cliquez pour voir le graphe" tooltipPosition="bottom">
+                        <div class="row justify-content-center" *ngIf="output?.lastPeriodRecord">
+                            <span class="text-left " >
+                                <button pButton 
+                                        pRipple 
+                                        (click)="initGraphData($event)"
+                                        icon="pi pi-chart-bar">
+                                </button>
+                            </span>
+                        </div>
+                    </td>
+    
+                </tr>
+                <tr *ngIf=" output?.isTheLast">
+                    <td colspan="4">
+                        <div class="row justify-content-center ">
+                            <span class="text-center ">Total sur la periode</span>
+                        </div>
+                    </td>
+                    <td colspan="3" pTooltip="en litres" tooltipPosition="bottom">
+                        <div class="row justify-content-center">
+                            <span class="">
+                                <p-tag severity="info" [value]="getRoundValue(output?.outputs)"></p-tag>
+                            </span>
+                        </div>
+    
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+    
+    
+    <p-overlayPanel #og 
+        [style]="{'width': '80%','height': '80%'}"
+        [styleClass]="'mt-8 pt-1 border-2 border-primary'"
+        [appendTo]="'body'"  
+        [showCloseIcon]="true">
+        <ng-template pTemplate="content" >
+            <div class="flex flex-column justify-content-center align-content-center ">
+                <div class="row ">
+                    <span class="text-center h4">
+                        Graphe d'évolution du débit sur la période
+                    </span>
+                </div>
+                <div class="row mt-8">
+                    <p-chart #line type="line" [data]="data" [options]="options"></p-chart>
+                </div>
+            </div>
+        </ng-template>
+    </p-overlayPanel>
+        
+
+</ng-container>
+
+
+

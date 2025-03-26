@@ -1,0 +1,42 @@
+
+<p-toast></p-toast>
+<div class="row bg-secondary justify-content-evenly" >
+    <div class="col">
+        <button class="bg-secondary" style="border: none;">
+            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
+        </button>
+    </div>
+    <div class="col-8 text-center">
+        <h4 class="text-white">Personnalisation de l'image de fond de la plateforme</h4>
+    </div>
+    <div class="col text-center">
+        <img src="../../../../../../assets/demo/images/product/icon.jpg" alt="icon">
+    </div>
+</div>
+
+<div class="card flex justify-content-center mt-3 ">
+    <div class="w-50 mx-auto">
+        <p-fileUpload name="demo[]" #uploader
+            [url]="urlSetImage" 
+            (onSelect)="onSelectedFile($event)" 
+            (uploadHandler)="onCustomUpload($event)"
+            chooseLabel="Choisir une image"
+            uploadLabel="Charger l'image"
+            cancelLabel="Annuler l'image"
+            [multiple]="false" 
+            [customUpload]="true"
+            chooseStyleClass="mx-2 my-2 w-auto"
+            uploadStyleClass="mx-2 my-2 w-auto"
+            cancelStyleClass="mx-2 my-2 w-auto"
+            previewWidth="100"
+            method="post"
+            accept="image/*" 
+            maxFileSize="1000000000">
+            <ng-template pTemplate="content">
+                <ul *ngIf="uploadedFiles.length">
+                    <li *ngFor="let file of uploadedFiles">{{ file.name }} - {{ file.size }} bytes</li>
+                </ul>
+            </ng-template>
+        </p-fileUpload>
+    </div> 
+</div>

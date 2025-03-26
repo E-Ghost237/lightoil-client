@@ -1,0 +1,39 @@
+<div class="grid">
+    <!-- Card of daily sales history -->
+    <div class="col-12 xl:col-6 lg:col-6">
+        <div class="card p-4">
+            <span class="font-semibold text-900 text-dark text-xl mb-4">
+                Ventes du {{ formatted_date ?? '...' }} en FCFA
+            </span>
+
+            <ng-container *ngIf="hourly_sales_of_product !== undefined && hourly_sales_of_product.length > 0; else elseTemplate">
+                <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
+            </ng-container>
+
+            <ng-template #elseTemplate>
+                <div class="flex flex-column align-items-center justify-content-center mt-4">
+                    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+
+    <!-- Card of last ten days sales history -->
+    <div class="col-12 xl:col-6 lg:col-6">
+        <div class="card p-4">
+            <span class="font-semibold text-900 text-dark text-xl mb-4">
+                Ventes sur 10 jours allant du {{ formatted_started_date ?? '...' }} au {{ formatted_ended_date ?? '...' }} en FCFA
+            </span>
+
+            <ng-container *ngIf="daily_sales_of_product !== undefined && daily_sales_of_product.length > 0; else elseTemplate">
+                <p-chart type="bar" [data]="barData" [options]="barOptions"></p-chart>
+            </ng-container>
+
+            <ng-template #elseTemplate>
+                <div class="flex flex-column align-items-center justify-content-center mt-4">
+                    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>

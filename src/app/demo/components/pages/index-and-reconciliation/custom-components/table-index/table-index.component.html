@@ -1,0 +1,301 @@
+
+<p-toast></p-toast>
+<p-table
+    #dt
+    [value]="listIndexes"
+    [rows]="50"
+    [scrollable]="true"
+    scrollHeight="30rem"
+    [paginator]="true"
+    [globalFilterFields]="['quart_working.time_start', 'index_start', 'index_end', 'gun_pump.name', 'user.first_name']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedIndexes"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[50, 100, 200]"
+    [paginator]="true"
+>
+    <ng-template pTemplate="caption">
+        <div class="flex align-items-center justify-content-between">
+            <h5 class="m-0">Gestion des index</h5>
+            <span class="p-input-icon-right">
+                <i class="pi pi-search"></i>
+                <input
+                    pInputText
+                    type="text"
+                    (input)="dt.filterGlobal($event.target.value, 'contains')"
+                    placeholder="Search..." />
+            </span>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+        <tr>
+            <th style="width: 4rem">
+                <p-tableHeaderCheckbox />
+            </th>
+            <th  style="min-width: 5rem">
+                Date
+            </th>
+            <th>
+                Pompiste
+            </th>
+            <th >
+                Produit
+            </th>
+            <th >
+                Pompe-pistolet
+            </th>
+            <th >
+                Quart
+            </th>
+            <th  style="min-width:10rem">
+                Index de départ
+            </th>
+            <th >
+                Index de fin
+            </th>
+            <th >
+                différence
+            </th>
+
+            <th></th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-index>
+        <tr>
+            <td>
+                <p-tableCheckbox [value]="index" />
+            </td>
+            <td>
+                {{ getToLocalDateTime(index.created_at) }}
+            </td>
+            <td>
+                {{ index.user.first_name+' '+index.user.last_name}}
+            </td>
+            <td>
+                {{ index.gun_pump.product.name }}
+            </td>
+            <td>
+                {{ index.gun_pump.pump.name +" - "+ index.gun_pump.name }}
+            </td>
+            <td>
+                <div class="flex align-content-center justify-content-around">
+                    <div>
+                        {{ index.quart_working.time_start +" - "+ index.quart_working.time_close }}
+                    </div>
+                    <div>
+                        <p-tag severity="warning" value="{{index.quart_working.description}}"></p-tag>
+                    </div>
+                </div>
+
+            </td>
+            <td pTooltip="litres">
+                {{ index.index_start | number: '2.1-3' }}
+            </td>
+            <td pTooltip="litres">
+                {{ index.index_end | number: '2.1-3' }}
+            </td>
+            <td pTooltip="litres">
+                {{ (index.index_end - index.index_start) | number: '2.1-3'  }}
+            </td>
+            <td *ngIf="activeEditAndDeleteButton">
+                <p-button
+                    pRipple
+                    icon="pi pi-pencil"
+                    class="mr-2"
+                    [rounded]="true"
+                    [outlined]="true"
+                    [disabled]="false"
+                    severity="success"
+                    pTooltip="Modifiez l'index"
+                    (click)="editIndex(index)" />
+                <p-button
+                    pRipple
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [rounded]="true"
+                    [outlined]="true"
+                    [disabled]="false"
+                    pTooltip="Supprimez l'index"
+                    (click)="deleteIndex(index)" />
+            </td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+        <div class="flex align-items-center justify-content-between">
+            Au total, il y'a {{ listIndexes ? listIndexes.length : 0 }} index de pompes.
+        </div>
+    </ng-template>
+</p-table>
+
+
+<p-dialog
+    [(visible)]="indexDialog"
+    [style]="{ width: '450px' }"
+    header="Details de l'index"
+    [modal]="true"
+    styleClass="p-fluid">
+        <ng-template pTemplate="content">
+            <img
+                [src]="'assets/demo/images/image_pistolet-removebg-preview.png'"
+                [alt]="pistolet"
+                class="block w-10rem m-auto pb-3" />
+
+            <div class="field mb-5">
+                <span class="p-float-label w-100">
+                    <p-dropdown
+                        [options]="listQuarts"
+                        [(ngModel)]="indexForDialog.quart"
+                        [showClear]="true"
+                        placeholder="Selectionnez le quart de travail"
+                        optionLabel="name" inputId="drop-down-product"
+                        (onChange)="onDropDownDialogQuartChange($event)"
+                        [styleClass]="'w-100'"
+                    >
+                    <ng-template pTemplate="selectedItem">
+                        <div *ngIf="indexForDialog.quart" class="flex align-content-center justify-content-around">
+                            <div>
+                                {{
+                                    indexForDialog.quart ?
+                                    indexForDialog.quart.time_start+' - '+indexForDialog.quart.time_close : ''
+                                }}
+                            </div>
+                            <div >
+                                <p-tag severity="warning" value="{{indexForDialog.quart.description}}"></p-tag>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template let-quart pTemplate="item">
+                        <div class="flex align-content-center justify-content-around">
+                            <div>{{ quart.time_start+' - '+quart.time_close }}</div>
+                            <div >
+                                <p-tag severity="warning" value="{{quart.description}}"></p-tag>
+                            </div>
+                        </div>
+                    </ng-template>
+                    </p-dropdown>
+                    <label for="drop-down-product">Selectionnez le quart de travail</label>
+                </span>
+                <small class="p-error" *ngIf="submitted && !indexForDialog.quart">
+                    Le quart de travail est requis
+                </small>
+            </div>
+            <div class="field mb-5">
+                <span class="p-float-label w-100">
+                    <p-dropdown
+                        [options]="listPumps"
+                        [(ngModel)]="indexForDialog.pump"
+                        [showClear]="true"
+                        placeholder="Selectionnez la pompe"
+                        optionLabel="name" inputId="drop-down-product"
+                        (onChange)="onDropDownDialogPumpChange($event)"
+                        [styleClass]="'w-100'"
+                    >
+                    <ng-template pTemplate="selectedItem">
+                        <div>
+                            {{ indexForDialog.pump ? indexForDialog?.pump?.name : '' }}
+                        </div>
+
+                    </ng-template>
+                    <ng-template let-pump pTemplate="item">
+                        <div>{{ pump?.name }}</div>
+                    </ng-template>
+                    </p-dropdown>
+                    <label for="drop-down-product">Selectionnez la pompe</label>
+                </span>
+            </div>
+            <div class="field mb-5">
+                <span class="p-float-label w-100">
+                    <p-dropdown
+                        [options]="listGuns"
+                        [(ngModel)]="indexForDialog.gun"
+                        [showClear]="true"
+                        placeholder="Selectionnez le pistolet"
+                        optionLabel="name" inputId="drop-down-product"
+                        (onChange)="onDropDownDialogGunChange($event)"
+                        [styleClass]="'w-100'"
+                    >
+                    <ng-template pTemplate="selectedItem">
+                        <div>
+                            {{
+                                indexForDialog.gun ?
+                                indexForDialog?.gun.code+' - '+indexForDialog?.gun.product.name : ''
+                            }}
+                        </div>
+
+                    </ng-template>
+                    <ng-template let-gun pTemplate="item">
+                        <div>{{ gun.code+' - '+gun.product.name }}</div>
+                    </ng-template>
+                    </p-dropdown>
+                    <label for="drop-down-product">Selectionnez le pistolet</label>
+                </span>
+                <small class="p-error" *ngIf="submitted && !indexForDialog.quart">
+                    Le pistolet est requis
+                </small>
+            </div>
+
+            <div class="field mb-5">
+                <label for="index_start">Index de depart</label>
+                <p-inputNumber *ngIf="!activeEditAndDeleteButton"
+                        id="index_start"
+                        [(ngModel)]="indexForDialog.index_start"
+                        mode="decimal"
+                        suffix=" litres"
+                        [min]="0"
+                        [minFractionDigits]="2"
+                        [disabled]="disabledInputIndexStart"
+                        locale="fr-FR" />
+
+                <p-inputNumber *ngIf="activeEditAndDeleteButton"
+                        id="index_start"
+                        [(ngModel)]="indexForDialog.index_start"
+                        mode="decimal"
+                        suffix=" litres"
+                        [min]="0"
+                        [minFractionDigits]="2"
+                        locale="fr-FR" />
+
+                <small class="p-error" *ngIf="submitted && indexForDialog.index_start < 0">
+                    L'index de depart est requis et doit etre >= 0
+                </small>
+            </div>
+            <div class="field mb-5">
+                <label for="index_end">Index de fin</label>
+                <p-inputNumber
+                        id="index_end"
+                        [(ngModel)]="indexForDialog.index_end"
+                        mode="decimal"
+                        suffix=" litres"
+                        [min]="0"
+                        [minFractionDigits]="2"
+                        locale="fr-FR" />
+                <small class="p-error" *ngIf="submitted && indexForDialog.index_end < indexForDialog.index_start">
+                    L'index de fin est requis et doit etre superieur à l'index de depart
+                </small>
+            </div>
+
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+            <p-button
+                pRipple
+                label="Annuler"
+                icon="pi pi-times"
+                [text]="true"
+                (click)="hideDialog()" />
+            <p-button
+                pRipple
+                label="Enregistrer"
+                icon="pi pi-check"
+                [text]="true"
+                (click)="saveIndex()" />
+        </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }" />
+
+
+

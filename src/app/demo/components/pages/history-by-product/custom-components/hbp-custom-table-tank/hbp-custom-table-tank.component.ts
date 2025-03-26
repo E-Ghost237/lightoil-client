@@ -1,0 +1,167 @@
+import { Component, Input } from '@angular/core';
+import * as Utility from '../../../../../utilities/utility';
+
+@Component({
+  selector: 'app-hbp-custom-table-tank',
+  templateUrl: './hbp-custom-table-tank.component.html',
+  styleUrls: ['./hbp-custom-table-tank.component.scss']
+})
+export class HbpCustomTableTankComponent {
+  @Input()
+  listRecord:any[]=[];
+
+  @Input()
+  stationProduct:any={};
+
+  @Input()
+  period:string="";
+
+  tankDetailsData:any;
+
+  constructor(){
+
+  }
+
+  ngOnInit(){
+      console.log("");
+  }
+
+  getLevel(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+Math.round(this.tankDetailsData.listLastRecord[0].liquid_height*100)/100;
+      }
+      return '0';
+  }
+
+  getListDayRecord(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          //console.log("list last record: ", this.tankDetailsData.listLastRecord);
+          return this.tankDetailsData.listLastRecord;
+      }
+      return [];
+  }
+
+
+  getVolumeAtT(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+ Math.round(this.tankDetailsData.listLastRecord[0].volume*100)/100 +' / '+this.tankDetailsData.listLastRecord[0].total_volume;
+      }
+      return '0';
+  }
+
+  getPercentOccupation(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          let percent = Math.round(this.tankDetailsData.listLastRecord[0].volume*10000/this.tankDetailsData.listLastRecord[0].total_volume)/100;
+          return ''+ percent;
+      }
+      return '0';
+  }
+
+  getSeverityPercent(){
+      let s= parseFloat(this.getPercentOccupation());
+      if(s < 20){
+          return 'danger';
+      }else{
+          return 'info';
+      }
+  }
+
+  getVolumeToDepote(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          let v = Math.round((this.tankDetailsData.listLastRecord[0].total_volume - this.tankDetailsData.listLastRecord[0].volume)*1000)/1000;
+          return ''+ v + ' litres';
+      }
+      return '0 litre';
+  }
+
+  getVolumeAtT15(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+Math.round(this.tankDetailsData.listLastRecord[0].volume_at_fift*100)/100;
+      }
+      return '0';
+  }
+
+  getLiquidTemp(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+this.tankDetailsData.listLastRecord[0].liquid_temperature;
+      }
+      return '0';
+  }
+
+  getEnvTemp(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+this.tankDetailsData.listLastRecord[0].env_temperature;
+      }
+      return '0';
+  }
+
+  getDensity(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+Math.round( this.tankDetailsData.listLastRecord[0].density*100)/100;
+      }
+      return '0';
+  }
+
+  getRmDay(){
+      if(this.tankDetailsData?.lastNotification){
+          return ''+ Math.round( this.tankDetailsData?.lastNotification?.remaining_day*100)/100;
+      }
+      return '--';
+  }
+
+  getSeverityRmDay(){
+      let rmd=Math.round( this.tankDetailsData?.lastNotification?.remaining_day*100)/100;
+      if(rmd <= 5){
+          return 'danger';
+      }else{
+          return 'info';
+      }
+  }
+
+  getLastIncomeDateRecord(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+          return ''+Utility.toLocalDateTime(this.tankDetailsData.listLastRecord[0].updated_at);
+      }
+      return '0';
+  }
+
+  getToLocalDateTime(date1:string){
+      return Utility.toLocalDateTime(date1);
+  }
+
+  getNameProduct(){
+      let nameProduct = "";
+      if(this.tankDetailsData?.product?.code){
+          let n = this.tankDetailsData?.product?.code;
+          switch (n) {
+              case "ESSENCE":
+                  nameProduct = "super";
+                  break;
+              case "GASOIL":
+                  nameProduct = "gasoil";
+                  break;
+              case "PETROLE":
+                  nameProduct = "petrol";
+                  break;
+
+              default:
+                  nameProduct = "petrol";
+                  break;
+          }
+      }
+      return nameProduct;
+  }
+
+  getSensorReference(){
+      let ref = "";
+      if(this.tankDetailsData?.tank?.sensor_reference){
+          ref = this.tankDetailsData?.tank?.sensor_reference;
+      }
+      return ref;
+
+  }
+
+  getRoundValue(num:number){
+      return Math.round(num*100)/100;
+  }
+}

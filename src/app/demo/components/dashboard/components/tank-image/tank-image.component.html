@@ -1,0 +1,108 @@
+<div class="row card-body" *ngIf="type != 'Debimetre' && type != 'Débimètre'">
+    <div class="col-5 d-flex flex-column justify-content-center fl mr-3">
+
+        <img width="100%" src="{{getTheCorrectImage()}}"
+            alt="une vue actuelle de la cuve"
+            pTooltip="Etat actuelle de la cuve">
+
+
+            <small class="text-center"
+                pTooltip="Date et heure d'arrivee de la derniere donnee"
+                tooltipPosition="bottom"
+                >
+                 {{getLastIncomeDateRecord()}}
+            </small>
+
+            <small *ngIf="getNotiMessage()" class="text-center text-danger anim-clip"
+                pTooltip="Derniere notification"
+                tooltipPosition="bottom"
+                >
+                 {{getNotiMessage()}}
+            </small>
+    </div>
+    <div class="col-6 ">
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class="text-left "> Niveau(cm) </div>
+            <div class="text-right"> {{getLevel()}} </div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Volume à {{getLiquidTemp()+ 'C(l)'}} </div>
+            <div class=" text-right"> {{getVolumeAtT()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Volume à 15C(l) </div>
+            <div class=" text-right"> {{getVolumeAtT15()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Quantité Sortie : </div>
+            <div class=" text-right"> {{getOutputVolume()}} litre(s)</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> T.liquide(C) </div>
+            <div class=" text-right"> {{getLiquidTemp()}}</div>
+        </div>
+        <!-- <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> T.ambiante(C) </div>
+            <div class=" text-right"> {{getEnvTemp()}}</div>
+        </div> -->
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Densité(*) </div>
+            <div class=" text-right"> {{getDensity()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between line-info">
+            <div class=" text-left "> Nombre de jours restants(*) </div>
+            <div class=" text-right"> {{getRmDay()}}</div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row card-body" *ngIf="type == 'Debimetre' || type == 'Débimètre'">
+    <div class="col-5 d-flex flex-column justify-content-center fl mr-3">
+        <img width="100%" src="{{getTheCorrectImage()}}"
+            alt="une vue actuelle du débimètre"
+            pTooltip="Etat actuelle du Débimètre">
+
+
+            <small class="text-center"
+                pTooltip="Date et heure d'arrivée de la dernière donnée"
+                tooltipPosition="bottom"
+                >
+                 {{getLastIncomeDateRecordFlow()}}
+            </small>
+
+            <small *ngIf="getNotiMessage()" class="text-center text-danger anim-clip"
+                pTooltip="Dernière notification"
+                tooltipPosition="bottom"
+                >
+                 {{getNotiMessage()}}
+            </small>
+    </div>
+    <div class="col-6 d-flex flex-column justify-content-between">
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class="text-left "> Débit instantanée </div>
+            <div class="text-right"> {{getInstantFlow()}} </div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Débit cumulatif </div>
+            <div class=" text-right"> {{getCumulativeFlow()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "
+                pTooltip="Quantité ayant transité durant la dernière heure"
+                tooltipPosition="bottom"
+                > 
+                Quantite transistante 
+            </div>
+            <div class=" text-right"> {{getLastHourQuantity()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Unité de mesure </div>
+            <div class=" text-right"> {{getUnitMeasurement()}}</div>
+        </div>
+        
+        
+    </div>
+</div>
+
+

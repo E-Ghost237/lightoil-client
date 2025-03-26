@@ -1,0 +1,117 @@
+<div class="row ">
+    <span class="text-center h4">
+        Rapport des donnees de la cuve {{tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name}}
+    </span>
+</div>
+<div class="row mt-1">
+    <p-table [value]="listReport?.listDayRecord"
+        [scrollable]="true"
+        styleClass="p-datatable-striped"
+        scrollHeight="30rem"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[50, 100, 200]"
+        [paginator]="true" [rows]="50"
+        >
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                {{
+                    "Du "+getToLocalDate(listReport?.dateStart)+
+                    " au "+getToLocalDate(listReport?.dateEnd)+
+                    " entre "+getToLocalTime(listReport?.dateStart)+
+                    " et "+getToLocalTime(listReport?.dateEnd)
+                }}
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th pTooltip="en centimetres">Volume à T de depart</th>
+                <th pTooltip="en centimetres">T(C) liquide</th>
+                <th pTooltip="en litres">Quantité sortie</th>
+                <th pTooltip="en litres">Quantité entrée</th>
+                <th pTooltip="en litres">Volume à T de fin</th>
+                <th pTooltip="en degres celsius">T(C) liquide</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-report let-rowData let-columns="columns" let-rowIndex="rowIndex">
+            <tr *ngIf="! report?.isTheLast">
+                <td>{{(rowIndex+1)}}</td>
+                <td>
+                    <div class="row justify-content-center">
+                        <span class="text-center ">{{getToLocalDate(report.start)}}</span>
+                    </div>
+                    <div class="row">
+                        {{"de "+getToLocalTime(report.start)+' à '+getToLocalTime(report.end)}}
+                    </div>
+                </td>
+                <td pTooltip="en litres" tooltipPosition="bottom">
+                    <div class="row justify-content-center" *ngIf="report?.firstPeriodRecord?.id">
+                        <span class="text-center ">
+                            {{getRoundValue(report?.firstPeriodRecord?.volume)}}
+                        </span>
+                    </div>
+                    <div class="row justify-content-center" *ngIf="report?.firstPeriodRecord?.id">
+                        <span class="text-center">
+                            {{getToLocalDateTime(report?.firstPeriodRecord?.updated_at)}}
+                        </span>
+                    </div>
+                </td>
+                <td pTooltip="en degres celsius" tooltipPosition="bottom">
+                    <div *ngIf="report?.firstPeriodRecord?.id">
+                        <span>
+                            {{getRoundValue(report?.firstPeriodRecord?.liquid_temperature)}}
+                        </span>
+                    </div>
+                </td>
+                <td pTooltip="en litres" tooltipPosition="bottom">
+                    {{getRoundValue(report?.output)}}
+                </td>
+                <td pTooltip="en litres" tooltipPosition="bottom">
+                    {{getRoundValue(report?.input)}}
+                </td>
+                <td pTooltip="en litres" tooltipPosition="bottom">
+                    <div class="row justify-content-center" *ngIf="report?.lastPeriodRecord?.id">
+                        <span class="text-center ">
+                            {{getRoundValue(report?.lastPeriodRecord?.volume)}}
+                        </span>
+                    </div>
+                    <div class="row justify-content-center" *ngIf="report?.lastPeriodRecord?.id">
+                        <span class="text-center ">
+                            {{getToLocalDateTime(report?.lastPeriodRecord?.updated_at)}}
+                        </span>
+                    </div>
+                </td>
+                <td pTooltip="en degres celsius" tooltipPosition="bottom">
+                    <div *ngIf="report?.lastPeriodRecord?.id">
+                        <span >
+                            {{getRoundValue(report?.lastPeriodRecord?.liquid_temperature)}}
+                        </span>
+                    </div>
+                </td>
+            </tr>
+            <tr *ngIf=" report?.isTheLast">
+                <td colspan="4">
+                    <div class="row justify-content-center ">
+                        <span class="text-center ">Total sur la periode</span>
+                    </div>
+                </td>
+                <td colspan="2" pTooltip="en litres" tooltipPosition="bottom">
+                    <div class="row justify-content-center">
+                        <span class="">
+                            <p-tag severity="info" [value]="'Sorties: '+getRoundValue(report?.output)"></p-tag>
+                        </span>
+                    </div>
+                </td>
+                <td colspan="2" pTooltip="en litres" tooltipPosition="bottom">
+                    <div class="row justify-content-center">
+                        <span class="">
+                            <p-tag severity="info" [value]="'Depotages: '+getRoundValue(report?.input)"></p-tag>
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

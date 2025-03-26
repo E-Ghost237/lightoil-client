@@ -1,0 +1,58 @@
+/* You can add global styles to this file, and also import other style files */
+
+$gutter: 1rem; //for primeflex grid system
+@import "assets/layout/styles/layout/layout.scss";
+
+/* PrimeNG */
+@import "../node_modules/primeng/resources/primeng.min.css";
+@import "../node_modules/primeflex/primeflex.scss";
+@import "../node_modules/primeicons/primeicons.css";
+
+/* Demos */
+@import "assets/demo/styles/flags/flags.css";
+@import "assets/demo/styles/badges.scss";
+@import "assets/demo/styles/code.scss";
+
+.img1{
+    background-image: url('assets/layout/images/LightOil_Final-04.png');
+    background-size: cover;
+}
+
+.img2{
+    background-color: transparent;
+    border: none;
+}
+
+.img2:hover
+{
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.img2:active
+{
+    background-color: transparent;
+    border: none;
+}
+
+.vl {
+    border-left: 6px solid green;
+    height: 500px;
+}
+
+.line-info{
+    background-color: transparent;
+}
+
+.line-info:hover{
+    background-color: rgb(105, 175, 241);
+}
+
+.tank-zoom{
+    transform: scale(1);
+}
+
+.tank-zoom:hover{
+    transform: scale(1.01);
+}
+

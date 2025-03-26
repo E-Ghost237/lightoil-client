@@ -1,0 +1,270 @@
+<!-- Show message -->
+<p-toast key="tst"></p-toast>
+
+<!-- Update price of product form -->
+<p-dialog header="Mise à jour du mot de passe" [(visible)]="show_modal" [modal]="true" [position]="position"
+    styleClass="w-24rem xl:w-30rem lg:w-30rem md:w-30rem" [dismissableMask]="false">
+    <ng-template pTemplate="header">
+        <div class="inline-flex align-items-center justify-content-center mb-3">
+            <span class="font-bold text-dark text-lg white-space-nowrap">
+                Mettre à jour le prix du produit
+            </span>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="updatePriceOfProductForm" (ngSubmit)="onUpdatePriceOfProductFormSubmit()"
+        class="flex flex-column justify-content-center">
+        <div class="grid align-items-start align-content-center mb-2">
+            <div class="col-5 pb-0">
+                <span class="font-semibold text-dark w-full">Produit : </span>
+            </div>
+            <div class="col-7 pb-0">
+                <span *ngIf="selected_product?.name == 'Super'" class="font-medium" style="color: #014da4;">
+                    {{ selected_product?.name }}
+                </span>
+                <span *ngIf="selected_product?.name == 'Gasoil'" class="font-medium" style="color: #fdc401;">
+                    {{ selected_product?.name }}
+                </span>
+                <span *ngIf="selected_product?.name == 'Pétrole' || selected_product?.name == 'Petrole'"
+                    class="font-medium" style="color: #007138;">
+                    {{ selected_product?.name }}
+                </span>
+            </div>
+        </div>
+
+        <div class="grid align-items-start align-content-center mb-2">
+            <div class="col-5 pb-0">
+                <span class="font-semibold text-dark w-full">Prix actuel : </span>
+            </div>
+            <div class="col-7 pb-0">
+                <span class="font-medium text-dark">{{ ((selected_product?.price | number:'1.0-0') | currency:'XAF')
+                    ?? '...'
+                    }}</span>
+            </div>
+        </div>
+
+        <div class="grid align-items-start align-content-center mb-2">
+            <div class="col-5 pb-0">
+                <span class="font-semibold text-dark w-full">Point de vente : </span>
+            </div>
+            <div class="col-7 pb-0">
+                <span class="font-medium text-dark">{{ selected_product?.point_of_sale_name ?? '...' }}</span>
+            </div>
+        </div>
+
+        <div class="grid align-items-start align-content-center mb-5">
+            <div class="col-5 pb-0">
+                <span class="font-semibold text-dark w-full">Réseau : </span>
+            </div>
+            <div class="col-7 pb-0">
+                <span class="font-medium text-dark">{{ selected_product?.point_of_sale_type ?? '...' }}</span>
+            </div>
+        </div>
+
+        <div class="grid align-items-start align-content-center mt-1 mb-2">
+            <div class="col-12 xl:col-5 lg:col-5 md:col-5 pb-0">
+                <label for="product_price" class="font-bold text-dark w-full">Nouveau prix du produit :</label>
+            </div>
+            <div class="col-12 xl:col-7 lg:col-7 md:col-7">
+                <p-inputNumber formControlName="product_price" id="product_price"
+                    placeholder="Entrer le nouveau prix du produit" mode="currency" currency="XAF" [minlength]="3"
+                    [maxlength]="6" styleClass="w-full" inputStyleClass="w-full" [allowEmpty]="false" [showClear]="true"
+                    aria-describedby="product_price-help" autofocus required="true" />
+                <ng-container
+                    *ngIf="updatePriceOfProductForm.get('product_price').invalid && 
+                    (updatePriceOfProductForm.get('product_price').dirty || updatePriceOfProductForm.get('product_price').touched)">
+                    <small *ngIf="updatePriceOfProductForm.get('product_price').errors?.required"
+                        id="product_price-help" class="p-error">
+                        Le nouveau prix est requis.
+                    </small>
+                    <small *ngIf="updatePriceOfProductForm.get('product_price').errors?.minlength || 
+                        updatePriceOfProductForm.get('product_price').errors?.maxlength" id="product_price-help"
+                        class="p-error">
+                        Le prix du produit doit etre un nombre positif.
+                    </small>
+                </ng-container>
+            </div>
+        </div>
+
+        <div class="mt-3 flex flex-row gap-2 justify-content-end">
+            <p-button (onClick)="hideModal()" type="button" label="Annuler" severity="secondary" [outlined]="true"
+                styleClass="align-content-center text-xl" size="small" />
+
+            <p-button type="submit" label="Mettre à jour" severity="primary" [loading]="loading_icon"
+                [loadingIcon]="'pi pi-spin pi-refresh'" iconPos="right" styleClass="align-content-center text-xl"
+                size="small" />
+        </div>
+    </form>
+</p-dialog>
+
+<!-- Page header -->
+<div class="card pb-0 mb-5">
+    <div class="card-body align-content-center justify-content-between pt-0">
+        <div class="text-center align-content-center text-xl text-uppercase">
+            <h1 class="font-bold">Liste de produits par point de vente</h1>
+        </div>
+    </div>
+</div>
+
+<ng-container *ngIf="loading_logo == false; else elseTemplate">
+    <!-- Table -->
+    <div class="card p-2 pb-3">
+        <p-table #dt [value]="products_of_points_of_sale" [(selection)]="selected_product" [rowHover]="true"
+            dataKey="id" styleClass="p-datatable-striped mt-5" [scrollable]="true" scrollHeight="30rem"
+            [paginator]="true" [rows]="10" [first]="first_page" [showCurrentPageReport]="true"
+            (onPage)="onPageChange($event)"
+            currentPageReportTemplate="Affichage de {first} à {last} élement(s) sur {totalRecords}"
+            [rowsPerPageOptions]="[10, 15, 25]" responsiveLayout="stack" [breakpoint]="'960px'"
+            [globalFilterFields]="['point_of_sale_name', 'point_of_sale_type', 'name', 'price']">
+            <ng-template pTemplate="caption">
+                <div class="flex align-items-center justify-content-between">
+                    <p-button (click)="loadData()" styleClass="font-semibold align-content-center mr-2"
+                        label="Actualiser" severity="primary" icon="pi pi-refresh" iconPos="right"
+                        [loading]="loading_icon" loadingIcon="pi pi-spin pi-refresh" />
+
+                    <span class="block p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..."
+                            class="w-full sm:w-auto" />
+                    </span>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header" let-columns>
+                <tr class="table-dark font-bold text-lg">
+                    <th scope="col" class="text-center">#</th>
+                    <th scope="col">Point de vente</th>
+                    <th scope="col">Réseau</th>
+                    <th scope="col">Produit</th>
+                    <th scope="col">Prix au litre</th>
+                    <th scope="col"></th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>
+                        <p-columnFilter field="point_of_sale_name" matchMode="in" [showMenu]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="selected_points_of_sale" [options]="points_of_sale"
+                                    [maxselectedLabels]="1" placeholder="Sélectionner"
+                                    [selectAll]="select_all_points_of_sale"
+                                    (onChange)="filter(onPointsOfSaleChange($event.value))"
+                                    (onSelectAllChange)="filter(onSelectAllPointsOfSaleChange($event.checked))"
+                                    (onClear)="filter([])" showClear="true" optionLabel="name">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="mt-1">
+                                                {{ option.name }}
+                                            </span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </th>
+                    <th>
+                        <p-columnFilter field="point_of_sale_type" matchMode="in" [showMenu]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="selected_point_of_sale_types" [options]="point_of_sale_types"
+                                    [maxselectedLabels]="1" placeholder="Sélectionner"
+                                    [selectAll]="select_all_point_of_sale_types"
+                                    (onChange)="filter(onPointsOfSaleTypesChange($event.value))"
+                                    (onSelectAllChange)="filter(onSelectAllPointsOfSaleTypesChange($event.checked))"
+                                    (onClear)="filter([])" showClear="true" optionLabel="name">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="mt-1">
+                                                {{ option.name }}
+                                            </span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </th>
+                    <th>
+                        <p-columnFilter field="name" matchMode="in" [showMenu]="false">
+                            <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                                <p-multiSelect [ngModel]="selected_products" [options]="products"
+                                    [maxSelectedLabels]="2" placeholder="Sélectionner" [selectAll]="select_all_products"
+                                    (onChange)="filter(onProductsChange($event.value))"
+                                    (onSelectAllChange)="filter(onSelectAllProductsChange($event.checked))"
+                                    (onClear)="filter([])" showClear="true" optionLabel="name">
+                                    <ng-template let-option pTemplate="item">
+                                        <div class="inline-block vertical-align-middle">
+                                            <span class="ml-1 mt-1">
+                                                {{ option.name }}
+                                            </span>
+                                        </div>
+                                    </ng-template>
+                                </p-multiSelect>
+                            </ng-template>
+                        </p-columnFilter>
+                    </th>
+                    <th>
+                        <p-columnFilter type="text" field="price" placeholder="Rechercher par prix"
+                            ariaLabel="Prix de produits" />
+                    </th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-product let-rowIndex="rowIndex" let-columns="columns">
+                <tr>
+                    <td class="font-bold text-center">
+                        <span class="p-column-title">#</span>{{ rowIndex + 1 }}
+                    </td>
+
+                    <td>
+                        <span class="p-column-title">Point de vente</span>
+                        <div>
+                            <span class="block font-bold">{{ product.point_of_sale_name }}</span>
+                            <span>{{ product.point_of_sale_town }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="p-column-title">Réseau</span>
+                        <span class="font-bold">{{ product.point_of_sale_type }}</span>
+                    </td>
+
+                    <td *ngIf="product.name == 'Super'" class="font-bold" style="color: #014da4;">
+                        <span class="p-column-title">Produit</span>{{ product.name }}
+                    </td>
+                    <td *ngIf="product.name == 'Gasoil'" class="font-bold" style="color: #fdc401;">
+                        <span class="p-column-title">Produit</span>{{ product.name }}
+                    </td>
+                    <td *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" class="font-bold"
+                        style="color: #007138;">
+                        <span class="p-column-title">Produit</span>{{ product.name }}
+                    </td>
+
+                    <td>
+                        <span class="p-column-title">Prix</span>{{ product.price | currency:'XAF' }}
+                    </td>
+
+                    <td class="pr-3">
+                        <p-button (onClick)="editPriceOfProduct(product)" icon="pi pi-pencil" [rounded]="true"
+                            [outlined]="true" [text]="true" [raised]="true" severity="success" iconPos="right"
+                            [loading]="loading_icon" loadingIcon="pi pi-spin pi-spinner-dotted"
+                            pTooltip="Cliquez pour mettre à jour le prix du produit." styleClass="font-bold mr-3"
+                            tooltipPosition="left" />
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6">Aucune corespondance trouvée.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Chatbot -->
+    <app-chatbot></app-chatbot>
+</ng-container>
+<ng-template #elseTemplate>
+    <div class="relative flex flex-column align-items-center justify-content-center mt-5">
+        <div class="absolute top-100 flex align-items-center justify-content-center mt-5">
+            <img src="../../../../../../../assets/img/logos/loading-oil-logo.gif" width="150rem"
+                style="margin-top: 70%;" alt="Loading...">
+        </div>
+    </div>
+</ng-template>

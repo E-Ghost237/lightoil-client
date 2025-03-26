@@ -1,0 +1,21 @@
+<p-toast></p-toast>
+<div class="row bg-secondary justify-content-evenly" >
+    <div class="col">
+        <button class="bg-secondary" style="border: none;">
+            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
+        </button>
+    </div>
+    <div class="col-8 text-center">
+        <h4 class="text-white">Configuration des quarts de travail</h4>
+    </div>
+    <div class="col text-center">
+        <img src="assets/demo/images/product/icon.jpg" alt="icon">
+    </div>
+</div>
+
+<div class="card m-1">
+    <div class="row">
+        <app-custom-table-quart [stationId]="user_details?.service_station_id">
+        </app-custom-table-quart>
+    </div>
+</div>

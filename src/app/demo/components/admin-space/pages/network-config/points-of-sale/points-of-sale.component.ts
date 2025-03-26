@@ -1,0 +1,166 @@
+import { Component, OnInit } from '@angular/core';
+import { Table } from 'primeng/table';
+import { MessageService } from 'primeng/api';
+import { PointsOfSaleService } from '../../../services/sale-points.service';
+import { CompaniesService } from '../../../services/companies.service';
+import { LocalStorageService } from 'src/app/demo/components/auth/services/local-storage.service';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-points-of-sale',
+  templateUrl: './points-of-sale.component.html',
+  styleUrls: ['./points-of-sale.component.scss']
+})
+export class PointsOfSaleComponent implements OnInit {
+  company_id!: number;
+  loading_icon: boolean = false;
+  loading_logo: boolean = true;
+
+  show_modal: boolean = false;
+  position: string = 'center';
+  updatePointOfSaleInfosForm!: FormGroup;
+
+  points_of_sale: Array<any> = [];
+  selected_points_of_sale: Array<any> = [];
+  select_all_points_of_sale: boolean = false;
+
+  point_of_sale_types: Array<any> = [];
+  selected_point_of_sale_types: Array<any> = [];
+  select_all_point_of_sale_types: boolean = false;
+
+  first_page: number = 0;
+  rows: number = 10;
+
+  constructor(
+    private messageService: MessageService,
+    private pointsOfSaleService: PointsOfSaleService,
+    private companiesService: CompaniesService,
+    private localStorageService: LocalStorageService
+  ) {
+    // this.updatePointOfSaleInfosForm = new FormGroup({
+    //   product_price: new FormControl<number>(this.selected_product?.price, Validators.required)
+    // });
+  }
+
+  ngOnInit(): void {
+    this.company_id = this.localStorageService.getCompanyId();
+    this.initFilters();
+    this.loadData();
+  }
+
+  initFilters() {
+    if (this.company_id !== undefined && this.company_id !== null) {
+      this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
+        (response) => {
+          if (response.success == true) {
+            this.point_of_sale_types = response.data
+            // console.log("point_of_sale_types: ", this.point_of_sale_types);
+          }
+        },
+        (err) => {
+          // console.log("getAllPointsOfSaleType error: ", err.error);
+          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
+        }
+      );
+    }
+  }
+
+  loadData() {
+    this.loading_icon = true;
+
+    if (this.company_id !== null && this.company_id !== undefined) {
+      this.companiesService.getAllPointsOfSaleOfCompany(this.company_id).subscribe(
+        (response) => {
+          if (response.success == true) {
+            this.points_of_sale = response.data
+            // console.log("points_of_sale: ", this.points_of_sale);
+            this.loading_logo = false;
+            this.loading_icon = false;
+            this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+          }
+        },
+        (err) => {
+          console.log("An error occure while loading all points of sale of company: ", err.error);
+          this.loading_logo = false;
+          this.loading_icon = false;
+          this.messageService.add(
+            {
+              key: 'tst', severity: 'error', summary: 'Error Message',
+              detail: 'An error occure while loading all points of sale of company. Please try again later.',
+              life: 10000
+            }
+          );
+        }
+      );
+    }
+  }
+
+  onPageChange(event: any) {
+    this.first_page = event.first;
+    this.rows = event.rows;
+  }
+
+  onGlobalFilter(table: Table, event: Event) {
+    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+  }
+
+  onPointsOfSaleChange(selected_option: any[]): string[] {
+    // console.log("selected_points_of_sale: ", selected_option);
+    if (!selected_option || selected_option.length === 0) {
+      this.selected_points_of_sale = [];
+      return [];
+    } else if (selected_option.length === this.points_of_sale.length) {
+      this.select_all_points_of_sale = true;
+    }
+    this.selected_points_of_sale = selected_option;
+    this.select_all_points_of_sale = false;
+    return selected_option.map(option => option.name);
+  }
+
+  onSelectAllPointsOfSaleChange(checked: boolean): string[] {
+    if (!checked) {
+      this.selected_points_of_sale = [];
+      this.select_all_points_of_sale = checked;
+      return [];
+    }
+    this.selected_points_of_sale = this.points_of_sale;
+    this.select_all_points_of_sale = checked;
+    return this.selected_points_of_sale.map(option => option.name);
+  }
+
+  onPointsOfSaleTypesChange(selected_options: any[]): string[] {
+    // console.log("selected_point_of_sale_types: ", selected_options);
+    if (!selected_options || selected_options.length === 0) {
+      this.selected_point_of_sale_types = [];
+      return [];
+    } else if (selected_options.length === this.point_of_sale_types.length) {
+      this.select_all_point_of_sale_types = true;
+    }
+    this.selected_point_of_sale_types = selected_options;
+    this.select_all_point_of_sale_types = false;
+    return selected_options.map(option => option.name);
+  }
+
+  onSelectAllPointsOfSaleTypesChange(checked: boolean): string[] {
+    if (!checked) {
+      this.selected_point_of_sale_types = [];
+      this.select_all_point_of_sale_types = checked;
+      return [];
+    }
+    this.selected_point_of_sale_types = this.point_of_sale_types;
+    this.select_all_point_of_sale_types = checked;
+    return this.selected_point_of_sale_types.map(option => option.name);
+  }
+
+  clear(table: Table) {
+    table.clear();
+  }
+
+  goToPointOfSaleSpace(point_of_sale_id: number) {
+    let user_details = JSON.parse(localStorage.getItem('user_details'));
+    user_details.service_station_id = point_of_sale_id;
+    localStorage.setItem('user_details', JSON.stringify(user_details));
+    // window.location.href = '/pages/dashboard';
+    window.open('/pages/dashboard', '_blank');
+  }
+}

@@ -1,0 +1,27 @@
+<div class="layout-wrapper" [ngClass]="containerClass">
+    <app-topbar></app-topbar>
+    <div class="layout-sidebar">
+        <app-sidebar></app-sidebar>
+    </div>
+    <div class="layout-main-container " 
+        style="
+        background-image: url({{back_image}});
+        background-repeat: no-repeat;
+        background-size: 100vw 100vh;
+        background-attachment: fixed;
+        background-color: black;
+        color: white;
+        ">
+        <div class="layout-main">
+            <router-outlet></router-outlet>
+        </div>
+        <app-footer></app-footer>
+    </div>
+
+    <app-config></app-config>
+    <div class="layout-mask"></div>
+</div>
+
+
+
+

@@ -1,0 +1,92 @@
+
+
+<p-toast></p-toast>
+<div class="row bg-secondary justify-content-evenly" >
+    <div class="col">
+        <button class="bg-secondary" style="border: none;">
+            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
+        </button>
+    </div>
+    <div class="col-8 text-center">
+        <h4 class="text-white">Historique des donnees du débitmètre</h4>
+    </div>
+    <div class="col text-center">
+        <img src="assets/demo/images/debimetreXl-removebg.png" alt="icon">
+    </div>
+</div>
+
+
+<div class="card flex  flex-row justify-content-evenly mt-3 text-white " >
+    <div class="">
+        <span class="p-float-label">
+            <p-calendar
+                [(ngModel)]="rangeDates"
+                selectionMode="range"
+                dateFormat="dd/mm/yy"
+                [readonlyInput]="true"
+                [showIcon]="true"
+                (onSelect)="onDateSelect($event)"
+                [maxDate]="maxDate"
+                >
+            </p-calendar>
+            <label for="float-label text-white">Selectionnez la periode</label>
+        </span>
+
+    </div>
+
+    <div class="">
+        <span class="p-float-label">
+            <p-dropdown
+                [options]="listFlowMeters"
+                [(ngModel)]="selectedFlowMeter"
+                [showClear]="true"
+                placeholder="Selectionnez le débitmètre"
+                optionLabel="sensor_reference" inputId="float-label"
+                (onChange)="onDropDownChange($event)"
+                [styleClass]="'w-100'"
+            >
+            <ng-template pTemplate="selectedItem">
+
+                <div>{{ selectedFlowMeter ? selectedFlowMeter?.sensor_reference+'-'+selectedFlowMeter?.product_service_station?.product?.name : '' }}</div>
+
+            </ng-template>
+            <ng-template let-flowMeter pTemplate="item">
+
+                <div>{{ flowMeter?.sensor_reference+'-'+flowMeter?.product_service_station?.product?.name }}</div>
+
+            </ng-template>
+            </p-dropdown>
+            <label for="float-label">Selectionnez le débitmètre</label>
+        </span>
+    </div>
+
+    <div class="border-round">
+        <button class=""
+            pTooltip="exporter les données au format pdf" 
+            (click)="generateFlowMeterDataPdf()"
+            >
+            <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
+        </button>
+    </div>
+
+</div>
+
+<div class="row" *ngIf="listRecords && listRecords?.length > 0">
+    <app-flow-meter-table [listRecord] = "listRecords" [flowMeter] = "selectedFlowMeter" [period]="period">
+    </app-flow-meter-table>
+</div>
+<div class="row justify-content-center" *ngIf="listRecords && listRecords?.length <= 0">
+    <div class="col text-center">
+        Aucune données disponible dans la période
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+

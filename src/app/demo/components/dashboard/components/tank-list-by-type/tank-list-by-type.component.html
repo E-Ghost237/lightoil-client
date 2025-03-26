@@ -1,0 +1,40 @@
+<div class="row">
+    <app-custom-divider>
+        <!-- {{listTank?.type?.name}} -->
+        <span numtank> {{listTank?.data?.length}} </span>
+    </app-custom-divider>
+    <div class="row d-flex flex-row justify-content-evenly flex-wrap ">
+        <div class="card col-xs-10 col-lg-5 mx-auto p-1 anim-fade" *ngFor="let tankData of listTank?.data; index as i;"
+            (click)="listTank?.type?.code == 'Debimetre' ? 
+                    goToFlowMeterInfo(tankData.tank.id, tankData)
+                    : goToTankInfo(tankData.tank.id, tankData)"
+            >
+            <app-tank-header [dataFromTankList] = "tankData"></app-tank-header>
+            <hr class="my-0"  style="color:gray; height:5px; border-top: 3px solid #333;">
+            <app-tank-image 
+                [dataFromTankList] = "tankData" 
+                [type] = "listTank?.type?.code == 'Debimetre' ? 
+                        'Debimetre'
+                        : 'sonde'" >
+            </app-tank-image>
+            <!-- <ng-container *ngIf="tankData?.tank?.sensor_reference == 'TKG111PORT_DLA'; else elseTemplate">
+                <div class="d-flex flex-column justify-content-center align-content-center">
+                    <span class="align-content-center font-bold text-2xl text-center text-info mt-3 mb-5">Jauge en maintenance</span>
+                    <div class="d-flex flex-row justify-content-center align-content-center">
+                        <img width="150rem" src="../../../../../../assets/layout/images/logo.gif" alt="Loading" srcset="">
+                    </div>
+                </div>
+            </ng-container>
+            <ng-template #elseTemplate>
+                <app-tank-image 
+                    [dataFromTankList] = "tankData" 
+                    [type] = "listTank?.type?.code == 'Debimetre' ? 
+                            'Debimetre'
+                            : 'sonde'" >
+                </app-tank-image>
+            </ng-template> -->
+        </div>
+        <div class="col-xs-12 col-lg-12"></div>
+    </div>
+</div>
+

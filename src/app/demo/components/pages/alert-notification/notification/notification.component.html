@@ -1,0 +1,88 @@
+
+<p-toast></p-toast>
+<div class="row bg-secondary justify-content-evenly" >
+    <div class="col">
+        <button class="bg-secondary" style="border: none;">
+            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
+        </button>
+    </div>
+    <div class="col-8 text-center">
+        <h4 class="text-white">Suivi des alertes et notifications par produit</h4>
+    </div>
+    <div class="col text-center">
+        <img src="assets/demo/images/product/icon.jpg" alt="icon">
+    </div>
+</div>
+
+
+<div class="card mt-3 p-2" >
+    <div class="row justify-content-evenly text-white">
+        <div class="offset-2 col">
+            <span class="p-float-label">
+                <p-calendar
+                    [(ngModel)]="rangeDates"
+                    selectionMode="range"
+                    dateFormat="dd/mm/yy"
+                    [readonlyInput]="true"
+                    [showIcon]="true"
+                    (onSelect)="onDateSelect($event)"
+                    [maxDate]="maxDate"
+                    >
+                </p-calendar>
+                <label for="float-label text-white">Selectionnez la periode</label>
+            </span>
+        </div>
+        <div class="col">
+            <span class="p-float-label">
+                <p-dropdown
+                    [options]="listStationProducts"
+                    [(ngModel)]="selectedStationProduct"
+                    [showClear]="true"
+                    placeholder="Selectionnez le produit"
+                    optionLabel="product.name" inputId="float-label"
+                    (onChange)="onDropDownChange($event)"
+                    [styleClass]="'w-100'"
+                >
+                <ng-template pTemplate="selectedItem">
+                    <div>
+                        {{ selectedStationProduct?.product?.name }}
+                    </div>
+                </ng-template>
+                <ng-template let-stationProduct pTemplate="item">
+                    <div class="row justify-content-center">
+                        <span class="text-center">
+                            {{ stationProduct?.product?.name }}
+                        </span>
+                    </div>
+                </ng-template>
+                </p-dropdown>
+                <label for="float-label">Selectionnez le produit</label>
+            </span>
+        </div>
+        <div class="col-2 border-round">
+            <!-- <button class="">
+                <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
+            </button> -->
+            <button class=""
+                    pTooltip="exporter les données au format pdf" 
+                    (click)="generateProductNotificationPdf()">
+                <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div *ngIf=" submitted &&  listNotifications && listNotifications.length > 0">
+    <app-table-notification 
+        [listNotification]="listNotifications" 
+        [stationProduct]="selectedStationProduct"
+        [period]="period"
+        >
+    </app-table-notification>
+</div>
+
+<div *ngIf="submitted && listNotifications && listNotifications.length <= 0">
+    <div class="d-flex flex-row justify-content-center align-content-center" style="margin-top: 15%;">
+        <img src="../../../../../../assets/layout/images/logo.gif" alt="Loading" srcset="">
+    </div>
+</div>

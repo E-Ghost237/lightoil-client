@@ -1,0 +1,42 @@
+import { Component, ElementRef } from '@angular/core';
+import { LayoutService } from "./service/app.layout.service";
+import { CookieService } from 'ngx-cookie-service';
+import { LocalStorageService } from '../demo/components/auth/services/local-storage.service';
+
+@Component({
+    selector: 'app-sidebar',
+    templateUrl: './app.sidebar.component.html'
+})
+export class AppSidebarComponent {
+
+    stationId:any;
+    user:any;
+    role:any;
+
+    constructor(
+        public layoutService: LayoutService,
+        public el: ElementRef,
+        private cookieService: CookieService,
+        private localStorageService: LocalStorageService,
+        ) { }
+
+
+    ngOnInit() {
+        //timer(0, 1000).subscribe(n => this.getStringDate());
+        //this.stationId = JSON.parse(this.cookieService.get('station_id'));
+        //console.log("station id: ", this.stationId);
+        // this.user = JSON.parse(this.cookieService.get('User'));
+        // this.stationId = this.user?.station
+        // console.log("station id: ", this.stationId);
+        // console.log("side bar user: ", this.user);
+        this.user = this.localStorageService.getUser();
+        this.stationId = this.localStorageService.getServiceStationId();
+        this.role = this.localStorageService.getRole();
+        console.log("station id: ", this.stationId);
+        console.log("side bar user: ", this.user);
+
+    }
+
+
+}
+

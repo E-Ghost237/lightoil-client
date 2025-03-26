@@ -1,0 +1,72 @@
+<div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+    <div class="flex flex-column align-items-center justify-content-center">
+        <p-toast key="tst"></p-toast>  <!-- Show message -->
+
+        <a (click)="router.navigate(['/'], {fragment: 'home'})" class="flex align-items-center cursor-pointer">
+            <img src="assets/img/logos/{{layoutService.config().colorScheme === 'light' ? 'lightoil-logo-black' : 'lightoil-logo-white'}}.png" 
+                alt="lightoil-logo" height="70" class="mb-5"/>
+        </a>
+
+        <div class="w-25rem xl:w-30rem lg:w-30rem md:w-30rem" 
+            style="border-radius:46px; padding:0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);">
+            <div class="card w-full p-5" style="border-radius:43px">
+                <div class="text-center mt-2 mb-4">
+                    <p class="text-800 text-secondary text-xl">
+                        <span class="block font-medium text-dark text-3xl mb-1">
+                            <strong>Content de vous revoir 😉</strong>
+                        </span>
+                        <i>Connectez-vous pour continuer.</i>
+                    </p>
+                </div>
+
+                <form [formGroup]="loginForm" (ngSubmit)="onLoginFormSubmit()">
+                    <div class="flex flex-column gap-2 mb-3">
+                        <label for="email" class="block text-900 text-lg font-medium mt-2">Email :</label>
+                        <input type="email" formControlName="email" id="email" placeholder="Adresse e-mail" pattern=".+@.+\..+" autofocus 
+                            pInputText aria-describedby="email-help" class="w-full" />
+                        <ng-container *ngIf="loginForm.get('email').invalid && (loginForm.get('email').dirty || loginForm.get('email').touched)">
+                            <small id="email-help" class="p-error" *ngIf="loginForm.get('email').errors?.required">
+                                L'adresse e-mail est requise.
+                            </small>
+                            <small id="email-help" class="p-error" *ngIf="loginForm.get('email').errors?.pattern">
+                                Entrer une adresse e-mail valide.
+                            </small>
+                        </ng-container>
+                    </div>
+
+                    <div class="flex flex-column gap-2 mb-4">
+                        <label for="password" class="block text-900 font-medium text-lg mt-2">Mot de passe :</label>
+                        <p-password formControlName="password" id="password" placeholder="Mot de passe" minlength="8" maxlength="30" 
+                            [toggleMask]="true" styleClass="w-full" inputStyleClass="w-full" aria-describedby="password-help" />
+                        <ng-container *ngIf="loginForm.get('password').invalid && (loginForm.get('password').dirty || loginForm.get('password').touched)">
+                            <small id="password-help" class="p-error" *ngIf="loginForm.get('password').errors?.required">
+                                Le mot de passe est requis.
+                            </small>
+                            <small id="password-help" class="p-error" *ngIf="loginForm.get('password').errors?.minlength || loginForm.get('password').errors?.maxlength">
+                                Le mot de passe doit avoir au moins 8 caractères.
+                            </small>
+                        </ng-container>
+                    </div>
+                    
+                    <div class="flex flex-wrap align-items-center justify-content-between mb-4">
+                        <div class="flex align-items-center">
+                            <p-checkbox [(ngModel)]="checked" formControlName="remember_me" [binary]="true" id="rememberme" styleClass="mr-2" />
+                            <label for="rememberme">Se souvenir de moi</label>
+                        </div>
+                        <a class="font-medium no-underline text-right cursor-pointer" 
+                           style="color: var(--primary-color)" routerLink="/auth/forgot-password">Mot de passe oublié ?</a>
+                    </div>
+                    
+                    <div class="flex flex-column justify-content-center mb-3">
+                        <p-button type="submit" label="Se connecter" 
+                            styleClass="w-full align-content-center font-bold text-xl mt-3" 
+                            [raised]="true" 
+                            severity="primary" 
+                            [loading]="loading" 
+                            loadingIcon="pi pi-refresh" iconPos="right" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

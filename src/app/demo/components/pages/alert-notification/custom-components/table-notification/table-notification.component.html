@@ -1,0 +1,83 @@
+<div class="row ">
+    <span class="text-center h4">
+        Historiques des notifications du {{stationProduct?.product?.name}}
+    </span>
+</div>
+<div class="row mt-1">
+    <p-table #dt
+        [value]="listNotification"
+        [scrollable]="true"
+        styleClass="p-datatable-striped"
+        scrollHeight="30rem"
+        [globalFilterFields]="['updated_at', 'tank.sensor_reference', 'type_notification.wording', 'percent', 'volume', 'remaining_day']"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[50, 100, 200]"
+        [paginator]="true" [rows]="50"
+        >
+        <ng-template pTemplate="caption">
+            <div class="flex align-items-center justify-content-between">
+                <h5 class="m-0">{{period}}</h5>
+                <span class="p-input-icon-right">
+                    <i class="pi pi-search"></i>
+                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Search..." />
+                </span>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th>#</th>
+                <th pSortableColumn="updated_at" pTooltip="date d'activation de la notification">
+                    Relevé à
+                    <p-sortIcon field="updated_at"></p-sortIcon>
+                </th>
+                <th pSortableColumn="tank.sensor_reference" pTooltip="reference de la cuve">
+                    Cuve
+                    <p-sortIcon field="tank.sensor_reference"></p-sortIcon>
+                </th>
+                <th pSortableColumn="type_notification.wording" pTooltip="type de notification">
+                    Type
+                    <p-sortIcon field="type_notification.wording"></p-sortIcon>
+                </th>
+                <th pSortableColumn="percent" pTooltip="pourcentage d'occupation">
+                    Pourcentage
+                    <p-sortIcon field="percent"></p-sortIcon>
+                </th>
+                <th pSortableColumn="volume" pTooltip="en litres">
+                    Volume à T
+                    <p-sortIcon field="volume"></p-sortIcon>
+                </th>
+                <th pSortableColumn="remaining_day" pTooltip="nombre de jours restant">
+                    Jours
+                    <p-sortIcon field="remaining_day"></p-sortIcon>
+                </th>
+                <!-- <th pTooltip="rapport des masses volumiques">Densité</th> -->
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-noti let-rowData let-columns="columns" let-rowIndex="rowIndex">
+            <tr>
+                <td>{{rowIndex+1}}</td>
+                <td>{{getToLocalDateTime(noti?.updated_at)}}</td>
+                <td pTooltip="reference de la cuve" tooltipPosition="bottom">
+                    {{noti?.tank?.sensor_reference}}
+                </td>
+                <td pTooltip="en centimetres" tooltipPosition="bottom">
+                    {{noti?.type_notification?.wording}}
+                </td>
+                <td pTooltip="en pourcentage" tooltipPosition="bottom">
+                    {{getRoundValue(noti.percent)+"%"}}
+                </td>
+                <td pTooltip="en litres" tooltipPosition="bottom">
+                    {{getRoundValue(noti.volume)}}
+                </td>
+                <td pTooltip="en jours" tooltipPosition="bottom">
+                    {{getRoundValue(noti.remaining_day)}}
+                </td>
+                <!-- <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">
+                    {{getRoundValue(noti.density)}}
+                </td> -->
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+

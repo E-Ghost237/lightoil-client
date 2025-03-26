@@ -1,0 +1,32 @@
+<div class="layout-topbar">
+    <button type="button" #menubutton class="p-link layout-menu-button layout-topbar-button mt-2 mr-3" 
+        (click)="layoutService.onMenuToggle()" title="Toggle Menu">
+        <i class="pi pi-bars"></i>
+    </button>
+
+    <a class="layout-topbar-logo" routerLink="/admin/dashboard">
+        <img src="assets/img/logos/{{layoutService.config().colorScheme === 'light' ? 'lightoil-logo-black' : 'lightoil-logo-white'}}.png" 
+            alt="lightoil-logo" class="mr-3" />
+        <span class="mt-1 font-bold">Admin</span>
+    </a>
+
+    <button type="button" #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button" 
+        (click)="layoutService.showProfileSidebar()" title="Show Profile Sidebar">
+        <i class="pi pi-ellipsis-v"></i>
+    </button>
+
+    <div #topbarmenu class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+        <button class="p-link layout-topbar-button">
+            <i class="pi pi-bell"></i>
+            <span>Notifications</span>
+        </button>
+        <button class="p-link layout-topbar-button border-none bg-gray-200 xl:border-circle lg:border-circle">
+            <i class="pi pi-user" style="font-size: 1.6rem"></i>
+            <span>Compte</span>
+        </button>
+        <button class="p-link layout-topbar-button text-danger" (click)="layoutService.logoutConfirm('top-right')">
+            <i class="pi pi-sign-out"></i>
+            <span>Se deconnecter</span>
+        </button>
+    </div>
+</div>

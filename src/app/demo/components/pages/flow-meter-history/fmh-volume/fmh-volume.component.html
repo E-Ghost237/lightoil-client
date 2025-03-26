@@ -1,0 +1,117 @@
+
+<p-toast></p-toast>
+<div class="row bg-secondary justify-content-evenly" >
+    <div class="col">
+        <button class="bg-secondary" style="border: none;">
+            <i class="pi pi-arrow-left"></i>
+        </button>
+    </div>
+    <div class="col-8 text-center">
+        <h4 class="text-white">Historiques des mouvements à travers le débitmètre</h4>
+    </div>
+    <div class="col text-center">
+        <img src="assets/demo/images/debimetreXl-removebg.png" alt="icon">
+    </div>
+</div>
+
+
+
+
+<div class="card flex  flex-row justify-content-evenly mt-3 text-white " >
+    <div class="col">
+        <span class="p-float-label">
+            <p-calendar
+                [(ngModel)]="rangeDates"
+                selectionMode="range"
+                dateFormat="dd/mm/yy"
+                [readonlyInput]="true"
+                [showIcon]="true"
+                (onSelect)="onDateSelect($event)"
+                [maxDate]="maxDate"
+                >
+            </p-calendar>
+            <label for="float-label text-white">Selectionnez la periode</label>
+        </span>
+    </div>
+    <div class="col">
+        <span class="p-float-label">
+            <p-dropdown
+                [options]="listQuarter"
+                [(ngModel)]="selectedQuart"
+                [showClear]="true"
+                placeholder="Selectionnez le quart"
+                optionLabel="sensor_reference" inputId="float-label"
+                (onChange)="onDropDownChangeQuart($event)"
+                [styleClass]="'w-100'"
+            >
+            <ng-template pTemplate="selectedItem">
+
+                <div>{{ selectedQuart ? selectedQuart?.time_start+'-'+selectedQuart?.time_close : "" }}</div>
+
+            </ng-template>
+            <ng-template let-quart pTemplate="item">
+
+                <div>{{ quart?.time_start+'-'+quart?.time_close }}</div>
+
+            </ng-template>
+            </p-dropdown>
+            <label for="">selectionez le quart</label>
+        </span>
+
+    </div>
+
+    <div class="col">
+        <span class="p-float-label">
+            <p-dropdown
+                [options]="listFlowMeters"
+                [(ngModel)]="selectedFlowMeter"
+                [showClear]="true"
+                placeholder="Selectionnez le débitmètre"
+                optionLabel="sensor_reference" inputId="float-label"
+                (onChange)="onDropDownChangeFlowMeter($event)"
+                [styleClass]="'w-100'"
+            >
+            <ng-template pTemplate="selectedItem">
+
+                <div>{{ selectedFlowMeter ? selectedFlowMeter?.sensor_reference+'-'+selectedFlowMeter?.product_service_station?.product?.name : '' }}</div>
+
+            </ng-template>
+            <ng-template let-FlowMeter pTemplate="item">
+                <div class="flex flex-row justify-content-around">
+                    <span>
+                        {{ FlowMeter?.sensor_reference+'-'+FlowMeter?.product_service_station?.product?.name }}
+                    </span>
+                </div>
+            </ng-template>
+            </p-dropdown>
+            <label for="float-label">Selectionnez le débitmètre</label>
+        </span>
+    </div>
+   <div class="col-2 text-center">
+      <button 
+        class=" "
+        pTooltip="exporter les données au format pdf" 
+        (click)="generateFlowMeterOutputPdf()">
+        <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
+      </button>
+    </div>
+</div>
+
+
+<div class="row" *ngIf="dataOutputs && dataOutputs?.periodRecord?.length > 0">
+    <app-fmh-table-volume [listOutputs] = "dataOutputs" [flowMeter]="selectedFlowMeter">
+    </app-fmh-table-volume>
+</div>
+<div class="row justify-content-center" *ngIf="dataOutputs && this.dataOutputs?.periodRecord?.length <= 0">
+    <div class="col text-center">
+        Aucune données disponible dans la période
+    </div>
+</div>
+
+
+
+
+
+
+
+

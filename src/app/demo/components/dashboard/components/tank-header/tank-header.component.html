@@ -1,0 +1,42 @@
+<div class="row card-title">
+    <div class="col-1 my-auto ml-3">
+        <ng-container *ngIf="getOnlineStatuSensor(); else elseTemplate">
+            <div class="spinner-grow text-success" role="status" pTooltip="Jauge active">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </ng-container>
+        <ng-template #elseTemplate>
+            <div class="spinner-grow text-secondary" role="status" pTooltip="Jauge inactive">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </ng-template>
+
+
+    </div>
+    <div class="col-1 ">
+        <div class="d-flex" style="height: 50px;">
+            <div class="vr"></div>
+          </div>
+    </div>
+
+    <div class="col-3 d-flex flex-column justify-content-between ">
+        <div class="h6 mb-1 ">
+            {{dataFromTankList?.tank?.sensor_reference}}
+        </div>
+        <div class="text-red-300 ">
+            {{getTotalNotification()+' notifications'}}
+        </div>
+    </div>
+    <div class="col-1">
+        <div class="d-flex" style="height: 50px;">
+            <div class="vr"></div>
+          </div>
+    </div>
+    <div class="col d-flex flex-column justify-content-center">
+        <span class="text-center h6">{{dataFromTankList?.product?.name}}</span>
+        <small *ngIf="getDepMessage()" class="text-danger anim-clip">
+            {{getDepMessage()}}
+        </small>
+
+    </div>
+</div>

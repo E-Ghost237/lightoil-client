@@ -1,0 +1,86 @@
+
+
+<p-toast></p-toast>
+<div class="row bg-secondary justify-content-evenly" >
+    <div class="col">
+        <button class="bg-secondary" style="border: none;">
+            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
+        </button>
+    </div>
+    <div class="col-8 text-center">
+        <h4 class="text-white">Graphe des donnees du débitmètre</h4>
+    </div>
+    <div class="col text-center">
+        <img src="assets/demo/images/debimetreXl-removebg.png" alt="icon">
+    </div>
+</div>
+
+
+<div class="card mt-3 p-2" >
+    <div class="row justify-content-evenly text-white">
+        <div class="col">
+            <span class="p-float-label">
+                <p-calendar
+                    [(ngModel)]="rangeDates"
+                    selectionMode="range"
+                    dateFormat="dd/mm/yy"
+                    [readonlyInput]="true"
+                    [showIcon]="true"
+                    (onSelect)="onDateSelect($event)"
+                    [maxDate]="maxDate"
+                    >
+                </p-calendar>
+                <label for="float-label text-white">Selectionnez la periode</label>
+            </span>
+        </div>
+        <div class="col">
+            <span class="p-float-label">
+                <p-dropdown
+                    [options]="listFlowMeters"
+                    [(ngModel)]="selectedFlowMeter"
+                    [showClear]="true"
+                    placeholder="Selectionnez le débitmètre"
+                    optionLabel="sensor_reference" inputId="float-label"
+                    (onChange)="onDropDownChange($event)"
+                    [styleClass]="'w-100'"
+                >
+                <ng-template pTemplate="selectedItem">
+    
+                    <div>{{ selectedFlowMeter ? selectedFlowMeter?.sensor_reference+'-'+selectedFlowMeter?.product_service_station?.product?.name : '' }}</div>
+    
+                </ng-template>
+                <ng-template let-flowMeter pTemplate="item">
+    
+                    <div>{{ flowMeter?.sensor_reference+'-'+flowMeter?.product_service_station?.product?.name }}</div>
+    
+                </ng-template>
+                </p-dropdown>
+                <label for="float-label">Selectionnez le débitmètre</label>
+            </span>
+        </div>
+        <div class="col-2 border-round">
+            <!-- <button class="">
+                <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
+            </button> -->
+            <button class=""
+                pTooltip="exporter le graphe" 
+                (click)="generateFlowMeterGraphPdf()">
+                <i class=" pi pi-image" style="font-size: 2.5rem; color: rgb(0, 255, 17);"></i>
+            </button>
+        </div>
+    </div>
+</div>
+<app-custom-fmh-graph></app-custom-fmh-graph>
+
+
+
+
+
+
+
+
+
+
+
+
+

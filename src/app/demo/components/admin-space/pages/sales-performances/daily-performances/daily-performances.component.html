@@ -1,0 +1,157 @@
+<div class="justify-content-center">
+    <h2 class="font-bold text-uppercase text-center text-2xl text-dark mb-5">
+        Performances de ventes du réseau {{ point_of_sale_type ?? '...' }} au {{ date ?? '...' }}
+    </h2>
+    <ng-container *ngIf="loading == false; else elseTemplate">
+        <div class="grid p-fluid text-lg mt-5">
+            <div class="col-12 xl:col-6 lg:col-6">
+                <div class="card p-4">
+                    <h5 class="font-semibold text-900 text-left w-full">
+                        Evolution des ventes par produit du {{ date ?? '...' }}
+                    </h5>
+
+                    <ng-container *ngIf="sales_by_product !== undefined && sales_by_product.length > 0; else elseTemplate">
+                        <p-chart type="line" [data]="hourlySalesPerProductData" [options]="hourlySalesPerProductOptions"></p-chart>
+                    </ng-container>
+        
+                    <ng-template #elseTemplate>
+                        <div class="flex flex-column align-items-center justify-content-center mt-4">
+                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+            <div class="col-12 xl:col-6 lg:col-6">
+                <div class="grid">
+                    <div class="col-12"></div>
+                    <div class="col-12"></div>
+                    <div class="col-12"></div>
+                    <div class="col-12"></div>
+                    <div class="col-12">
+                        <p class="font-bold">
+                            Vente totale du réseau : &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            <span>
+                                <strong>{{ (total_network_sales | number:'1.0-0':'fr') ?? '...' }} FCFA</strong>
+                            </span>
+                        </p>
+                        <p class="font-bold" *ngIf="best_sale_product !== undefined && best_sale_product !== null">
+                            Produit le plus vendu : &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                            <span [ngStyle]="{'color': getProductColor(best_sale_product.name)}">
+                                <strong>{{ best_sale_product.name }}</strong> => 
+                                <strong>{{ (best_sale_product.sales  | number:'1.0-0':'fr') }} FCFA</strong>
+                            </span>
+                        </p>
+                        <p class="font-bold" *ngIf="best_sale_product !== undefined && best_sale_product !== null">
+                            Point de vente le plus performant :&nbsp; &nbsp;
+                            <span>
+                                <strong>{{ best_point_of_sale.name }}</strong> => 
+                                <strong>{{ (best_point_of_sale.sales  | number:'1.0-0':'fr') }} FCFA</strong>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                </div>
+        </div>
+        <div class="grid p-fluid">
+            <div class="col-12 xl:col-6 lg:col-6">
+                <div class="card p-4 flex flex-column align-items-center">
+                    <h5 class="font-semibold text-900 text-left w-full">
+                        Ventes par produit du réseau du {{ date ?? '...' }}
+                    </h5>
+
+                    <ng-container *ngIf="sales_by_product !== undefined && sales_by_product.length > 0; else elseTemplate">
+                        <p-chart type="doughnut" [data]="productData" [options]="productOptions"></p-chart>
+                    </ng-container>
+        
+                    <ng-template #elseTemplate>
+                        <div class="flex flex-column align-items-center justify-content-center mt-4">
+                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+            <div class="col-12 xl:col-6 lg:col-6">
+                <div class="card p-4 flex flex-column align-items-center">
+                    <h5 class="font-semibold text-900 text-left w-full">
+                        Ventes par point de vente du {{ date ?? '...' }}
+                    </h5>
+
+                    <ng-container *ngIf="sales_by_product !== undefined && sales_by_product.length > 0; else elseTemplate">
+                        <p-chart type="pie" [data]="pointOfSaleData" [options]="pointOfSaleOptions"></p-chart>
+                    </ng-container>
+        
+                    <ng-template #elseTemplate>
+                        <div class="flex flex-column align-items-center justify-content-center mt-4">
+                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card p-4">
+                    <h5 class="font-semibold text-900 text-left w-full">
+                        Ventes de produits par point de vente du réseau du {{ date ?? '...' }}
+                    </h5>
+
+                    <ng-container *ngIf="sales_by_product !== undefined && sales_by_product.length > 0; else elseTemplate">
+                        <p-chart type="line" [data]="salesOfProductPerPointOfSaleData" [options]="salesOfProductPerPointOfSaleOptions"></p-chart>
+                    </ng-container>
+        
+                    <ng-template #elseTemplate>
+                        <div class="flex flex-column align-items-center justify-content-center mt-4">
+                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card p-4 pt-3 pb-3">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered caption-top">
+                            <caption class="font-semibold text-900 text-xl text-dark mb-3">
+                                Produit le plus vendu par point de vente   du réseau au {{ date ?? '...' }}
+                            </caption>
+                            <thead class="table-dark">
+                                <tr class="font-bold">
+                                    <th scope="col">Point de vente</th>
+                                    <th scope="col">Produit</th>
+                                    <th scope="col">Montant</th>
+                                </tr>
+                            </thead>
+                            <ng-container *ngIf="sales_by_product !== undefined && sales_by_product.length > 0; else elseTemplate">
+                                <tbody class="table-group-divider align-middle" *ngFor="let point_of_sale of best_sale_product_per_point_of_sale">
+                                    <tr>
+                                        <td>
+                                            <b>{{ point_of_sale.name }}</b> <br><i>{{ point_of_sale.town }}</i>
+                                        </td>
+                                        <td [ngStyle]="{'color': getProductColor(point_of_sale.product.name)}">
+                                            <strong>{{ point_of_sale.product.name }}</strong>
+                                        </td>
+                                        <td class="font-bold">
+                                            {{ point_of_sale.product.total_sales | number:'1.0-0':'fr' }} FCFA
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot class="table-group-divider align-middle">
+                                    <tr></tr>
+                                </tfoot>
+                            </ng-container>
+                            <ng-template #elseTemplate>
+                                <div class="flex flex-column align-items-center justify-content-center mt-4">
+                                    <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                                </div>
+                            </ng-template>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
+    <ng-template #elseTemplate>
+        <div class="relative flex flex-column align-items-center justify-content-center mt-5">
+            <div class="absolute top-100 flex align-items-center justify-content-center mt-5">
+                <img src="../../../../../../../assets/img/logos/loading-oil-logo.gif" width="150rem" alt="Loading...">
+            </div>
+        </div>
+    </ng-template>
+</div>

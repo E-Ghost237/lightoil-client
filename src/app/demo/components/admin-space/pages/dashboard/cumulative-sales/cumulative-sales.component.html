@@ -1,0 +1,139 @@
+<ng-container *ngIf="sales_by_product != undefined && sales_by_product.length > 0; else elseTemplate">
+    <div class="grid">
+        <div *ngFor="let product of sales_by_product" class="col-12 xl:col-3 lg:col-6 md:col-6">
+            <!-- Card of gasoline's sales -->
+            <div *ngIf="product.name == 'Super'" class="card p-4">
+                <span class="font-bold text-xl mb-4" style="color: #014da4;">Super :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <img src="assets/img/oil/gasoline.png" alt="gasoline-image">
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        {{ (product.sales | number:'1.0-0':'fr') ?? '...' }} FCFA
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card of diesel's sales -->
+            <div *ngIf="product.name == 'Gasoil'" class="card p-4">
+                <span class="font-bold text-xl mb-4" style="color: #fdc401;">Gasoil :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-yellow-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <img src="assets/img/oil/diesel.png" alt="diesel-image">
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        {{ (product.sales | number:'1.0-0':'fr') ?? '...' }} FCFA
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Card of petroleum's sales -->
+            <div *ngIf="product.name == 'Pétrole'" class="card p-4">
+                <span class="font-bold text-xl mb-4" style="color: #007138;">Pétrole :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-green-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <img src="assets/img/oil/petroleum.png" alt="petroleum-image">
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        {{ (product.sales | number:'1.0-0':'fr') ?? '...' }} FCFA
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Card of total sales -->
+        <div class="col-12 xl:col-3 lg:col-6 md:col-6">
+            <div class="card p-4">
+                <span class="font-bold text-dark text-xl mb-4">Total des ventes :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <i class="pi pi-wallet text-black-500" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div *ngIf="total_sales != undefined" class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        {{ total_sales | number:'1.0-0':'fr' }} FCFA
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
+
+<ng-template #elseTemplate>
+    <div class="grid">
+        <!-- Card of gasoline's sales -->
+        <div class="col-12 xl:col-3 lg:col-6 md:col-6">
+            <div class="card p-4">
+                <span class="font-bold text-xl mb-4" style="color: #014da4;">Super :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <img src="assets/img/oil/gasoline.png" alt="gasoline-image">
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Card of diesel's sales -->
+        <div class="col-12 xl:col-3 lg:col-6 md:col-6">
+            <div class="card p-4">
+                <span class="font-bold text-xl mb-4" style="color: #fdc401;">Gasoil :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-yellow-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <img src="assets/img/oil/diesel.png" alt="diesel-image">
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Card of petroleum's sales -->
+        <div class="col-12 xl:col-3 lg:col-6 md:col-6">
+            <div class="card p-4">
+                <span class="font-bold text-xl mb-4" style="color: #007138;">Pétrole :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-green-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <img src="assets/img/oil/petroleum.png" alt="petroleum-image">
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Card of total sales -->
+        <div class="col-12 xl:col-3 lg:col-6 md:col-6">
+            <div class="card p-4">
+                <span class="font-bold text-dark text-xl mb-4">Total des ventes :</span>
+    
+                <div class="flex flex-wrap gap-5 justify-content-start">
+                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
+                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
+                        <i class="pi pi-wallet text-black-500" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="align-items-center font-bold text-dark text-xl text-center pt-2">
+                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>

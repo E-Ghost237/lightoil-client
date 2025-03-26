@@ -1,0 +1,36 @@
+.chatbot-container {
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    width: 500px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.chat-header {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0px 0px;
+}
+.chat-body {
+    padding: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+.chat-footer {
+    display: flex;
+    padding: 10px;
+}
+.chat-toggle {
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+}

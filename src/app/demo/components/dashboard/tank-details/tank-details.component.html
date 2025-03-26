@@ -1,0 +1,292 @@
+<ng-container *ngIf="tankDetailsData; else elseTemplate">
+    <div class="row my-4 justify-content-center" #targetEl>
+        <p-toast></p-toast>
+        <div class="col-5 card m-0 mb-2 d-flex flex-column justify-content-between anim-fade">
+            <div class="row ">
+                <div class="col-1" (click)="backToDashboard()">
+                    <i class="pi pi-arrow-left" pTooltip="Retour au dashboard"></i>
+                </div>
+                <div class="col-1 ">
+                    <ng-container *ngIf="getOnlineStatuSensor(); else elseTemplate">
+                        <div class="spinner-grow text-success" role="status" pTooltip="Jauge active">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </ng-container>
+                    <ng-template #elseTemplate>
+                        <div class="spinner-grow text-secondary" role="status" pTooltip="Jauge inactive">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </ng-template>
+                </div>
+                <div class="col text-center ">
+                    <span class="h5">
+                        {{'Cuve '+getSensorReference()+' '+getNameProduct()}}
+                    </span>
+                </div>
+                <div class="col text-end">
+                    <span>{{d}}</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col" >
+                    <span class="mr-4" pTooltip="Pourcentage d'occupation actuelle de la cuve"> Occupation de la cuve: </span>
+                    <span>
+                        <p-badge value="{{getPercentOccupation()+'%'}}"
+                                size="large" severity="{{getSeverityPercent()}}"
+                                pTooltip="Pourcentage d'occupation actuelle de la cuve"
+                                >
+                        </p-badge>
+                    </span>
+                </div>
+                <div class="col pr-0 text-end" pTooltip="Nombre de notifications de la journee" >
+                    <span class="mr-4"> Notifications: </span>
+                    <span><p-badge value="{{getTotalNotification()}}" size="large" severity="{{getSeverityNoti()}}"></p-badge></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <small *ngIf="getNotiMessage()" class="text-center text-danger anim-clip"
+                    pTooltip="Derniere notification"
+                    tooltipPosition="bottom"
+                    >
+                     {{getNotiMessage()}}
+                </small>
+            </div>
+
+            <div class="row d-flex flex-row justify-content-center">
+                <div class="col-10 ">
+                    <img width="100%" src="{{getTheCorrectImage()}}"
+                        alt="une vue actuelle de la cuve"
+                        pTooltip="Niveau actuel de produit dans la cuve">
+                </div>
+            </div>
+
+            <div class="row">
+                <small class="text-center"
+                    pTooltip="Date et heure d'arrivee de la derniere donnee"
+                    tooltipPosition="bottom"
+                    >
+                     {{getLastIncomeDateRecord()}}
+                </small>
+            </div>
+
+            <div class="row">
+                <div class="col" >
+                    <span class="mr-4" pTooltip="Espace disponible pour depotage dans la cuve"> Volume à depoter: </span>
+                    <span>
+                        <p-badge value="{{getVolumeToDepote()}}" size="large" severity="info" pTooltip="Espace disponible pour depotage dans la cuve"></p-badge>
+                    </span>
+                </div>
+                <div class="col pr-0 text-end" pTooltip="Nombre de jours de consommation avant epuisement" >
+                    <span class="mr-4"> Journées restantes: </span>
+                    
+                    <span><p-badge value="{{getRmDay()}}" size="large" severity="{{getSeverityRmDay()}}"></p-badge></span>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-6 mx-1 pt-0">
+            <div class="row justify-content-end ">
+
+                <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Niveau(cm): </span>
+                    <span><p-badge value="{{getLevel()}}" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
+                </div>
+                <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Densité(*): </span>
+                    <span><p-badge value="{{getDensity()}}" size="large" severity="info"></p-badge></span>
+                </div>
+                <span></span>
+
+            </div>
+            <div class="row justify-content-end ">
+
+                <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Volume à {{getLiquidTemp()+ 'C(l)'}}: </span>
+                    <span><p-badge value="{{getVolumeAtT()}}" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
+                </div>
+                <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Volume à T15(litres): </span>
+                    <span><p-badge value="{{getVolumeAtT15()}}" size="large" severity="info"></p-badge></span>
+                </div>
+                <span></span>
+
+            </div>
+            <div class="row justify-content-end ">
+                <div class="col-10 card mx-4 d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Quantité Sortie : </span>
+                    <span><p-badge value="{{getOutputVolume()}} litre(s)" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
+                </div>
+                <span></span>
+            </div>
+            <div class="row justify-content-end ">
+
+                <!-- <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Temp. ambiante(Celsius): </span>
+                    <span><p-badge value="{{getEnvTemp()}}" size="large" severity="info"></p-badge></span>
+                </div> -->
+                <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Temp. liquide(Celsius): </span>
+                    <span><p-badge value="{{getLiquidTemp()}}" size="large" severity="info"></p-badge></span>
+                </div>
+                <span></span>
+
+            </div>
+            <div class="row card justify-content-center mx-1 p-0">
+                <div class="col p-0 pl-1 pr-1">
+                    <div class="row p-1 pb-0">
+                        <div class="col ">
+                            <p-button (click)="op.toggle($event, targetEl)" 
+                                label="Afficher tout" 
+                                [text]="true" 
+                                [raised]="true" 
+                                severity="info">
+                            </p-button>
+                        </div>
+                        <div class="col d-flex flex-row justify-content-end ">
+                            <p-button (click)="og.toggle($event, targetEl)" 
+                                label="Graphe" 
+                                [text]="true" 
+                                [raised]="true" 
+                                severity="info">
+                            </p-button>
+                        </div>
+                    </div>
+                    <div class="row p-0 ">
+                        <p-table
+                            [value]="ajusted_records"
+                            [scrollable]="true"
+                            scrollHeight="350px"
+                            styleClass="p-datatable-striped"
+                            [tableStyle]="{'min-width': '30rem'}">
+                            <ng-template pTemplate="header" let-columns>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Relevé à</th>
+                                    <th pTooltip="en centimetres" tooltipPosition="bottom">Niveau(cm)</th>
+                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume a T(litres)</th>
+                                    <th pTooltip="en litres" tooltipPosition="bottom">Qté. Sortie(litre)</th>
+                                    <th pTooltip="en degres celsius" tooltipPosition="bottom">T(C) liquide</th>
+                                    <th pTooltip="rapport des masses volumiques" tooltipPosition="bottom">Densite</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-record let-columns="columns" let-rowIndex="rowIndex">
+                                <tr>
+                                    <td>{{rowIndex+1}}</td>
+                                    <td>{{getToLocalDateTime(record.updated_at)}}</td>
+                                    <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
+                                    <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
+                                    <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
+                                    <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
+                                    <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <span></span>
+    </div>
+
+    <!-- affficher tout -->
+    <p-overlayPanel #op [style]="{'width': '98%','height': '92%'}" [showCloseIcon]="true">
+        <ng-template pTemplate="content">
+            <div class="row justify-content-evenly">
+                <div class="col text-center h4">
+                    Historiques des donnees de la journee
+                </div>
+                <div class="col text-center">
+                    <button class="border-none" (click)="generateTankDataDetailsPdf()">
+                        <i class="pi pi-fw pi-file-pdf"
+                            pTooltip="Exporter au format pdf" tooltipPosition="bottom"
+                            style="font-size: 3rem; color: red;">
+                        </i>
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-8">
+                <p-table [value]="ajusted_records"
+                    [scrollable]="true"
+                    styleClass="p-datatable-striped"
+                    scrollHeight="45rem"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [rowsPerPageOptions]="[15, 50, 100]"
+                    (onRowSelect)="onRowSelect($event, op)"
+                    [paginator]="true" [rows]="15"
+                    >
+                    <ng-template pTemplate="header" let-columns>
+                        <tr>
+                            <th>#</th>
+                            <th>Releve a</th>
+                            <th pTooltip="en centimetres">Niveau(cm)</th>
+                            <th pTooltip="en litres">Volume a T</th>
+                            <th pTooltip="en litres">Volume a 15C</th>
+                            <th pTooltip="en litres" tooltipPosition="bottom">Qté. Sortie (en litre)</th>
+                            <th pTooltip="en degres celsius">T(C) liquide</th>
+                            <th pTooltip="rapport des masses volumiques">Densite</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-record let-rowData let-columns="columns" let-rowIndex="rowIndex">
+                        <tr>
+                            <td>{{rowIndex+1}}</td>
+                            <td>{{getToLocalDateTime(record.updated_at)}}</td>
+                            <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume_at_fift)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
+                            <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
+                            <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </ng-template>
+    </p-overlayPanel>
+
+    <!-- graphe -->
+    <p-overlayPanel #og [style]="{'width': '98%','height': '92%'}"  [showCloseIcon]="true">
+
+        <ng-template pTemplate="content" >
+            <div class="d-flex flex-column justify-content-center">
+                <div class="row ">
+                    <span class="text-center h4">
+                        Graphe d'evolution des consommations de la journee
+                    </span>
+                </div>
+                <div class="row mt-8">
+                    <p-chart #line type="line" [data]="data" [options]="options"></p-chart>
+                </div>
+                <div class="row mt-1">
+                    <div class="col text-center">
+                        <button class="border-none" (click)="generateTankDataDetailsImage()">
+                            <i class="pi pi-fw pi-image"
+                                pTooltip="Exporter l'image" tooltipPosition="bottom"
+                                style="font-size: 3rem; color: rgb(0, 255, 4);">
+                            </i>
+                        </button>
+                        <!-- <i class="pi pi-fw pi-file-excel"
+                            pTooltip="Exporter au format excel" tooltipPosition="bottom"
+                            style="font-size: 3rem; color: green;">
+                        </i> -->
+                    </div>
+                </div>
+            </div>
+        </ng-template>
+    </p-overlayPanel>
+
+    <!-- Chatbot -->
+    <app-chatbot></app-chatbot>
+</ng-container>
+<ng-template #elseTemplate>
+    <div class="d-flex flex-row justify-content-center align-content-center" style="margin-top: 20%;">
+        <img width="150rem" src="../../../../../assets/layout/images/logo.gif" alt="Loading" srcset="">
+    </div>
+</ng-template>
+

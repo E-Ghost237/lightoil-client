@@ -1,0 +1,88 @@
+<div class="row ">
+    <span class="text-center h4">
+        Historiques des donnees de la cuve {{tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name}}
+    </span>
+</div>
+<div class="row mt-1">
+    <p-table [value]="listInputs?.periodInputs"
+        [scrollable]="true"
+        styleClass="p-datatable-striped"
+        scrollHeight="30rem"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[50, 100, 200]"
+        [paginator]="true" [rows]="50"
+        >
+        <ng-template pTemplate="caption">
+            <div class="flex">
+                {{
+                    "Du "+getToLocalDate(listInputs?.dateStart)+
+                    " au "+getToLocalDate(listInputs?.dateEnd)+
+                    " entre "+getToLocalTime(listInputs?.dateStart)+
+                    " et "+getToLocalTime(listInputs?.dateEnd)
+                }}
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th>#</th>
+                <th>Date</th>
+                <th pTooltip="en centimetres">Volume à T de depart</th>
+                <th pTooltip="en centimetres">T(C) liquide</th>
+                <th pTooltip="en litres">Quantité depotée</th>
+                <th pTooltip="en litres">Volume à T de fin</th>
+                <th pTooltip="en degres celsius">T(C) liquide</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-income let-rowData let-columns="columns" let-rowIndex="rowIndex">
+
+            <tr *ngIf="! income?.isTheLast" >
+                <td>{{(rowIndex+1)}}</td>
+                <td>
+                    <div class="row justify-content-center">
+                        <span class="text-center ">{{getToLocalDate(income?.takedDay)}}</span>
+                    </div>
+                    <div class="row">
+                        {{"de "+getToLocalTime(income?.takedDay)+' à '+getToLocalTime(income?.endedDay)}}
+                    </div>
+                </td>
+
+                <td class="text-center" pTooltip="en litres" tooltipPosition="bottom">
+                    {{getRoundValue(income?.start_volume)}}
+                </td>
+
+                <td class="text-center" pTooltip="en degres celsius" tooltipPosition="bottom">
+                    {{getRoundValue(income?.start_liquid_temperature)}}
+                </td>
+
+                <td class="text-center" pTooltip="en litres" tooltipPosition="bottom">
+                    {{getRoundValue(income?.totalInput)}}
+                </td>
+
+                <td class="text-center" pTooltip="en litres" tooltipPosition="bottom">
+                    {{getRoundValue(income?.end_volume)}}
+                </td>
+
+                <td class="text-center" pTooltip="en degres celsius" tooltipPosition="bottom">
+                    {{getRoundValue(income?.end_liquid_temperature)}}
+                </td>
+            </tr>
+
+            <tr *ngIf=" income?.isTheLast">
+                <td colspan="4">
+                    <div class="row justify-content-center ">
+                        <span class="text-center ">Total sur la periode</span>
+                    </div>
+                </td>
+                <td colspan="3" pTooltip="en litres" tooltipPosition="bottom">
+                    <div class="row justify-content-center">
+                        <span class="">
+                            <p-tag severity="info" [value]="getRoundValue(income?.totalInput)"> </p-tag>
+                        </span>
+                    </div>
+
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
