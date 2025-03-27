@@ -10,17 +10,17 @@ export const environment = {
     cluster: "eu",
   },
   
-  apiUrl: "http://localhost:8001/api/",
-  apiAuthUrl : "http://localhost:8001/api/",
-  authUrl: "http://localhost:4201/auth/login",
+  apiUrl: "http://localhost:8000/api/",
+  apiAuthUrl : "http://localhost:8000/api/",
+  authUrl: "http://localhost:4200/auth/login",
 
   
   oauth: "http://localhost:8000/oauth/token",
   client_id: "9deb2f64-c310-4f43-9dcb-2c99213800dd",
   client_secret: "xqNbktj94DlMTtswPOI00PmkB3qy6Rv9XNfgkGpI",
-  redirect_uri_path: "http://localhost:4201/auth/login",
+  redirect_uri_path: "http://localhost:4200/auth/login",
   admin_view: "http://localhost:4202/",
-  light_oil:  "http://localhost:4201/",
+  light_oil:  "http://localhost:4200/",
   super_admin_view: "http://localhost:4203/"
 };
 

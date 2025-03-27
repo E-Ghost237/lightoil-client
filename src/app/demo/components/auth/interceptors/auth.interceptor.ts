@@ -22,7 +22,7 @@ export class AuthInterceptor implements HttpInterceptor {
     
     // Clone the request to add new headers
     const clonedRequest = req.clone({
-      headers: req.headers.set('Authorization', 'Bearer '+token)
+      headers: req.headers.set('Authorization', 'Bearer ' + token)
     });
 
     // Log the request for debugging

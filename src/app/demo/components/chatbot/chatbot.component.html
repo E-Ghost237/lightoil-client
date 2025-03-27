@@ -1,42 +1,72 @@
-<p-card header="" [style]="{ width: '500px' }" *ngIf="showChat" 
-    styleClass="z-4 card fixed bottom-0 right-0 flex justify-content-center p-shadow-3 overflow-hidden p-0 mr-5 mb-5">
-    <ng-template pTemplate="header">
-        <div class="border-round-top bg-blue-500 text-light flex flex-wrap alight-items-center justify-content-between p-2">
-            <div class="align-content-start font-semibold text-2xl">Assistance virtuelle</div>
-            <div class="align-content-end cursor-pointer">
-                <p-button severity="primary" styleClass="border-none border-round bg-blue-500 p-2" (onClick)="toggleChat()">
-                    <i class="pi pi-times" style="font-size: 1.3rem"></i>
-                </p-button>
-            </div>
-        </div>
-    </ng-template>
-    <div class="flex-auto">
-        <p-scrollPanel [style]="{ width: '100%', height: '400px' }" styleClass="">
-            <div *ngFor="let msg of messages"
-                [ngClass]="{'user p-text-right': msg.sender === 'user', 'bot p-text-left': msg.sender === 'bot'}">
-                <p class="p-mb-1">{{ msg.text }}</p>
-                <div *ngIf="msg.buttons" class="p-mt-2">
-                    <p-button *ngFor="let btn of msg.buttons" label="{{ btn }}" (onClick)="selectButton(btn)" />
+<div class="z-4 chat-container">
+    <p-card header="" [style]="{ width: '500px' }" *ngIf="showChat" 
+        styleClass="z-4 card fixed bottom-0 right-0 flex justify-content-center p-shadow-3 overflow-hidden p-0 mr-5 mb-5"
+        [@fadeInOut]>
+
+        <ng-template pTemplate="header">
+            <div class="border-round-top bg-blue-500 text-light flex flex-wrap align-items-center justify-content-between p-2">
+                <div class="align-content-start font-semibold text-2xl">Assistance virtuelle</div>
+                <div class="align-content-end cursor-pointer">
+                    <p-button [outlined]="true" severity="primary" styleClass="border-none border-round font-semibold text-light p-2 mr-2" 
+                        (onClick)="loadHistory()">
+                        <i class="pi pi-history mr-2" style="font-size: 1.3rem"></i> Historique<!-- Historique -->
+                    </p-button>
+                    <p-button severity="primary" styleClass="border-none border-round bg-blue-500 p-2" (onClick)="toggleChat()">
+                        <i class="pi pi-times" style="font-size: 1.3rem"></i>
+                    </p-button>
                 </div>
             </div>
-        </p-scrollPanel>
-    </div>
-    <ng-template pTemplate="footer">
-        <div class="p-inputgroup">
-            <input type="text" #msgInput pInputText placeholder="Poser une question..." autofocus />
-            <button pButton type="button" class="border-none border-round-right p-button-primary bg-blue-500 p-2" title="Envoyer"
-                (click)="sendMessage(msgInput.value); msgInput.value=''">
-                <i class="pi pi-send" style="font-size: 1.8rem"></i>
-            </button>
-            <!-- <p-button severity="primary" size="large" styleClass="border-none border-round-right bg-blue-500 p-2" 
-                (onClick)="sendMessage(msgInput.value); msgInput.value=''">
-                <i class="pi pi-send" style="font-size: 2.3rem"></i>
-            </p-button> -->
-        </div>
-    </ng-template>
-</p-card>
+        </ng-template>
 
-<p-button *ngIf="!showChat" [rounded]="true" [raised]="true" severity="primary" size="large" 
-    styleClass="z-4 fixed bottom-0 right-0 border-none border-circle bg-blue-500 p-2 mr-5 mb-5" (onClick)="toggleChat()">
-    <i class="pi pi-comments" style="font-size: 2.3rem"></i>
-</p-button>
+        <div class="flex-auto chat-messages">
+            <p-scrollPanel #scrollPanel [style]="{ width: '100%', height: '400px' }">
+                <div *ngFor="let msg of messages" class="message-container"
+                    [ngClass]="{'user-message': msg.sender === 'user', 'bot-message': msg.sender === 'bot'}"
+                    [@messageAnimation]>
+
+                    <!-- Avatar à gauche pour le bot -->
+                    <div class="message-avatar">
+                        <i *ngIf="msg.sender === 'bot'" class="pi pi-reddit avatar"></i>
+                    </div>
+
+                    <div *ngIf="msg.sender === 'bot'" class="flex flex-column mb-2">
+                        <div class="message-content">
+                            <p class="p-mb-1">{{ msg.text }}</p>
+                        </div>
+                        <div *ngIf="msg?.buttons?.length > 0" class="button-group">
+                            <p-button *ngFor="let btn of msg.buttons" label="{{ btn }}" [rounded]="true"
+                                (onClick)="selectButton(btn)" styleClass="border-none bg-blue-500 interactive-button p-2" />
+                        </div>
+                    </div>
+
+                    <div *ngIf="msg.sender === 'user'" class="message-content">
+                        <p class="p-mb-1">{{ msg.text }}</p>
+                    </div>
+
+                    <!-- Avatar à droite pour l'utilisateur -->
+                    <div class="message-avatar">
+                        <i *ngIf="msg.sender === 'user'" class="pi pi-user avatar"></i>
+                    </div>
+                </div>
+            </p-scrollPanel>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <div class="p-inputgroup">
+                <input type="text" #msgInput pInputText placeholder="Poser une question..." autofocus />
+                <button pButton type="button" class="border-none border-round-right p-button-primary bg-blue-500 p-2"
+                    title="Envoyer"
+                    (click)="sendMessage(msgInput.value); msgInput.value=''">
+                    <i class="pi pi-send" style="font-size: 1.8rem"></i>
+                </button>
+            </div>
+        </ng-template>
+    </p-card>
+
+    <p-button *ngIf="!showChat" [rounded]="true" [raised]="true" severity="primary" size="large" 
+        styleClass="z-4 fixed bottom-0 right-0 border-none border-circle bg-blue-500 p-2 mr-5 mb-5" 
+        (onClick)="toggleChat()" 
+        [@fadeInOut]>
+        <i class="pi pi-comments" style="font-size: 2.3rem"></i>
+    </p-button>
+</div>

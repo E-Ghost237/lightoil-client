@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { SalesPerformancesService } from '../sales-performances.service';
+import { SalesPerformancesService } from '../../services/sales-performances.service';
 import { LocalStorageService } from '../../../auth/services/local-storage.service';
 import { PointsOfSaleService } from '../../services/sale-points.service';
 import { CommonService } from '../../services/common-services.service';
