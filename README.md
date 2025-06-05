@@ -1,27 +1,31 @@
-# Sakai
+# 🚀 Lightoil_frontend Docker Deployment
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.0.4.
+This repository contains a Dockerized setup for deploying a lighoil-api application on an Ubuntu server using **Docker** and **Docker Compose**.
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## 📦 Prerequisites
 
-## Code scaffolding
+Make sure your server has the following installed **before proceeding**:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- ✅ Docker (v20+ recommended)
+- ✅ Docker Compose (v2+)
 
-## Build
+If Docker is not installed, you can clone our setup script and run it:
+```git clone https://github.com/merveille-nitcheu/scripts.git```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Usage
 
-## Running unit tests
+### 📁 Clone the Lightoil-frontend Project
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```git clone https://gitlab.com/light-technical/soft/lightoil-version-2/lightoil-api.git```
 
-## Running end-to-end tests
+### Navigate to the Lightoil-api folder
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```cd lightoil-api```
 
-## Further help
+### 🐳 Run the Application
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```docker compose up -d --build```
+
+### 🧪 Run Migrations and Seeders Commands

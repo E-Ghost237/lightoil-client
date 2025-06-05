@@ -1,0 +1,18 @@
+
+services:
+    frontend:
+        build: .
+        container_name: lightoil_frontend
+        restart: always
+        environment:
+            - VIRTUAL_HOST=lightoil.cm
+            - LETSENCRYPT_HOST=lightoil.cm
+            - LETSENCRYPT_EMAIL=merveillenitcheu12@gmail.com
+        networks:
+            - nginx_proxy
+        expose:
+            - "80" # Nginx-proxy s'en sert pour proxy_pass
+
+networks:
+    nginx_proxy:
+        external: true
