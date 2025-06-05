@@ -8,24 +8,28 @@ This repository contains a Dockerized setup for deploying a lighoil-api applicat
 
 Make sure your server has the following installed **before proceeding**:
 
-- ✅ Docker (v20+ recommended)
-- ✅ Docker Compose (v2+)
+- ✅ Docker (v20+ recommended):  Check with ```docker --version```
+- ✅ Docker Compose (v2+):  Check with ```docker compose version```
+- ✅ Nginx Proxy and Let's Encrypt Companion:  Check running containers with ```docker ps```
 
-If Docker is not installed, you can clone our setup script and run it:
+If Docker, Nginx Proxy, or Let's Encrypt Companion are not installed, you can quickly set them up by cloning and running our setup script:
+
 ```git clone https://github.com/merveille-nitcheu/scripts.git```
 
 ## Usage
 
 ### 📁 Clone the Lightoil-frontend Project
 
-```git clone https://gitlab.com/light-technical/soft/lightoil-version-2/lightoil-api.git```
+```git clone https://gitlab.com/light-technical/soft/lightoil-version-2/service-station-client.git```
 
 ### Navigate to the Lightoil-api folder
 
-```cd lightoil-api```
+```cd service-station-client```
 
 ### 🐳 Run the Application
 
 ```docker compose up -d --build```
 
-### 🧪 Run Migrations and Seeders Commands
+### Access
+
+Access to lightoil_frontend via: [https://lightoil.cm]
