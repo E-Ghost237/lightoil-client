@@ -23,7 +23,7 @@ FROM nginx:alpine
 
 # Copier les fichiers construits dans le repertoire Nginx
 COPY --from=build /app/dist/lightoil  /usr/share/nginx/html
-
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Exposer le port
 EXPOSE 80
 
