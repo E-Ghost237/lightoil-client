@@ -40,7 +40,7 @@ export class TankImageComponent {
         this.stationId = this.user_details?.service_station_id;
         this.flowSensorId = this.dataFromTankList.tank.id;
         this.getLastHourVolume();
-        
+
     }
 
     getLevel(){
@@ -73,17 +73,17 @@ export class TankImageComponent {
         let output_volume!: number;
         let records = this.dataFromTankList.listLastRecord;
         // console.log("records: ", records);
-        
+
         if (records.length > 0) {
-            new_volume = records[0].volume;
-            last_volume = records[1].volume;
+            new_volume = records[0]?.volume;
+            last_volume = records[1]?.volume;
 
             if (new_volume <= last_volume) {
                 output_volume = last_volume - new_volume;
                 // console.log("Home Output Volume: ", output_volume);
             }
             return Math.round(output_volume*100)/100;
-        } 
+        }
         else {
             return '---';
         }
@@ -209,11 +209,11 @@ export class TankImageComponent {
                 }else if(percent >= 100 ){
                     routeImage = "../../../../assets/demo/images/"+nameProduct+"/p100.svg";
                 }
-    
+
             }
         }
-        
-        
+
+
         return routeImage;
     }
 
