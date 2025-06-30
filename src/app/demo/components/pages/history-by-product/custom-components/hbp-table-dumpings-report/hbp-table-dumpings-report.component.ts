@@ -23,6 +23,12 @@ export class HbpTableDumpingsReportComponent {
     console.log("tank by table: ", this.stationProduct);
   }
 
+   ngOnChanges() {
+  if (this.listReport?.listDayRecord) {
+    this.prepareListDayRecord();
+  }
+}
+
   getToLocalDateTime(date1:string){
     return Utility.toLocalDateTime(date1)??"";
   }
@@ -38,4 +44,51 @@ export class HbpTableDumpingsReportComponent {
   getRoundValue(num:number){
     return Math.round(num*100)/100;
   }
+
+   getstockTherorique(report:any){
+    const volume  = this.getRoundValue(report?.firstPeriodRecord?.volume?? 0);
+    const input = this.getRoundValue(report?.input?? 0)
+    const output = this.getRoundValue(report?.output?? 0)
+    return volume + input - output;
+  }
+
+  getstockPhysique(report:any){
+    const volume  = this.getRoundValue(report?.firstPeriodRecord?.volume?? 0);
+    const input = this.getRoundValue(report?.input?? 0)
+    const output = this.getRoundValue(report?.output?? 0)
+    return volume + input - output;
+  }
+
+  getEcart(report: any): number {
+  const stockTheorique = this.getstockTherorique(report)?? 0;
+  const stockPhysique = this.getstockPhysique(report)?? 0; // ou autre champ
+  return stockPhysique - stockTheorique;
+}
+
+prepareListDayRecord(): void {
+  if (!this.listReport?.listDayRecord) return;
+
+  let cumulVentes = 0;
+  let cumulEcarts = 0;
+
+  const newList = this.listReport.listDayRecord.map((record) => {
+
+    const output = Number(record.output ?? 0);
+
+    cumulVentes += output;
+    const ecart = this.getEcart(record);
+
+    cumulEcarts += ecart;
+
+    return {
+      ...record,
+      cumulVentes: Number(cumulVentes),
+      ecart: Number(ecart),
+      cumulEcarts: Number(cumulEcarts),
+    };
+  });
+
+
+  this.listReport.listDayRecord = [...newList];
+}
 }

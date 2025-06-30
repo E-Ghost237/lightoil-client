@@ -30,6 +30,10 @@ If Docker, Nginx Proxy, or Let's Encrypt Companion are not installed, you can qu
 
 ```docker compose up -d --build```
 
+### 🐳 Vider le cache
+
+````docker compose build --no-cache````
+
 ### Access
 
 Access to lightoil_frontend via: [https://lightoil.cm]

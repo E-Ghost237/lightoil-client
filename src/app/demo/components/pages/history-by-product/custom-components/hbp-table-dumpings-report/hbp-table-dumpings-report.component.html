@@ -23,91 +23,194 @@
                 }}
             </div>
         </ng-template>
-        <ng-template pTemplate="header" let-columns>
+       <ng-template pTemplate="header" let-columns>
             <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th pTooltip="en centimetres">Volume à T de depart</th>
-                <th pTooltip="en centimetres">T(C) liquide</th>
-                <th pTooltip="en litres">Quantité sortie</th>
-                <th pTooltip="en litres">Quantité entrée</th>
-                <th pTooltip="en litres">Volume à T de fin</th>
-                <th pTooltip="en degres celsius">T(C) liquide</th>
+                <th id="index">#</th>
+                <th id="date">Date</th>
+                <th id="level" class="text-center" pTooltip="en centimetres">
+                    Niveau (cm)
+                </th>
+                <th id="volume" class="text-center" pTooltip="en litres">
+                    Volume
+                </th>
+                <th id="reception" class="text-center" pTooltip="en litres">
+                    Reception
+                </th>
+                <th id="ventes" class="text-center" pTooltip="en litres">
+                    Ventes
+                </th>
+                <th id="remises" class="text-center" pTooltip="en litres">
+                    Remises en cuves
+                </th>
+                <th id="cumul_ventes" class="text-center" pTooltip="en litres">
+                    Cumul ventes
+                </th>
+                <th id="stock" class="text-center" pTooltip="en litres">
+                    Stock Théoriques
+                </th>
+                <th id="physique" class="text-center" pTooltip="en litres">
+                    Stock Physique
+                </th>
+                <th id="ecarts" class="text-center" pTooltip="en litres">
+                    Ecarts
+                </th>
+                <th id="cumul_ecarts" class="text-center" pTooltip="en litres">
+                    Cumul ecarts
+                </th>
             </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-report let-rowData let-columns="columns" let-rowIndex="rowIndex">
-            <tr *ngIf="! report?.isTheLast">
-                <td>{{(rowIndex+1)}}</td>
+        <ng-template
+            pTemplate="body"
+            let-report
+            let-rowData
+            let-columns="columns"
+            let-rowIndex="rowIndex"
+        >
+            <tr *ngIf="!report?.isTheLast">
+                <td>{{ rowIndex + 1 }}</td>
                 <td>
-                    <div class="row justify-content-center">
-                        <span class="text-center ">{{getToLocalDate(report.start)}}</span>
+                    <div class="row">
+                        <span class="">{{ getToLocalDate(report.start) }}</span>
                     </div>
                     <div class="row">
-                        {{"de "+getToLocalTime(report.start)+' à '+getToLocalTime(report.end)}}
+                        {{
+                            "de " +
+                                getToLocalTime(report.start) +
+                                " à " +
+                                getToLocalTime(report.end)
+                        }}
                     </div>
                 </td>
-                <td pTooltip="en litres" tooltipPosition="bottom">
-                    <div class="row justify-content-center" *ngIf="report?.firstPeriodRecord?.id">
-                        <span class="text-center ">
-                            {{getRoundValue(report?.firstPeriodRecord?.volume)}}
-                        </span>
-                    </div>
-                    <div class="row justify-content-center" *ngIf="report?.firstPeriodRecord?.id">
+
+                <td pTooltip="en cm" tooltipPosition="bottom">
+                    <div
+                        class="row justify-content-center"
+                        *ngIf="report?.firstPeriodRecord?.id"
+                    >
                         <span class="text-center">
-                            {{getToLocalDateTime(report?.firstPeriodRecord?.updated_at)}}
+                            {{ report?.firstPeriodRecord?.liquid_height }}
                         </span>
                     </div>
                 </td>
-                <td pTooltip="en degres celsius" tooltipPosition="bottom">
-                    <div *ngIf="report?.firstPeriodRecord?.id">
-                        <span>
-                            {{getRoundValue(report?.firstPeriodRecord?.liquid_temperature)}}
+                <td
+                    pTooltip="en litres volume de depart "
+                    tooltipPosition="bottom"
+                >
+                    <div class="row" *ngIf="report?.firstPeriodRecord?.id">
+                        <span class="text-center">
+                            {{
+                                getRoundValue(report?.firstPeriodRecord?.volume)
+                            }}
+                        </span>
+                    </div>
+                    <div
+                        class="row justify-content-center"
+                        *ngIf="report?.firstPeriodRecord?.id"
+                    >
+                        <span class="text-center">
+                            {{
+                                getToLocalDateTime(
+                                    report?.firstPeriodRecord?.updated_at
+                                )
+                            }}
                         </span>
                     </div>
                 </td>
-                <td pTooltip="en litres" tooltipPosition="bottom">
-                    {{getRoundValue(report?.output)}}
+
+
+                <td
+                    pTooltip="en litres volume entrées"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
+                    {{ getRoundValue(report?.input) }}
                 </td>
-                <td pTooltip="en litres" tooltipPosition="bottom">
-                    {{getRoundValue(report?.input)}}
+                <td
+                    pTooltip="en litres volume sorties"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
+                    {{ getRoundValue(report?.output) }}
                 </td>
-                <td pTooltip="en litres" tooltipPosition="bottom">
-                    <div class="row justify-content-center" *ngIf="report?.lastPeriodRecord?.id">
-                        <span class="text-center ">
-                            {{getRoundValue(report?.lastPeriodRecord?.volume)}}
-                        </span>
-                    </div>
-                    <div class="row justify-content-center" *ngIf="report?.lastPeriodRecord?.id">
-                        <span class="text-center ">
-                            {{getToLocalDateTime(report?.lastPeriodRecord?.updated_at)}}
-                        </span>
-                    </div>
-                </td>
-                <td pTooltip="en degres celsius" tooltipPosition="bottom">
+
+
+                <td pTooltip="en litres remises en cuves" tooltipPosition="bottom" class="text-center">
                     <div *ngIf="report?.lastPeriodRecord?.id">
-                        <span >
-                            {{getRoundValue(report?.lastPeriodRecord?.liquid_temperature)}}
+                        <span class="text-center">
+                            {{
+                                getRoundValue(
+                                    report?.lastPeriodRecord?.liquid_temperature
+                                )
+                            }}
                         </span>
                     </div>
+                </td>
+                <td pTooltip="en litres cumul ventes" tooltipPosition="bottom" class="text-center">
+                    <div>
+                        <span class="text-center">
+                            {{ getRoundValue(report?.cumulVentes) }}
+                        </span>
+                    </div>
+                </td>
+                <td
+                    pTooltip="en litres stock theorique"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
+                    {{ getstockTherorique(report??0) }}
+                </td>
+
+                <td
+                    pTooltip="en litres physique"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
+                    {{ getstockPhysique(report??0) }}
+                </td>
+
+                <td
+                    pTooltip="en litres ecarts"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
+                    {{ getEcart(report) }}
+                </td>
+
+                <td
+                    pTooltip="en litres ecarts cumuls"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
+                    {{ getRoundValue(report?.cumulEcarts) }}
                 </td>
             </tr>
-            <tr *ngIf=" report?.isTheLast">
+            <tr *ngIf="report?.isTheLast">
                 <td colspan="4">
-                    <div class="row justify-content-center ">
-                        <span class="text-center ">Total sur la periode</span>
+                    <div class="row justify-content-center">
+                        <span class="text-center">Total sur la periode</span>
                     </div>
                 </td>
                 <td colspan="2" pTooltip="en litres" tooltipPosition="bottom">
                     <div class="row justify-content-center">
                         <span class="">
-                            <p-tag severity="info" [value]="'Sorties: '+getRoundValue(report?.output)"></p-tag>
+                            <p-tag
+                                severity="info"
+                                [value]="
+                                    'Sorties: ' + getRoundValue(report?.output)
+                                "
+                            ></p-tag>
                         </span>
                     </div>
                 </td>
                 <td colspan="2" pTooltip="en litres" tooltipPosition="bottom">
                     <div class="row justify-content-center">
                         <span class="">
-                            <p-tag severity="info" [value]="'Depotages: '+getRoundValue(report?.input)"></p-tag>
+                            <p-tag
+                                severity="info"
+                                [value]="
+                                    'Depotages: ' + getRoundValue(report?.input)
+                                "
+                            ></p-tag>
                         </span>
                     </div>
                 </td>
