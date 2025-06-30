@@ -63,13 +63,17 @@
             <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
         </button> -->
         <button class=""
-            pTooltip="exporter les données au format pdf" 
+            pTooltip="exporter les données au format pdf"
             (click)="generateTankDataPdf()"
             >
             <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
         </button>
     </div>
 
+</div>
+
+<div class="row d-flex justify-content-center mt-5" *ngIf="!listRecords || listRecords.length === 0">
+  <p-progressSpinner strokeWidth="4" animationDuration=".5s" styleClass="custom-spinner"></p-progressSpinner>
 </div>
 
 <div class="row" *ngIf="listRecords && listRecords?.length > 0">

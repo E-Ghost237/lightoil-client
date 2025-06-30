@@ -26,7 +26,7 @@ export class DashboardComponent implements OnInit {
   company_id!: number;
   sale_point_types!: Array<any>;
   selected_sale_point_type!: any;
-  
+
   sale_points!: Array<any>;
   sale_points_matching_type!: Array<any>;
   selected_sale_points!: Array<any>
@@ -171,7 +171,7 @@ export class DashboardComponent implements OnInit {
           this.companiesService.getDailySalesOfPointsOfSaleOfCompany(this.company_id, this.sale_point_ids, this.selected_sale_point_type.id, daily_date).subscribe(
             (response) => {
               if (response.success == true) {
-                // console.log("getDailySalesOfPointsOfSaleOfCompany: ", response.data);
+                console.log("getDailySalesOfPointsOfSaleOfCompany: ", response.data);
                 this.daily_sales_of_sale_points_of_company = response.data;
               }
             },
@@ -180,7 +180,7 @@ export class DashboardComponent implements OnInit {
               this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
             }
           );
-  
+
           this.companiesService.getLastTenDaysSalesOfPointsOfSaleOfCompany(this.company_id, this.sale_point_ids, this.selected_sale_point_type.id, daily_date).subscribe(
             (response) => {
               if (response.success == true) {

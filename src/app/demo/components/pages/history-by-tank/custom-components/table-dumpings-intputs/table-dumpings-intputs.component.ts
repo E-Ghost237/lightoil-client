@@ -22,7 +22,7 @@ export class TableDumpingsIntputsComponent {
     }
 
     ngOnInit(){
-        //console.log("on table: ", this.listOutputs);
+        console.log("on table: ", this.listInputs);
     }
 
 

@@ -43,7 +43,7 @@ export class SalesEvolutionComponent implements OnDestroy, OnChanges {
         this.initBarChart(this.date);
       });
   }
-  
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['daily_sales']) {
       if (this.daily_sales !== undefined) {
@@ -51,7 +51,7 @@ export class SalesEvolutionComponent implements OnDestroy, OnChanges {
         if (this.daily_sales.date !== null && this.daily_sales.date !== undefined) {
           const date = new Date(this.daily_sales.date);
           const current_date = new Date();
-          
+
           if (date.getDate() == current_date.getDate()) {
             this.daily_sales.date = current_date;
             this.formatted_date = this.commonService.formatDateToMeduimFR(date);
@@ -66,17 +66,17 @@ export class SalesEvolutionComponent implements OnDestroy, OnChanges {
         this.hourly_sales_of_gasoline = new Array(24);
         this.hourly_sales_of_diesel = new Array(24);
         this.hourly_sales_of_petroleum = new Array(24);
-  
+
         for (const product of this.hourly_sales_of_product) {
           if (product.name == 'Super') {
-            this.hourly_sales_of_gasoline = Object.values(product.hourly_sales);
+            this.hourly_sales_of_gasoline = Object.values(product.hourly_volumes);
           } else if (product.name == 'Gasoil') {
-            this.hourly_sales_of_diesel = Object.values(product.hourly_sales);
+            this.hourly_sales_of_diesel = Object.values(product.hourly_volumes);
           } else if (product.name == 'Pétrole') {
-            this.hourly_sales_of_petroleum = Object.values(product.hourly_sales);
+            this.hourly_sales_of_petroleum = Object.values(product.hourly_volumes);
           }
         }
-        
+
         this.initLineChart();
       }
     }
@@ -91,17 +91,17 @@ export class SalesEvolutionComponent implements OnDestroy, OnChanges {
         this.daily_sales_of_gasoline = new Array(10);
         this.daily_sales_of_diesel = new Array(10);
         this.daily_sales_of_petroleum = new Array(10);
-  
+
         for (const product of this.daily_sales_of_product) {
           if (product.name == 'Super') {
-            this.daily_sales_of_gasoline = Object.values(product.daily_sales);
+            this.daily_sales_of_gasoline = Object.values(product.daily_volumes);
           } else if (product.name == 'Gasoil') {
-            this.daily_sales_of_diesel = Object.values(product.daily_sales);
+            this.daily_sales_of_diesel = Object.values(product.daily_volumes);
           } else if (product.name == 'Pétrole') {
-            this.daily_sales_of_petroleum = Object.values(product.daily_sales);
+            this.daily_sales_of_petroleum = Object.values(product.daily_volumes);
           }
         }
-        
+
         this.initBarChart(this.date);
       }
     }
@@ -201,7 +201,7 @@ export class SalesEvolutionComponent implements OnDestroy, OnChanges {
         this.barLabels[i] = day_key;
       }
     }
-    
+
     this.barData = {
       labels: this.barLabels,
       datasets: [

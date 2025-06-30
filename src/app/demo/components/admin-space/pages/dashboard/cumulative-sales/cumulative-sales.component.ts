@@ -8,7 +8,7 @@ import { co } from '@fullcalendar/core/internal-common';
 })
 export class CumulativeSalesComponent implements OnChanges {
   @Input() daily_sales!: any;
-  total_sales!: number;
+  total_volume!: number;
   sales_by_product!: Array<any>;
 
   constructor(private changeDetector: ChangeDetectorRef) { }
@@ -16,7 +16,7 @@ export class CumulativeSalesComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['daily_sales']) {
       if (this.daily_sales !== undefined) {
-        this.total_sales = this.daily_sales.total_sales;
+        this.total_volume = this.daily_sales.total_volume;
         this.sales_by_product = this.daily_sales.sales_by_product;
       }
     }

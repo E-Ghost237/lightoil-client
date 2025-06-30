@@ -33,13 +33,13 @@
                     minlength="8" maxlength="30" styleClass="w-full" inputStyleClass="w-full" autocomplete="off"
                     [toggleMask]="true" aria-describedby="current_password-help" autofocus />
                 <ng-container
-                    *ngIf="updatePasswordForm.get('current_password').invalid && 
+                    *ngIf="updatePasswordForm.get('current_password').invalid &&
                     (updatePasswordForm.get('current_password').dirty || updatePasswordForm.get('current_password').touched)">
                     <small *ngIf="updatePasswordForm.get('current_password').errors?.required"
                         id="current_password-help" class="p-error">
                         Votre mot de passe actuel est requis.
                     </small>
-                    <small *ngIf="updatePasswordForm.get('current_password').errors?.minlength || 
+                    <small *ngIf="updatePasswordForm.get('current_password').errors?.minlength ||
                         updatePasswordForm.get('current_password').errors?.maxlength" id="current_password-help"
                         class="p-error">
                         Le mot de passe doit avoir au moins 8 caractères.
@@ -56,13 +56,13 @@
                 <p-password formControlName="password" id="password" placeholder="Nouveau mot de passe" minlength="8"
                     maxlength="30" styleClass="w-full" inputStyleClass="w-full" autocomplete="off" [toggleMask]="true"
                     aria-describedby="password-help" />
-                <ng-container *ngIf="updatePasswordForm.get('password').invalid && 
+                <ng-container *ngIf="updatePasswordForm.get('password').invalid &&
                     (updatePasswordForm.get('password').dirty || updatePasswordForm.get('password').touched)">
                     <small *ngIf="updatePasswordForm.get('password').errors?.required" id="password-help"
                         class="p-error">
                         Votre nouveau mot de passe est requis.
                     </small>
-                    <small *ngIf="updatePasswordForm.get('password').errors?.minlength || 
+                    <small *ngIf="updatePasswordForm.get('password').errors?.minlength ||
                         updatePasswordForm.get('password').errors?.maxlength" id="password-help" class="p-error">
                         Le mot de passe doit avoir au moins 8 caractères.
                     </small>
@@ -80,13 +80,13 @@
                     inputStyleClass="w-full" autocomplete="off" [toggleMask]="true"
                     aria-describedby="password_confirmation-help" />
                 <ng-container
-                    *ngIf="updatePasswordForm.get('password_confirmation').invalid && 
+                    *ngIf="updatePasswordForm.get('password_confirmation').invalid &&
                     (updatePasswordForm.get('password_confirmation').dirty || updatePasswordForm.get('password_confirmation').touched)">
                     <small *ngIf="updatePasswordForm.get('password_confirmation').errors?.required"
                         id="password_confirmation-help" class="p-error">
                         Confirmer le mot de passe.
                     </small>
-                    <small *ngIf="updatePasswordForm.get('password_confirmation').errors?.minlength || 
+                    <small *ngIf="updatePasswordForm.get('password_confirmation').errors?.minlength ||
                         updatePasswordForm.get('password_confirmation').errors?.maxlength"
                         id="password_confirmation-help" class="p-error">
                         Le mot de passe ne correspond pas.
@@ -149,7 +149,7 @@
         <div class="flex flex-wrap justify-content-between pr-1 pb-2 pl-1">
             <div class="inline-flex mr-4">
                 <h3 class="text-900 font-bold text-xl pb-0 mb-0">
-                    Cumul des ventes par produit du réseau {{ selected_sale_point_type?.name ?? '...' }} du {{
+                    Volume de chaque produit du réseau {{ selected_sale_point_type?.name ?? '...' }} du {{
                     formatted_date ?? '...' }}
                 </h3>
             </div>
@@ -162,7 +162,7 @@
         <!-- Sales evolution section -->
         <div class="flex flex-wrap pt-4 justify-content-between pr-1 pb-2 pl-1">
             <div class="inline-flex mr-4">
-                <h3 class="text-900 font-bold text-xl">Evolution des ventes par produit du réseau {{
+                <h3 class="text-900 font-bold text-xl">Evolution du volume vendu par produit du réseau {{
                     selected_sale_point_type?.name ?? '...' }}</h3>
             </div>
             <div class="col p-0 ml-0">
