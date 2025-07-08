@@ -16,7 +16,7 @@ export class PdfService {
     if (!this.pdfMake) {
       const pdfMakeModule = await import('pdfmake/build/pdfmake');
       const pdfFonts = await import('pdfmake/build/vfs_fonts');
-  
+
       pdfMakeModule.default.vfs = pdfFonts.vfs;
       this.pdfMake = pdfMakeModule.default;
     }
@@ -52,7 +52,7 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionReconciliations(usefullData:any){
-    console.log("service user: ",usefullData);
+
     let today = new Date();
     let listOutputs = usefullData.data['allTankByDay'];
     let station = usefullData.station;
@@ -81,7 +81,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -89,9 +89,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -112,9 +112,9 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
-        
+
         {
           style: 'tableExample',
           headerRows: 2,
@@ -186,7 +186,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Liste des reconciliations",
@@ -195,7 +195,7 @@ export class PdfService {
         keywords: 'Index, Pompe, LightOil',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -210,7 +210,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -239,7 +239,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -265,7 +265,7 @@ export class PdfService {
           style: "tableLine"
         },
         {
-         
+
           text: "Stock",
           style: "tableLine"
         },
@@ -293,7 +293,7 @@ export class PdfService {
         "",
         "",
         {
-         
+
           text: "Index",
           style: "tableLine"
         },
@@ -307,7 +307,7 @@ export class PdfService {
           text: this.getRoundValue(output.lossIndex),
           style: "tableLine"
         }
-      ]); 
+      ]);
     }
     return lines;
   }
@@ -328,7 +328,7 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionPumpIndices(usefullData:any){
-    console.log("service user: ",usefullData);
+
     let today = new Date();
     let listOutputs = usefullData.data;
     let station = usefullData.station;
@@ -357,7 +357,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -365,9 +365,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -388,9 +388,9 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
-        
+
         {
           style: 'tableExample',
           headerRows: 2,
@@ -465,7 +465,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Liste des index",
@@ -474,7 +474,7 @@ export class PdfService {
         keywords: 'Index, Pompe, LightOil',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -489,7 +489,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -518,7 +518,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -565,7 +565,7 @@ export class PdfService {
           style: "tableLine"
         },
 
-      ]); 
+      ]);
     }
     return lines;
   }
@@ -587,8 +587,8 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankOutputs(usefullData:any){
-    //console.log("date: ", Date.now().toLocaleString());
-    console.log("service user: ",usefullData);
+    //("date: ", Date.now().toLocaleString());
+
     let today = new Date();
     let listOutputs = usefullData.dataOuptuts;
     let service_station = this.getTheCorrectGasStationData(usefullData.user_details);
@@ -616,7 +616,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -624,9 +624,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -649,9 +649,9 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
-        
+
         {
           style: 'tableExample',
           headerRows: 2,
@@ -718,7 +718,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Quantité de produit sortie par cuve",
@@ -727,7 +727,7 @@ export class PdfService {
         keywords: 'Sorties, Cuve',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -742,7 +742,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -771,7 +771,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -792,13 +792,13 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: output.firstPeriodRecord ? 
+            text: output.firstPeriodRecord ?
                   this.getRoundValue(output?.firstPeriodRecord?.volume)+"\n"+
                   this.getToLocalDateTime(output?.firstPeriodRecord?.updated_at):"--",
             style: "tableLine"
           },
           {
-            text: output.firstPeriodRecord ? 
+            text: output.firstPeriodRecord ?
                   this.getRoundValue(output?.firstPeriodRecord?.liquid_temperature): "--",
             style: "tableLine"
           },
@@ -808,13 +808,13 @@ export class PdfService {
             fillColor: '#87CEFA'
           },
           {
-            text: output?.lastPeriodRecord ? 
+            text: output?.lastPeriodRecord ?
                   this.getRoundValue(output?.lastPeriodRecord?.volume)+"\n"+
                   this.getToLocalDateTime(output?.lastPeriodRecord?.updated_at) : "--",
             style: "tableLine"
           },
           {
-            text: output?.lastPeriodRecord ? 
+            text: output?.lastPeriodRecord ?
                   this.getRoundValue(output?.lastPeriodRecord?.liquid_temperature) : "--",
             style: "tableLine"
           },
@@ -841,7 +841,7 @@ export class PdfService {
           ""
         ]);
       }
-      
+
     }
     return lines;
   }
@@ -862,8 +862,8 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankInputs(usefullData:any){
-    //console.log("date: ", Date.now().toLocaleString());
-    console.log("service user: ",usefullData);
+    //("date: ", Date.now().toLocaleString());
+
     let today = new Date();
     let listInputs = usefullData.dataInputs;
     let service_station = this.getTheCorrectGasStationData(usefullData.user_details);
@@ -891,7 +891,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -899,9 +899,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -924,9 +924,9 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
-        
+
         {
           style: 'tableExample',
           headerRows: 2,
@@ -993,7 +993,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Dépotage par cuve",
@@ -1002,7 +1002,7 @@ export class PdfService {
         keywords: 'Dépotage, Cuve',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -1017,7 +1017,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -1046,7 +1046,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -1067,12 +1067,12 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: income?.start_volume ? 
+            text: income?.start_volume ?
                   this.getRoundValue(income?.start_volume):"--",
             style: "tableLine"
           },
           {
-            text: income?.start_liquid_temperature ? 
+            text: income?.start_liquid_temperature ?
                   this.getRoundValue(income?.start_liquid_temperature): "--",
             style: "tableLine"
           },
@@ -1082,12 +1082,12 @@ export class PdfService {
             fillColor: '#FF7F7F'
           },
           {
-            text: income?.end_volume ? 
+            text: income?.end_volume ?
                   this.getRoundValue(income?.end_volume) : "--",
             style: "tableLine"
           },
           {
-            text: income?.end_liquid_temperature ? 
+            text: income?.end_liquid_temperature ?
                   this.getRoundValue(income?.end_liquid_temperature) : "--",
             style: "tableLine"
           },
@@ -1114,7 +1114,7 @@ export class PdfService {
           ""
         ]);
       }
-      
+
     }
     return lines;
   }
@@ -1135,8 +1135,8 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankReports(usefullData:any){
-    //console.log("date: ", Date.now().toLocaleString());
-    console.log("service user: ",usefullData);
+    //("date: ", Date.now().toLocaleString());
+
     let today = new Date();
     let listReports = usefullData.dataReports;
     let service_station = this.getTheCorrectGasStationData(usefullData.user_details);
@@ -1164,7 +1164,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -1172,9 +1172,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -1197,7 +1197,7 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
         {
           style: 'tableExample',
@@ -1270,7 +1270,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Rapport par cuve",
@@ -1279,7 +1279,7 @@ export class PdfService {
         keywords: 'Rapport, Cuve',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -1294,7 +1294,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -1323,7 +1323,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -1344,13 +1344,13 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: report?.firstPeriodRecord?.id ? 
+            text: report?.firstPeriodRecord?.id ?
                   this.getRoundValue(report?.firstPeriodRecord?.volume)+"\n"+
                   this.getToLocalDateTime(report?.firstPeriodRecord?.updated_at):"--",
             style: "tableLine"
           },
           {
-            text: report?.firstPeriodRecord?.id ? 
+            text: report?.firstPeriodRecord?.id ?
                   this.getRoundValue(report?.firstPeriodRecord?.liquid_temperature): "--",
             style: "tableLine"
           },
@@ -1365,13 +1365,13 @@ export class PdfService {
             fillColor: '#FF7F7F'
           },
           {
-            text: report?.lastPeriodRecord?.id ? 
+            text: report?.lastPeriodRecord?.id ?
                   this.getRoundValue(report?.lastPeriodRecord?.volume)+"\n"+
                   this.getToLocalDateTime(report?.lastPeriodRecord?.updated_at) : "--",
             style: "tableLine"
           },
           {
-            text: report?.lastPeriodRecord?.id ? 
+            text: report?.lastPeriodRecord?.id ?
                   this.getRoundValue(report?.lastPeriodRecord?.liquid_temperature) : "--",
             style: "tableLine"
           },
@@ -1394,7 +1394,7 @@ export class PdfService {
             colSpan: 1,
             fillColor: '#87CEFA',
           },
-          
+
           {
             text: this.getRoundValue(report?.input)+" litres",
             style: "tableLine",
@@ -1405,11 +1405,11 @@ export class PdfService {
           "",
         ]);
       }
-      
+
     }
     return lines;
   }
-  
+
   //tank records OK
   async generateTankDataPdf(usefullData:any, action = 'open'){
     await this.loadPdfMake();
@@ -1426,8 +1426,8 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankRecords(usefullData:any){
-    //console.log("date: ", Date.now().toLocaleString());
-    console.log("service user: ",usefullData);
+    //("date: ", Date.now().toLocaleString());
+
     let today = new Date();
     let listRecords = usefullData.listRecords;
     let period = usefullData.period;
@@ -1456,7 +1456,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -1464,9 +1464,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -1489,7 +1489,7 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
         {
           style: 'tableExample',
@@ -1549,7 +1549,7 @@ export class PdfService {
                   text: "Densité",
                   style: "tableHeader"
                 },
-                
+
               ],
               ...this.lineTableTankRecord(listRecords)
             ]
@@ -1560,7 +1560,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Historique par cuve",
@@ -1569,7 +1569,7 @@ export class PdfService {
         keywords: 'Historique, Cuve',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -1584,7 +1584,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -1613,7 +1613,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -1680,8 +1680,8 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankProductOutputs(usefullData:any){
-    //console.log("date: ", Date.now().toLocaleString());
-    console.log("service user: ",usefullData);
+    //("date: ", Date.now().toLocaleString());
+
     let today = new Date();
     let listOutputs = usefullData.dataOuptuts;
     let period = usefullData.period;
@@ -1711,7 +1711,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -1719,9 +1719,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -1743,9 +1743,9 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
-        
+
         {
           style: 'tableExample',
           headerRows: 2,
@@ -1793,7 +1793,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Quantité de produit sortie des cuves",
@@ -1802,7 +1802,7 @@ export class PdfService {
         keywords: 'Sorties, produit',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -1817,7 +1817,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -1846,7 +1846,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -1888,7 +1888,7 @@ export class PdfService {
           }
         ]);
       }
-      
+
     }
     return lines;
   }
@@ -1909,7 +1909,7 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankProductInputs(usefullData:any){
-    console.log("service user: ",usefullData);
+
     let today = new Date();
     let listInputs = usefullData.dataInputs;
     let period = usefullData.period;
@@ -1939,7 +1939,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -1947,9 +1947,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -1971,9 +1971,9 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
-        
+
         {
           style: 'tableExample',
           headerRows: 2,
@@ -2045,7 +2045,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Dépotage par produit",
@@ -2054,7 +2054,7 @@ export class PdfService {
         keywords: 'Dépotage, Produit',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -2069,7 +2069,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -2098,7 +2098,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -2123,12 +2123,12 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: income?.start_volume ? 
+            text: income?.start_volume ?
                   this.getRoundValue(income?.start_volume):"--",
             style: "tableLine"
           },
           {
-            text: income?.start_liquid_temperature ? 
+            text: income?.start_liquid_temperature ?
                   this.getRoundValue(income?.start_liquid_temperature): "--",
             style: "tableLine"
           },
@@ -2138,12 +2138,12 @@ export class PdfService {
             fillColor: '#FF7F7F'
           },
           {
-            text: income?.end_volume ? 
+            text: income?.end_volume ?
                   this.getRoundValue(income?.end_volume) : "--",
             style: "tableLine"
           },
           {
-            text: income?.end_liquid_temperature ? 
+            text: income?.end_liquid_temperature ?
                   this.getRoundValue(income?.end_liquid_temperature) : "--",
             style: "tableLine"
           },
@@ -2171,7 +2171,7 @@ export class PdfService {
           ""
         ]);
       }
-      
+
     }
     return lines;
   }
@@ -2193,7 +2193,7 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankProductReports(usefullData:any){
-    console.log("service user: ",usefullData);
+
     let today = new Date();
     let listReports = usefullData.dataReports;
     let period = usefullData.period;
@@ -2223,7 +2223,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -2231,9 +2231,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -2255,7 +2255,7 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
         {
           style: 'tableExample',
@@ -2336,7 +2336,7 @@ export class PdfService {
         keywords: 'Rapport, Produit',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -2351,7 +2351,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -2379,7 +2379,7 @@ export class PdfService {
           margin:[5, 0, 5, 0],
           border: [false, true, false, true]
         }
-      }, 
+      },
     };
   }
 
@@ -2400,13 +2400,13 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: report?.firstPeriodRecord?.id ? 
+            text: report?.firstPeriodRecord?.id ?
                   this.getRoundValue(report?.firstPeriodRecord?.volume)+"\n"+
                   this.getToLocalDateTime(report?.firstPeriodRecord?.updated_at):"--",
             style: "tableLine"
           },
           {
-            text: report?.firstPeriodRecord?.id ? 
+            text: report?.firstPeriodRecord?.id ?
                   this.getRoundValue(report?.firstPeriodRecord?.liquid_temperature): "--",
             style: "tableLine"
           },
@@ -2421,13 +2421,13 @@ export class PdfService {
             fillColor: '#FF7F7F'
           },
           {
-            text: report?.lastPeriodRecord?.id ? 
+            text: report?.lastPeriodRecord?.id ?
                   this.getRoundValue(report?.lastPeriodRecord?.volume)+"\n"+
                   this.getToLocalDateTime(report?.lastPeriodRecord?.updated_at) : "--",
             style: "tableLine"
           },
           {
-            text: report?.lastPeriodRecord?.id ? 
+            text: report?.lastPeriodRecord?.id ?
                   this.getRoundValue(report?.lastPeriodRecord?.liquid_temperature) : "--",
             style: "tableLine"
           },
@@ -2450,7 +2450,7 @@ export class PdfService {
             colSpan: 1,
             fillColor: '#87CEFA',
           },
-          
+
           {
             text: this.getRoundValue(report?.input)+" litres",
             style: "tableLine",
@@ -2461,11 +2461,11 @@ export class PdfService {
           "",
         ]);
       }
-      
+
     }
     return lines;
   }
-  
+
   // tank OK
   async generateTankProductPdf(usefullData:any, action = 'open'){
     await this.loadPdfMake();
@@ -2482,8 +2482,8 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionTankProductRecords(usefullData:any){
-    //console.log("date: ", Date.now().toLocaleString());
-    console.log("service user: ",usefullData);
+    //("date: ", Date.now().toLocaleString());
+
     let today = new Date();
     let listRecords = usefullData.listRecords;
     let period = usefullData.period;
@@ -2513,7 +2513,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -2521,9 +2521,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -2545,7 +2545,7 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
         {
           style: 'tableExample',
@@ -2605,7 +2605,7 @@ export class PdfService {
                   text: "Densité",
                   style: "tableHeader"
                 },
-                
+
               ],
               ...this.lineTableTankProductRecord(listRecords)
             ]
@@ -2616,7 +2616,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Historique par produit",
@@ -2625,7 +2625,7 @@ export class PdfService {
         keywords: 'Historique, produit',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -2640,7 +2640,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -2669,7 +2669,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -2716,7 +2716,7 @@ export class PdfService {
     }
     return lines;
   }
-  
+
   //notification OK
   async generateProductNotificationPdf(usefullData:any, action = 'open'){
     await this.loadPdfMake();
@@ -2733,7 +2733,7 @@ export class PdfService {
 
   // OK
   getDocumentDefinitionProductNotification(usefullData:any){
-    console.log("service user: ",usefullData);
+
     let today = new Date();
     let listNotifications = usefullData.listNotifications;
     let period = usefullData.period;
@@ -2763,7 +2763,7 @@ export class PdfService {
         },
       ],
 
-      footer: function(currentPage, pageCount) { 
+      footer: function(currentPage, pageCount) {
         return [
           {
             text: currentPage.toString() + ' sur ' + pageCount,
@@ -2771,9 +2771,9 @@ export class PdfService {
             fontSize: 8,
             alignment: 'center',
           }
-        ] ; 
+        ] ;
       },
-      
+
       content: [
         {
           columns:[
@@ -2795,7 +2795,7 @@ export class PdfService {
               margin: [0, 10, 10, 10]
             }
           ],
-          
+
         },
         {
           style: 'tableExample',
@@ -2850,7 +2850,7 @@ export class PdfService {
                   text: "Jours",
                   style: "tableHeader"
                 }
-                
+
               ],
               ...this.lineTableProductNotification(listNotifications)
             ]
@@ -2861,7 +2861,7 @@ export class PdfService {
             }
           }
         },
-        
+
       ],
       info: {
         title: "Historique des alertes",
@@ -2870,7 +2870,7 @@ export class PdfService {
         keywords: 'Historique, alertes',
       },
       styles: {
-        
+
         name: {
           fontSize: 16,
           bold: true
@@ -2885,7 +2885,7 @@ export class PdfService {
           alignment: 'right',
           italics: true
         },
-        
+
         header: {
           fontSize: 18,
           bold: true,
@@ -2914,7 +2914,7 @@ export class PdfService {
           border: [false, true, false, true]
         }
       },
-      
+
     };
   }
 
@@ -2958,7 +2958,7 @@ export class PdfService {
     return lines;
   }
 
-  
+
   //utilities
   getToLocalDateTime(date1:string){
     return Utility.toLocalDateTime(date1)??"";

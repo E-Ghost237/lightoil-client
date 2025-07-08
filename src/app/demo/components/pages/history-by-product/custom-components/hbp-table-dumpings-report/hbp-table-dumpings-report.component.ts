@@ -16,8 +16,7 @@ export class HbpTableDumpingsReportComponent {
     constructor() {}
 
     ngOnInit() {
-        console.log('list report by table: ', this.listReport);
-        console.log('tank by table: ', this.stationProduct);
+
     }
 
     ngOnChanges() {

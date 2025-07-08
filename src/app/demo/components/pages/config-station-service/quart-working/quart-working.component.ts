@@ -32,17 +32,17 @@ export class QuartWorkingComponent {
 
     this.user_details = this.authService.getUserData();
     this.getListQuartWorking();
-    console.log("user quart working: ", this.user_details);
+
   }
 
 
   getListQuartWorking(){
     this.quartService.getListQuarts(this?.user_details?.service_station_id).subscribe((res)=>{
-      console.log("Liste des quarts: ", res);
+
       this.listQuarts = res;
       if(this.listQuarts.length > 0){
         this.listQuarts.forEach((quart)=>{
-          console.log("tab quart: ",this.getHourQuartFromQuartString(quart));
+
         });
       }
     });
@@ -59,6 +59,6 @@ export class QuartWorkingComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 }

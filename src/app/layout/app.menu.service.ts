@@ -14,7 +14,7 @@ export class MenuService {
     resetSource$ = this.resetSource.asObservable();
 
     onMenuStateChange(event: MenuChangeEvent) {
-        console.log("je change");
+        ("je change");
         this.menuSource.next(event);
     }
 

@@ -38,15 +38,15 @@ export class TankListComponent implements OnInit, OnDestroy {
     ngOnInit() {
         //timer(0, 1000).subscribe(n => this.getStringDate());
         //this.stationId = JSON.parse(this.cookieService.get('station_id'));
-        //console.log("station id: ", this.stationId);
+        //;
         // this.user = JSON.parse(this.cookieService.get('User'));
         // this.stationId = this.user['station'];
         this.user = this.localStorageService.getUser();
         this.stationId = this.localStorageService.getServiceStationId();
-        //console.log("user: ", this.user);
+        //;
 
         /* this.recordService.getListDaylyRecord().subscribe((request)=>{
-            console.log("the first request: ", request);
+            ;
         }); */
 
         this.getDashboardData();
@@ -82,7 +82,7 @@ export class TankListComponent implements OnInit, OnDestroy {
 
     getDashboardData(){
         this.recordService.getFirstDashboardDataByStationIdAndTypeSensor(this.stationId).subscribe((res)=>{
-            console.log("record to show: ", res);
+
             this.dashboardData = res;
             this.exempleDashBoardData=res;
             this.showNotificationMessage();
@@ -102,16 +102,16 @@ export class TankListComponent implements OnInit, OnDestroy {
     }
 
     subscribeToChannelSocket(){
-        console.log("j'ecoute la socket");
+        ("j'ecoute la socket");
         this.pusherService.echo1.listen('record_channel'+this.stationId,'Recorded',(e: any)=>{
-            console.log(e);
+            (e);
             this.getDashboardData();
         });
     }
 
     getStringDate(){
         this.d = new Date().toLocaleString();
-        //console.log("date: ",this.d);
+        //;
 
     }
 
@@ -132,7 +132,7 @@ export class TankListComponent implements OnInit, OnDestroy {
             //tankData:tankData
         });
         this.router.navigate(['/pages/dashboard/tank-details',tankId]);
-        console.log("je pars au specific tank data: ",tankData);
+        ;
     } */
 
 

@@ -24,7 +24,7 @@ export class TableTankComponent {
     }
 
     ngOnInit(){
-        console.log("");
+        ("");
     }
 
     getLevel(){
@@ -36,7 +36,7 @@ export class TableTankComponent {
 
     getListDayRecord(){
         if(this.tankDetailsData?.listLastRecord?.length > 0){
-            //console.log("list last record: ", this.tankDetailsData.listLastRecord);
+            //;
             return this.tankDetailsData.listLastRecord;
         }
         return [];

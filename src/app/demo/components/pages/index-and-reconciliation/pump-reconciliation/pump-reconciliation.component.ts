@@ -56,7 +56,7 @@ export class PumpReconciliationComponent {
   ngOnInit(){
     this.user_details = this.authService.getUserData();
     this.getServiceStation();
-    console.log("user data is: ", this.user_details);
+    ;
     this.getListProduct();
     this.getListQuartByStationId();
     this.getInteractionMsg();
@@ -64,34 +64,34 @@ export class PumpReconciliationComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 
   getServiceStation(){
     this.stationService.getServiceStation(this.user_details.service_station_id).subscribe((res)=>{
-      console.log("station details pump index: ", res);
+      ;
       this.station = res;
     });
   }
 
   onDateSelect(event: any){
-    console.log("date range: ",event);
+    ;
     this.getPeriodReconciliation();
   }
 
   onDropDownProductChange(event:any){
-    console.log("show event product: ", event.value);
+    ;
     this.getPeriodReconciliation();
   }
 
   onDropDownQuartWorkingChange(event: any){
-    console.log("show event: ", event.value);
+    ;
     this.getPeriodReconciliation();
   }
 
   getListQuartByStationId(){
     this.quartService.getListQuarts(this.user_details.service_station_id).subscribe((res)=>{
-      console.log("list quart: ", res);
+      ;
       if(res.length > 0){
         this.listQuartWorkings = res;
       }else{
@@ -113,7 +113,7 @@ export class PumpReconciliationComponent {
         res?.listStationProducts.forEach((stationProduct: any) => {
           listPro.push(stationProduct.product);
         });
-        console.log("list product:", listPro);
+        ;
         this.listProducts = listPro;
       }else{
         this.messageService.add(
@@ -143,8 +143,8 @@ export class PumpReconciliationComponent {
         this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
 
         this.indexService.getListReconciliationByPeriod(usefullData).subscribe((res)=>{
-          //console.log("usefullData: ",usefullData);
-          console.log("response reconciliation: ", res);
+          //;
+          ;
           if(res.status == true){
             if(res.data['allTankByDay'].length > 0){
               this.activeExport = false;
@@ -183,10 +183,10 @@ export class PumpReconciliationComponent {
                       (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
         };
         this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-        
+
         this.indexService.getListReconciliationByPeriod(usefullData).subscribe((res)=>{
-          //console.log("usefullData: ",usefullData);
-          console.log("response reconciliation: ", res);
+          //;
+          ;
           if(res.status == true){
             this.messageService.add({
               severity: 'success',

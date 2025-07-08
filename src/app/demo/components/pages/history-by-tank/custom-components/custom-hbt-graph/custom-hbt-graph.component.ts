@@ -43,20 +43,20 @@ export class CustomHbtGraphComponent {
     "level" => $level,
     "listDate" => $date, */
 
-    /* this.initData(this.listRecord?.temp, 
-      this.listRecord?.volume, 
-      this.listRecord?.volume15, 
-      this.listRecord?.density, this.listRecord?.level, 
+    /* this.initData(this.listRecord?.temp,
+      this.listRecord?.volume,
+      this.listRecord?.volume15,
+      this.listRecord?.density, this.listRecord?.level,
       this.listRecord?.listDate); */
-      this.initData(this.listRecord?.temp, 
-        this.listRecord?.volume, 
-        this.listRecord?.volume15, 
-        this.listRecord?.density, 
-        this.listRecord?.level, 
+      this.initData(this.listRecord?.temp,
+        this.listRecord?.volume,
+        this.listRecord?.volume15,
+        this.listRecord?.density,
+        this.listRecord?.level,
         this.listRecord?.listDate);
       this.getInteractionMsg();
 
-    
+
   }
 
   computeTheListDateToRightGmt(listDate:any[]){
@@ -148,8 +148,8 @@ export class CustomHbtGraphComponent {
     };
 
     this.graph1?.refresh();
-    
-    
+
+
   }
 
   getInteractionMsg(){
@@ -160,19 +160,19 @@ export class CustomHbtGraphComponent {
     selectedTank: this.selectedTank,
     period: this.period */
     this.interactionService.dataToShare$.subscribe((msg)=>{
-      //console.log("j'ai recu le msg de graphe: ", msg);
+      //;
       if(msg.from == "hbt-graph" &&
         msg.for == "custom-hbt-graph" &&
         msg.action == "reinitialize the graph"){
-          console.log("j'ai recu le msg de graphe");
+          ("j'ai recu le msg de graphe");
           this.listRecord = msg.listRecord;
           this.tank = msg.selectedTank;
           this.period = msg.period;
-          this.initData(this.listRecord?.temp, 
-            this.listRecord?.volume, 
-            this.listRecord?.volume15, 
-            this.listRecord?.density, 
-            this.listRecord?.level, 
+          this.initData(this.listRecord?.temp,
+            this.listRecord?.volume,
+            this.listRecord?.volume15,
+            this.listRecord?.density,
+            this.listRecord?.level,
             this.listRecord?.listDate);
       }else if(msg.from == "hbt-graph" &&
               msg.for == "custom-hbt-graph" &&
@@ -181,7 +181,7 @@ export class CustomHbtGraphComponent {
         for: "custom-hbt-graph",
         action: "empty the graph" */
         this.listRecord = {};
-        console.log("je vide le graphe");
+        ("je vide le graphe");
       }else if(msg.from == "hbt-graph" &&
               msg.for == "custom-hbt-graph" &&
               msg.action == "export the graph"){
@@ -192,9 +192,9 @@ export class CustomHbtGraphComponent {
         a.href = this.graph1.getBase64Image();
         a.download = 'Graphe '+this.tank?.sensor_reference+'.png';
         a.click();
-        console.log("j'exporte les graphes: ");
+        ("j'exporte les graphes: ");
       }
     });
   }
-  
+
 }

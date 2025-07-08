@@ -24,16 +24,15 @@ export class AppSidebarComponent {
     ngOnInit() {
         //timer(0, 1000).subscribe(n => this.getStringDate());
         //this.stationId = JSON.parse(this.cookieService.get('station_id'));
-        //console.log("station id: ", this.stationId);
+        //;
         // this.user = JSON.parse(this.cookieService.get('User'));
         // this.stationId = this.user?.station
-        // console.log("station id: ", this.stationId);
-        // console.log("side bar user: ", this.user);
+        // ;
+        // ;
         this.user = this.localStorageService.getUser();
         this.stationId = this.localStorageService.getServiceStationId();
         this.role = this.localStorageService.getRole();
-        console.log("station id: ", this.stationId);
-        console.log("side bar user: ", this.user);
+
 
     }
 

@@ -19,7 +19,7 @@ export class FmhVolumeComponent {
   maxDate: Date | undefined;
   rangeDates: Date[] | undefined;
   selectedFlowMeter:any;
-  
+
   listFlowMeters:any[]=[];
   listQuarter: variables[];
   selectedQuart:any;
@@ -39,7 +39,7 @@ export class FmhVolumeComponent {
   ngOnInit() {
     this.maxDate = new Date();
     this.user_details = this.authService.getUserData();
-    console.log("station id: ", this.user_details.service_station_id);
+
     this.getListQuartWorking();
     this.getListFlowMeters();
   }
@@ -51,31 +51,31 @@ export class FmhVolumeComponent {
         this.selectedFlowMeter = this.listFlowMeters[0];
       }
     });
-    //console.log("user is: ", this.user);
+    //;
   }
 
   getListQuartWorking(){
     this.quartService.getListQuarts(this.user_details?.service_station_id).subscribe((res)=>{
       this.listQuarter = res;
-      //console.log("list quarts: ", res);
+      //;
     });
   }
 
   onDropDownChangeQuart(event:any){
     this.getOutputsOnPeriod();
-    console.log("show event: ", this.selectedQuart);
+
     //this.getPeriodRecords();
   }
 
   onDropDownChangeFlowMeter(event:any){
     this.getOutputsOnPeriod();
-    console.log("show event: ", this.selectedFlowMeter);
+
     //this.getPeriodRecords();
   }
 
   onDateSelect(event:any){
     this.getOutputsOnPeriod();
-    console.log("show event: ", this.rangeDates);
+
     //this.getPeriodRecords();
   }
 
@@ -112,16 +112,15 @@ export class FmhVolumeComponent {
               this.recordService.getOutPutsOnPeriod(usefullData).subscribe((res)=>{
                   this.dataOutputs = res;
                   if(this.dataOutputs?.periodRecord?.length <= 0){
-                      this.messageService.add({ 
-                              severity: 'error', 
-                              summary: "Informations", 
-                              detail: "Aucune sortie dans la période" 
+                      this.messageService.add({
+                              severity: 'error',
+                              summary: "Informations",
+                              detail: "Aucune sortie dans la période"
                           });
                   }else{
-                      this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" }); 
+                      this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" });
                   }
-                  console.log("usefull data js: ", usefullData);
-                  console.log("usefull data: ", res);
+
               });
           }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
               if (this.selectedQuart) {
@@ -149,20 +148,19 @@ export class FmhVolumeComponent {
                           (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
                   }
               }
-              
+
               this.recordService.getOutPutsOnPeriod(usefullData).subscribe((res)=>{
                   this.dataOutputs = res;
                   if(this.dataOutputs?.periodRecord?.length <= 0){
-                      this.messageService.add({ 
-                              severity: 'error', 
-                              summary: "Informations", 
-                              detail: "Aucune sortie dans la période" 
+                      this.messageService.add({
+                              severity: 'error',
+                              summary: "Informations",
+                              detail: "Aucune sortie dans la période"
                           });
                   }else{
-                      this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" }); 
+                      this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" });
                   }
-                  console.log("usefull data js: ", usefullData);
-                  console.log("usefull data: ", res);
+
               });
           }else{
               this.dataOutputs = {};

@@ -18,7 +18,7 @@ export class TankListByTypeComponent {
   }
 
   ngOnInit() {
-    console.log("list tank by type: ", this.listTank);
+
   }
 
   goToTankInfo(tankId:number, tankData:any){
@@ -38,7 +38,7 @@ export class TankListByTypeComponent {
       //tankData:tankData
     });
     this.router.navigate(['/pages/dashboard/tank-details',tankId]);
-    console.log("je pars au specific tank data: ",tankData);
+
   }
 
   goToFlowMeterInfo(flowMeterId:number, flowMeterData:any){
@@ -57,8 +57,8 @@ export class TankListByTypeComponent {
         type: "Debimetre"
     });
     this.router.navigate(['/pages/dashboard/flow-meter-details',flowMeterId]);
-    console.log("je pars au specific flow meter data: ",flowMeterData);
+
   }
 
-  
+
 }

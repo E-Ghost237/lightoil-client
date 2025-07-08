@@ -29,7 +29,7 @@ export class HbpTankComponent {
 
   selectedStationProduct:any;
   listStationProducts:any[]=[];
-  
+
   listRecords:any[]=[];
 
  constructor(
@@ -59,9 +59,9 @@ export class HbpTankComponent {
         if(res.length > 0){
             this.selectedTank = this.listTanks[0]
         }
-        console.log("list tank: ", this.listTanks);
+        ;
     });
-    console.log("user is: ", this.user);
+    ;
   }
  */
   getListStationProducts(){
@@ -72,9 +72,9 @@ export class HbpTankComponent {
           this.selectedStationProduct = this.listStationProducts[0];
         }
       }
-      console.log("list station products: ", this.listStationProducts);
+
     });
-    //console.log("user is: ", this.user);
+    //;
   }
 
   getPeriodRecords(){
@@ -88,7 +88,7 @@ export class HbpTankComponent {
                             (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
             };
             this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-            console.log("usefullData: ",usefullData);
+
 
             this.recordService.getListRecordsForOneDayByStationProduct(usefullData).subscribe((res)=>{
               if(res.status == true){
@@ -96,22 +96,21 @@ export class HbpTankComponent {
                 if(this.listRecords?.length > 0){
                   this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
                 }else{
-                  this.messageService.add({ 
-                    severity: 'error', 
-                    summary: "Informations", 
-                    detail: "Aucune données disponible dans la période" 
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: "Informations",
+                    detail: "Aucune données disponible dans la période"
                   });
                 }
               }else{
                 this.listRecords=[];
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              
-              console.log("res day record: ",res);
+
             });
         }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
             usefullData = {
@@ -124,7 +123,7 @@ export class HbpTankComponent {
                             (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
             };
             this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-            console.log("usefullData: ",usefullData);
+
 
             this.recordService.getListRecordsForPeriodByStationProduct(usefullData).subscribe((res)=>{
               if(res.status == true){
@@ -132,22 +131,22 @@ export class HbpTankComponent {
                 if(this.listRecords?.length > 0){
                   this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
                 }else{
-                  this.messageService.add({ 
-                    severity: 'error', 
-                    summary: "Informations", 
-                    detail: "Aucune données disponible dans la période" 
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: "Informations",
+                    detail: "Aucune données disponible dans la période"
                   });
                 }
               }else{
                 this.listRecords=[];
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              
-              console.log("res period record: ",res);
+
+
             });
         }else{
             this.listRecords=[];
@@ -160,16 +159,16 @@ export class HbpTankComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 
   onDropDownChange(event:any){
-    console.log("show event: ", event.value);
+
     this.getPeriodRecords();
   }
 
   onDateSelect(event:any){
-    console.log("show event: ", this.rangeDates);
+
     this.getPeriodRecords();
   }
 

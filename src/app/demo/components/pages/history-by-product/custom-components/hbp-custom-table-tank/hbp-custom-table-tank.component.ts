@@ -23,7 +23,7 @@ export class HbpCustomTableTankComponent {
   }
 
   ngOnInit(){
-      console.log("");
+      ("");
   }
 
   getLevel(){
@@ -35,7 +35,7 @@ export class HbpCustomTableTankComponent {
 
   getListDayRecord(){
       if(this.tankDetailsData?.listLastRecord?.length > 0){
-          //console.log("list last record: ", this.tankDetailsData.listLastRecord);
+          //;
           return this.tankDetailsData.listLastRecord;
       }
       return [];

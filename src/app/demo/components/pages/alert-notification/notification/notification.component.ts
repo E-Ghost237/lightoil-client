@@ -53,7 +53,7 @@ export class NotificationComponent {
     this.getListProducts();
   }
 
-  
+
 
   getListProducts(){
     this.productService.getListStationProductsByStationId(this.user_details?.service_station_id).subscribe((res)=>{
@@ -63,9 +63,9 @@ export class NotificationComponent {
           this.selectedStationProduct = this.listStationProducts[0];
         }
       }
-      //console.log("list tank: ", this.listTanks);
+      //;
     });
-    //console.log("user is: ", this.user);
+    //;
   }
 
   getPeriodNotifications(){
@@ -80,16 +80,16 @@ export class NotificationComponent {
                           (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
           };
           this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-          //console.log("usefullData: ",usefullData);
+          //;
 
           this.notificationService.getListNotificationByStationProductId(usefullData).subscribe((res)=>{
             if(res.status == true){
-              this.listNotifications = res.data; 
+              this.listNotifications = res.data;
               this.messageService.add({ severity: 'info', summary: "Notification", detail: "Liste chargée" });
             }
-            console.log("res day record notification: ",res);
+
           });
-            
+
         }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
           usefullData = {
               stationProductId: this.selectedStationProduct.id,
@@ -101,15 +101,15 @@ export class NotificationComponent {
                           (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
           };
           this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-          //console.log("usefullData: ",usefullData);
+          //;
 
           this.notificationService.getListNotificationByStationProductId(usefullData).subscribe((res)=>{
-            
+
             if(res.status == true){
-              this.listNotifications = res.data; 
+              this.listNotifications = res.data;
               this.messageService.add({ severity: 'info', summary: "Notification", detail: "Liste chargée" });
             }
-            console.log("res day record notification: ",res);
+
           });
         }else{
           this.listNotifications=[];
@@ -145,16 +145,16 @@ export class NotificationComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 
   onDropDownChange(event:any){
-    //console.log("show event: ", event.value);
+    //;
     this.getPeriodNotifications();
   }
 
   onDateSelect(event:any){
-    //console.log("show event: ", this.rangeDates);
+    //;
     this.getPeriodNotifications();
   }
 

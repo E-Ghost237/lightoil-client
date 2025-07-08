@@ -21,7 +21,7 @@ export class AuthService {
   };
 
   user:any;
-  
+
   link: string = "/redirect?url=" + environment.redirect_uri_path;
 
 
@@ -34,7 +34,7 @@ export class AuthService {
   // Get user's token
   getAccessToken(): string {
     const token = JSON.parse(localStorage.getItem('token'));
-    // console.log("AccessToken: ", token.access_token);
+    // ;
 
     if (!token) {
       return null;
@@ -45,20 +45,20 @@ export class AuthService {
 
   getUserData() {
     const user_details = JSON.parse(localStorage.getItem('user_details'));
-    // console.log("User details: ", user_details);
+    // ;
     return user_details;
   }
 
   getUserId() {
     const user_details = JSON.parse(localStorage.getItem('user_details'));
-    // console.log("User ID: ", user_details.user.id);
+    // ;
     return user_details.user.id;
   }
 
   // Get user's email
   getUserEmail(): string {
     const user_details = JSON.parse(localStorage.getItem('user_details'));
-    // console.log("User email: ", user_details.user.email);
+    // ;
     return user_details.user.email;
   }
 
@@ -75,7 +75,7 @@ export class AuthService {
       password: password,
       remember_me: remember_me
     }
-    // console.log('Login, data send to API: ', data);
+    // ('Login, data send to API: ', data);
     return this.httpClient.post<any>(environment.apiUrl + 'auth/login', data);
   }
   // login(email: string, password: string, remember_me: boolean): Observable<any> {
@@ -89,7 +89,7 @@ export class AuthService {
   //     password: password,
   //     scope: this.passport.scope
   //   }
-  //   console.log('Login, data send to API: ', data);
+  //   ('Login, data send to API: ', data);
   //   return this.httpClient.post<any>(environment.apiUrl + 'auth/login', data);
   // }
 
@@ -99,10 +99,10 @@ export class AuthService {
       email: this.getUserEmail(),
       headers: new HttpHeaders().set('Authorization', `Bearer ${this.getAccessToken()}`)
     }
-    // console.log('Logout, data send to API: ', data);
+    // ('Logout, data send to API: ', data);
     return this.httpClient.post<any>(environment.apiUrl + 'auth/logout', data);
   }
-  
+
   // Logout user form all devices
   logoutFormAllDevices(allDevices: boolean): Observable<any> {
     const data = {
@@ -110,7 +110,7 @@ export class AuthService {
       allDevices: allDevices,
       headers: new HttpHeaders().set('Authorization', `Bearer ${this.getAccessToken()}`)
     }
-    // console.log('Logout, data send to API: ', data);
+    // ('Logout, data send to API: ', data);
     return this.httpClient.post<any>(environment.apiUrl + 'auth/logout', data);
   }
 
@@ -118,7 +118,7 @@ export class AuthService {
   forgotPassword(email: string) {
     return this.httpClient.post(environment.apiUrl + 'auth/password/forgot', { email: email });
   }
-  
+
   // Reset user's password
   resetPassword(token: string, password: string, password_confirmation: string) {
     const data = {
@@ -128,10 +128,10 @@ export class AuthService {
     }
     return this.httpClient.put(environment.apiUrl + 'auth/password/reset', data);
   }
-  
+
   // Update user's password
   updatePassword(current_password: string, password: string, password_confirmation: string): Observable<any> {
-    const data = { 
+    const data = {
       current_password: current_password,
       password: password,
       password_confirmation: password_confirmation,
@@ -145,7 +145,7 @@ export class AuthService {
   //     let njUser:string = this.cookieService.get('User');
   //     if(njUser != null && njUser.length > 0){
   //         this.user = JSON.parse(njUser);
-  //         //console.log("user is: ", this.user);
+  //         //;
   //     }
   //     return this.user;
   // }

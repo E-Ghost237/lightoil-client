@@ -25,7 +25,7 @@ export class TankHeaderComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(): void {
-        console.log("dataFromTankList: ", this.dataFromTankList);
+
     }
 
     getOnlineStatuSensor(){
@@ -35,7 +35,7 @@ export class TankHeaderComponent implements OnInit, OnDestroy {
             return true;
         }
 
-        //console.log("status sensor ", this.dataFromTankList?.listLastRecord?.length);
+        //("status sensor ", this.dataFromTankList?.listLastRecord?.length);
 
         return false;
     }

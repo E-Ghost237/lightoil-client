@@ -42,7 +42,7 @@ export class AppMenuComponent implements OnInit {
 
     constructor(
         private localStorageService: LocalStorageService,
-        private messageService: MessageService, 
+        private messageService: MessageService,
         public layoutService: LayoutService,
         private cookieService: CookieService,
         private userService: UserService,
@@ -50,7 +50,7 @@ export class AppMenuComponent implements OnInit {
         private router: Router
         ) { }
 
-    
+
 
     ngOnInit() {
         this.role_type = this.localStorageService.getRoleType();
@@ -68,7 +68,7 @@ export class AppMenuComponent implements OnInit {
         }
 
         this.user_details = this.authService.getUserData();
-        console.log("user data app menu: ", this.user_details);
+
         this.getListFeatures();
         this.model = this.formTheModel();
     }
@@ -77,7 +77,7 @@ export class AppMenuComponent implements OnInit {
         let user_details = JSON.parse(localStorage.getItem('user_details'));
         user_details.service_station_id = gas_station_id;
         localStorage.setItem('user_details', JSON.stringify(user_details));
-  
+
         // Navigate to Service Station dashboard
         // window.location.href = '/pages/dashboard';
         window.open('/pages/dashboard', '_blank');
@@ -101,7 +101,7 @@ export class AppMenuComponent implements OnInit {
                     label: 'Dashboard',
                     icon: 'pi pi-fw pi-th-large',
                     items:itemDashboard,
-    
+
                 }
                 return {
                     status:true,
@@ -161,10 +161,10 @@ export class AppMenuComponent implements OnInit {
                     label: 'Historiques par cuve',
                     icon: 'pi pi-fw pi-database',
                     items:itemTankHistory,
-    
+
                 }
                 itemHistory.push(tableTankHistory);
-                
+
             }
         }
         //produit
@@ -201,7 +201,7 @@ export class AppMenuComponent implements OnInit {
                     label: 'Historiques par produit',
                         icon: 'pi pi-fw pi-wallet',
                     items:itemProductHistory,
-    
+
                 }
             }
             itemHistory.push(tableProductHistory);
@@ -240,7 +240,7 @@ export class AppMenuComponent implements OnInit {
                     label: 'Historiques des debimetres',
                     icon: 'pi pi-fw pi-wallet',
                     items:itemFlowMeterHistory,
-    
+
                 }
                 itemHistory.push(tableFlowMeterHistory);
             }
@@ -303,7 +303,7 @@ export class AppMenuComponent implements OnInit {
                     label: 'Index de pompes et reconciliation',
                     icon: 'pi pi-fw pi-sort-alt-slash',
                     items:itemPump,
-    
+
                 }
                 return {
                     status:true,
@@ -396,10 +396,10 @@ export class AppMenuComponent implements OnInit {
                     label: 'Station service',
                     icon: 'pi pi-fw pi-home',
                     items: itemSsConfig,
-    
+
                 }
                 itemConfig.push(tableSsConfig);
-                
+
             }
         }
         //Account
@@ -423,7 +423,7 @@ export class AppMenuComponent implements OnInit {
                     },
                 );
             }
-            
+
             if(itemAccountConfig.length > 0){
                 tableAccountConfig = {
                     label: 'Compte',
@@ -433,7 +433,7 @@ export class AppMenuComponent implements OnInit {
             }
             itemConfig.push(tableAccountConfig);
         }
-        
+
 
         if(itemConfig.length > 0){
             tableConfig = {
@@ -479,7 +479,7 @@ export class AppMenuComponent implements OnInit {
         if(data.status == true){
             model.push(data.data);
         }
-        
+
         if (this.role_type === 'Admin' || this.role_type === 'Moderator') {
             model.push(this.admin_space_menu);
         }
@@ -498,8 +498,7 @@ export class AppMenuComponent implements OnInit {
                 });
                 this.model = this.formTheModel();
             }
-            console.log("res features: ", this.listFeatures);
-            console.log("res type permission: ", this.listTypePermissions);
+
         });
     }
 
@@ -514,7 +513,7 @@ export class AppMenuComponent implements OnInit {
     logout() {
       this.authService.logout().subscribe(
         (response: any) => {
-          console.log("Logout response: ", response);
+
           if (response.success === true) {
             this.clearCurrentUser();
             this.messageService.add({severity: 'success', summary: 'Success', detail: response.message, life: 3000});
@@ -525,12 +524,12 @@ export class AppMenuComponent implements OnInit {
           }
         },
         (error) => {
-          console.log("Logout error: ", error);
+
           this.messageService.add({severity: 'error', summary: 'Error', detail: error.message, life: 3000});
         }
       );
     }
-    
+
     // Delete athenticated user's data to the Local Storage
     private clearCurrentUser(): void {
       localStorage.removeItem('user_details');

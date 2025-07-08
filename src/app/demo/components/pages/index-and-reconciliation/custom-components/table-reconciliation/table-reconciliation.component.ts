@@ -40,20 +40,20 @@ export class TableReconciliationComponent {
   ngOnInit(){
     this.user_details = this.authService.getUserData();
     this.stationId = this.user_details.service_station_id;
-   
+
     this.getInteractionMsg();
-    
+
   }
 
   showStockGraph(reconciliation: any){
-    console.log("data show stock graph",reconciliation['allDayRecords']);
+
     this.listDataForGraph = this.getDataForGraph(reconciliation['allDayRecords']);
-    console.log("data show stock graph",this.getDataForGraph(reconciliation['allDayRecords']));
+
     this.dialogVisible = true;
   }
 
   showIndexGraph(reconciliation: any){
-    console.log("data show Index graph",reconciliation);
+    ;
   }
 
   getDataForGraph(reconciliation:any[]){
@@ -85,9 +85,9 @@ export class TableReconciliationComponent {
           };
         }
       }
-      
+
     }else{
-      
+
     }
     return listData;
   }
@@ -100,24 +100,24 @@ export class TableReconciliationComponent {
     this.interactionService.dataToShare$.subscribe((msg)=>{
       /* from: 'pump-reconciliation',
       for: 'table-reconciliation',
-      action: 'charge-list-reconciliations-in-table', 
+      action: 'charge-list-reconciliations-in-table',
       from: 'pump-reconciliation',
       for: 'table-reconciliation',
       action: 'charge-list-reconciliations-in-table',
       data: listReconciliations*/
       if(msg.from == "pump-reconciliation" &&
-        msg.for == "custom-table-reconciliation" && 
+        msg.for == "custom-table-reconciliation" &&
         msg.action == "toggle de reconciliation dialog box"
       ){
-        
+
       }else if(msg.from == "pump-reconciliation" &&
-        msg.for == "table-reconciliation" && 
+        msg.for == "table-reconciliation" &&
         msg.action == "charge-list-reconciliations-in-table"){
           this.listReconciliations = msg.data['allTankByDay'];
-          console.log("msg list reconciliation : ", this.listReconciliations);
-        
+          ;
+
       }else if(msg.from == "pump-reconciliation" &&
-        msg.for == "table-reconciliation" && 
+        msg.for == "table-reconciliation" &&
         msg.action == "empty-list-reconciliation-in-table"){
           this.listReconciliations = [];
       }

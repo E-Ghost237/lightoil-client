@@ -46,11 +46,11 @@ export class FlowMeterDetailsComponent {
   ngOnInit() {
     this.user_details = this.authService.getUserData();
     this.stationId = this.user_details?.service_station_id;
-    console.log("flow meter init function: ");
+    ("flow meter init function: ");
     this.flowMeterId = this.route.snapshot.paramMap.get('id');
     this.flowSensorId = this.flowMeterId;
     this.t1=interval(1000).subscribe(n => this.getStringDate());
-    
+
     this.getFlowMeterDetailsData();
     this.getLastHourVolume();
     this.getSubscribeData();
@@ -154,7 +154,7 @@ export class FlowMeterDetailsComponent {
         dataToShare['for'] == "flow-meter-details" &&
         dataToShare['action'] == "refresh the page" ){
         this.shareData = dataToShare["data"];
-        //console.log("i try to share this data: ", shareData);
+        //;
         this.flowMeterId = this.shareData.id;
       }
 
@@ -169,8 +169,8 @@ export class FlowMeterDetailsComponent {
 
         this.shareData = dataToShare["flowMeterData"];
         this.flowMeterId = dataToShare["flowMeterId"];
-        console.log("get in flow meter details: ", this.shareData);
-        
+        ;
+
       } */
     });
   }
@@ -186,12 +186,12 @@ export class FlowMeterDetailsComponent {
   getFlowMeterDetailsData(){
     //TODO get flow meter data
     this.flowSensorService.getDaylyFlowSensorRecord(this.flowSensorId).subscribe((res)=>{
-      console.log("res dayly flow sensor: ",res.data[0]);
+
       this.shareData = res.data[0];
       this.records = this.shareData.listLastRecord;
       this.flowMeterDetailsData = {data: this.records};
       this.initGraphData();
-    }); 
+    });
   }
 
   getTheCorrectImage(){
@@ -199,7 +199,7 @@ export class FlowMeterDetailsComponent {
   }
 
   getOnlineStatuSensor(){
-    //TODO get flow meter data 
+    //TODO get flow meter data
     if(this.shareData?.listLastRecord?.length > 0){
       return true;
     }
@@ -209,35 +209,35 @@ export class FlowMeterDetailsComponent {
 
   getSensorReference(){
     //TODO get flow meter data
-    return this.shareData?.tank?.sensor_reference ?? "Undefined"; 
+    return this.shareData?.tank?.sensor_reference ?? "Undefined";
   }
 
   getNameProduct(){
-    //TODO get flow meter data 
+    //TODO get flow meter data
     return this.shareData?.product.code;
   }
 
   generateFlowMeterDataDetailsPdf(){
-    //TODO get flow meter data 
-    this.messageService.add({ 
-      severity: 'info', 
-      summary: 'Fonctionnalite indisponible', 
-      detail: "Veuillez excuser l'indisponibilite de la fonctionnalite" 
+    //TODO get flow meter data
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Fonctionnalite indisponible',
+      detail: "Veuillez excuser l'indisponibilite de la fonctionnalite"
     });
   }
 
   generateFlowMeterDataDetailsImage(){
-    //TODO get flow meter data 
+    //TODO get flow meter data
     let a = document.createElement('a');
     a.href = this.line.getBase64Image();
     a.download = 'Graphe '+'d\' evolution du debit'+'.png';
     a.click();
-    
+
   }
 
   getLastHourVolume(){
     this.flowSensorService.getLastHourVolumeFlowSensor(this.stationId, this.flowSensorId).subscribe((res)=>{
-      console.log("from sensor service: ", res);
+
       if(res.status == "success"){
         this.volume = res.volume;
       }else{
@@ -247,7 +247,7 @@ export class FlowMeterDetailsComponent {
   }
 
   getInstantFlow(){
-    //console.log("instant flow details: ", this.shareData?.listLastRecord[0]);
+    //("instant flow details: ", this.shareData?.listLastRecord[0]);
     if(this.shareData?.listLastRecord?.length > 0){
       return ''+(Math.round(this.shareData.listLastRecord[0].instant_flow*100)/100);
     }else{
@@ -279,5 +279,5 @@ export class FlowMeterDetailsComponent {
     }
   }
 
-  
+
 }

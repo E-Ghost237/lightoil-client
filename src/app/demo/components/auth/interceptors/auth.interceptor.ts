@@ -15,24 +15,24 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(req).pipe(
         tap(event => {
           // Log the response for debugging
-          // console.log('HTTP Response without token:', event);
+          // ('HTTP Response without token:', event);
         })
       );
     }
-    
+
     // Clone the request to add new headers
     const clonedRequest = req.clone({
       headers: req.headers.set('Authorization', 'Bearer ' + token)
     });
 
     // Log the request for debugging
-    // console.log('HTTP Request with token:', clonedRequest);
+    // ('HTTP Request with token:', clonedRequest);
 
     // Pass the cloned request instead of the original request to the next handle
     return next.handle(clonedRequest).pipe(
       tap(event => {
         // Log the response for debugging
-        // console.log('HTTP Response with token:', event);
+        // ('HTTP Response with token:', event);
       })
     );
   }

@@ -22,7 +22,7 @@ export class HbpTableDumpingsOutputComponent {
   }
 
   ngOnInit(){
-      //console.log("on table: ", this.listOutputs);
+      //;
   }
 
   getToLocalDateTime(date1:string){
@@ -46,7 +46,7 @@ export class HbpTableDumpingsOutputComponent {
     if (periodRecord.length > 0) {
       for(let i=0; i<periodRecord.length; i++){
         total = total + periodRecord[i].outputs;
-      }  
+      }
     }
     return total;
   }

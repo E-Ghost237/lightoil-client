@@ -25,7 +25,7 @@ export class ProfilComponent {
   password!:string;
   oldPassword!:string;
   password_confirmation!:string;
-  statusIsFirstConn: boolean = true; 
+  statusIsFirstConn: boolean = true;
 
   constructor(
     private router: Router,
@@ -44,14 +44,14 @@ export class ProfilComponent {
     this.user = this.localStorageService.getUser();
     this.roles = this.localStorageService.getRole();
     this.getUserDetails();
-    /* console.log("user profil 1: ", this.user);
-    console.log("is first conn profil: ", this.user.is_first_conn); */
+    /* ;
+    ; */
     this.statusIsFirstConn = this.user.is_first_conn;
   }
 
   getUserDetails(){
     this.userService.getUserDetailsByUserId(this.user.id).subscribe((res)=>{
-      console.log("user profil: ", res);
+
       if(res.status == true){
         this.userDetails = res.data;
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Données chargées', life: 3000 });
@@ -72,7 +72,7 @@ export class ProfilComponent {
       password: this.password?? "",
       password_confirmation: this.password_confirmation?? "",
     }).subscribe((res)=>{
-      console.log("res check password: ", res);
+
       if(res.success === true){
         this.messageService.add({ severity: 'success', summary: 'Success', detail: res.message, life: 3000 });
         this.emptyThePasswords();
@@ -89,7 +89,7 @@ export class ProfilComponent {
   logout() {
     this.authService.logout().subscribe(
       (response: any) => {
-        console.log("Logout response: ", response);
+
         if (response.success === true) {
           this.clearCurrentUser();
           this.messageService.add({severity: 'success', summary: 'Success', detail: response.message, life: 3000});
@@ -100,12 +100,12 @@ export class ProfilComponent {
         }
       },
       (error) => {
-        console.log("Logout error: ", error);
+
         this.messageService.add({severity: 'error', summary: 'Error', detail: error.message, life: 3000});
       }
     );
   }
-  
+
   // Delete athenticated user's data to the Local Storage
   private clearCurrentUser(): void {
     localStorage.removeItem('user_details');
@@ -117,7 +117,7 @@ export class ProfilComponent {
     this.password = "";
     this.password_confirmation = "";
   }
-  
+
   disconnectUser(){
     this.cookieService.deleteAll();
     localStorage.clear();
@@ -131,6 +131,6 @@ export class ProfilComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 }

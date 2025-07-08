@@ -54,11 +54,11 @@ export class PointsOfSaleComponent implements OnInit {
         (response) => {
           if (response.success == true) {
             this.point_of_sale_types = response.data
-            // console.log("point_of_sale_types: ", this.point_of_sale_types);
+            // ;
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleType error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -73,14 +73,14 @@ export class PointsOfSaleComponent implements OnInit {
         (response) => {
           if (response.success == true) {
             this.points_of_sale = response.data
-            // console.log("points_of_sale: ", this.points_of_sale);
+            // ;
             this.loading_logo = false;
             this.loading_icon = false;
             this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
           }
         },
         (err) => {
-          console.log("An error occure while loading all points of sale of company: ", err.error);
+
           this.loading_logo = false;
           this.loading_icon = false;
           this.messageService.add(
@@ -105,7 +105,7 @@ export class PointsOfSaleComponent implements OnInit {
   }
 
   onPointsOfSaleChange(selected_option: any[]): string[] {
-    // console.log("selected_points_of_sale: ", selected_option);
+    // ;
     if (!selected_option || selected_option.length === 0) {
       this.selected_points_of_sale = [];
       return [];
@@ -129,7 +129,7 @@ export class PointsOfSaleComponent implements OnInit {
   }
 
   onPointsOfSaleTypesChange(selected_options: any[]): string[] {
-    // console.log("selected_point_of_sale_types: ", selected_options);
+    // ;
     if (!selected_options || selected_options.length === 0) {
       this.selected_point_of_sale_types = [];
       return [];

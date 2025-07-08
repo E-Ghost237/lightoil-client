@@ -34,8 +34,8 @@ export class TankImageComponent {
 
 
     ngOnInit(): void {
-        //console.log("dataFromTankList: ", this.dataFromTankList);
-        //console.log("date: ", this.getLastIncomeDateRecord());
+        //;
+        //("date: ", this.getLastIncomeDateRecord());
         this.user_details = this.authService.getUserData();
         this.stationId = this.user_details?.service_station_id;
         this.flowSensorId = this.dataFromTankList.tank.id;
@@ -72,7 +72,7 @@ export class TankImageComponent {
         let new_volume: number;
         let output_volume!: number;
         let records = this.dataFromTankList.listLastRecord;
-        // console.log("records: ", records);
+        // ;
 
         if (records.length > 0) {
             new_volume = records[0]?.volume;
@@ -80,7 +80,7 @@ export class TankImageComponent {
 
             if (new_volume <= last_volume) {
                 output_volume = last_volume - new_volume;
-                // console.log("Home Output Volume: ", output_volume);
+                // ;
             }
             return Math.round(output_volume*100)/100;
         }
@@ -252,7 +252,7 @@ export class TankImageComponent {
 
     getLastHourVolume(){
         this.flowSensorService.getLastHourVolumeFlowSensor(this.stationId, this.flowSensorId).subscribe((res)=>{
-            console.log("from sensor service: ", res);
+
             if(res.status == "success"){
                 this.volume = res.volume;
             }else{

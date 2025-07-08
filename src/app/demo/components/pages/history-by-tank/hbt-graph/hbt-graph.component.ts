@@ -17,7 +17,7 @@ import { MessageService } from 'primeng/api';
   providers: [MessageService]
 })
 export class HbtGraphComponent {
-  
+
   date: Date;
   maxDate: Date | undefined;
   rangeDates: Date[] | undefined;
@@ -54,9 +54,9 @@ export class HbtGraphComponent {
         if(res.length > 0){
             this.selectedTank = this.listTanks[0]
         }
-        console.log("list tank: ", this.listTanks);
+
     });
-    console.log("user is: ", this.user_details);
+
   }
 
   getPeriodRecords(){
@@ -70,24 +70,24 @@ export class HbtGraphComponent {
                             (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
             };
             this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-            console.log("usefullData: ",usefullData);
-            
+
+
             this.hbtGraphService.getListRecordsForGraph(usefullData).subscribe((res)=>{
               if(res.status == true){
-                this.listRecords = res; 
+                this.listRecords = res;
                 this.sendInitGraph();
-                this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" }); 
+                this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
               }else{
                 this.emptyTheGraph();
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              console.log("res day record graph: ",res);
+
             });
-            
+
         }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
             usefullData = {
                 tankId: this.selectedTank.id,
@@ -99,26 +99,26 @@ export class HbtGraphComponent {
                             (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
             };
             this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-            console.log("usefullData: ",usefullData);
+
 
             this.hbtGraphService.getListRecordsForGraph(usefullData).subscribe((res)=>{
               if(res.status == true){
-                this.listRecords = res; 
+                this.listRecords = res;
                 this.sendInitGraph();
-                this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" }); 
+                this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
               }else{
                 this.emptyTheGraph();
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              console.log("res day record graph: ",res);
+
             });
             /* this.recordService.getListRecordsForPeriod(usefullData).subscribe((res)=>{
                 this.listRecords = res;
-                console.log("res period record: ",res);
+                ;
             }); */
         }else{
             this.listRecords=[];
@@ -131,16 +131,16 @@ export class HbtGraphComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 
   onDropDownChange(event:any){
-    console.log("show event: ", event.value);
+
     this.getPeriodRecords();
   }
 
   onDateSelect(event:any){
-    console.log("show event: ", this.rangeDates);
+
     this.getPeriodRecords();
   }
 

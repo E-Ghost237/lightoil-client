@@ -9,7 +9,7 @@ import { OverlayPanel } from 'primeng/overlaypanel';
   styleUrls: ['./fmh-table-volume.component.scss']
 })
 export class FmhTableVolumeComponent {
-  
+
   @Input()
   listOutputs!:any;
 
@@ -30,7 +30,7 @@ export class FmhTableVolumeComponent {
   }
 
   ngOnInit(){
-      //console.log("on table: ", this.listOutputs);
+      //;
   }
 
 
@@ -108,7 +108,7 @@ export class FmhTableVolumeComponent {
         }
     };
 
-    
+
     this.line?.refresh();
     this.overlay.toggle(event);
   }

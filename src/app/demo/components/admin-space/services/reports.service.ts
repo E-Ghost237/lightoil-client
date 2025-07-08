@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
 export class ReportsService {
 
   constructor(private http: HttpClient) { }
-  
+
   getDailySalesOfPointsOfSaleOfCompany(company_id: number, sale_point_type_id: number, sale_point_ids: Array<number>, product_ids: Array<number>, date: Date): Observable<any> {
     const data = {
       'company_id': company_id,
@@ -18,11 +18,11 @@ export class ReportsService {
       'product_ids': product_ids,
       'date': date
     }
-    // console.log("Data sent to get daily sales Of ompany's gas stations: ", data);
+    // ;
 
     return this.http.post<any>(environment.apiUrl + 'company/reports/sales/daily', data);
   }
-  
+
   getWeeklySalesOfPointsOfSaleOfCompany(company_id: number, sale_point_type_id: number, sale_point_ids: Array<number>, product_ids: Array<number>, date: Array<Date>): Observable<any> {
     const data = {
       'company_id': company_id,
@@ -31,7 +31,7 @@ export class ReportsService {
       'product_ids': product_ids,
       'date': date
     }
-    // console.log("Data sent to get weekly sales Of ompany's gas stations: ", data);
+    // ;
 
     return this.http.post<any>(environment.apiUrl + 'company/reports/sales/weekly', data);
   }

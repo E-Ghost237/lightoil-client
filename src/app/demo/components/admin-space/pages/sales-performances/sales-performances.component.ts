@@ -78,7 +78,7 @@ export class SalesPerformancesComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleType error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error});
         }
       );
@@ -88,7 +88,7 @@ export class SalesPerformancesComponent implements OnInit {
   loadData(calendar_type: string) {
     if (this.company_id !== undefined && this.company_id !== null) {
       this.resetData();
-  
+
       switch (calendar_type) {
         case 'daily':
           this. getDailySalesPerformancesOfPointsOfSale();
@@ -132,11 +132,11 @@ export class SalesPerformancesComponent implements OnInit {
           }
         },
         (err) => {
-          console.log("An error occure while getting daily sales performances: ", err.error);
+
           this.loading_icon = false;
           this.lightoil_loading = false;
-          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error Message', 
-            detail: 'An error occure while generatting daily sales performances. Please try again later.', life: 10000 
+          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error Message',
+            detail: 'An error occure while generatting daily sales performances. Please try again later.', life: 10000
           });
         }
       );
@@ -160,14 +160,14 @@ export class SalesPerformancesComponent implements OnInit {
           }
         },
         (err) => {
-          console.log("An error occure while getting weekly sales performances: ", err.error);
+
           this.loading_icon = false;
           this.lightoil_loading = false;
           this.messageService.add(
-            { 
-              key: 'tst', severity: 'error', summary: 'Error Message', 
-              detail: 'An error occure while generatting weekly sales performances. Please try again later.', 
-              life: 10000 
+            {
+              key: 'tst', severity: 'error', summary: 'Error Message',
+              detail: 'An error occure while generatting weekly sales performances. Please try again later.',
+              life: 10000
             }
           );
         }
@@ -189,8 +189,8 @@ export class SalesPerformancesComponent implements OnInit {
   }
 
   exportPerformancesToPDFFormat() {
-    this.messageService.add({ key: 'tst', severity: 'info', summary: 'Info. Message', 
-      detail: 'Export to PDF feature is under developement. It will be available soon.', life: 5000 
+    this.messageService.add({ key: 'tst', severity: 'info', summary: 'Info. Message',
+      detail: 'Export to PDF feature is under developement. It will be available soon.', life: 5000
     });
   }
 
@@ -201,7 +201,7 @@ export class SalesPerformancesComponent implements OnInit {
       case 'daily':
         this.is_daily_performances = true;
         this.is_weekly_performances = false;
-        this.is_monthly_performances = false; 
+        this.is_monthly_performances = false;
         this.is_annual_performances = false;
 
         if (this.daily_date == undefined) {
@@ -214,7 +214,7 @@ export class SalesPerformancesComponent implements OnInit {
       case 'weekly':
         this.is_weekly_performances = true;
         this.is_daily_performances = false;
-        this.is_monthly_performances = false; 
+        this.is_monthly_performances = false;
         this.is_annual_performances = false;
 
         if (this.weekly_date == undefined || (this.weekly_date[0] == null || this.weekly_date[1] == null)) {
@@ -225,11 +225,11 @@ export class SalesPerformancesComponent implements OnInit {
 
         break;
       case 'monthly':
-        this.is_monthly_performances = true; 
+        this.is_monthly_performances = true;
         this.is_daily_performances = false;
         this.is_weekly_performances = false;
         this.is_annual_performances = false;
-        
+
         if (this.monthly_date == undefined) {
           this.can_export_performances = false;
         } else {
@@ -242,7 +242,7 @@ export class SalesPerformancesComponent implements OnInit {
         this.is_daily_performances = false;
         this.is_weekly_performances = false;
         this.is_monthly_performances = false;
-        
+
         if (this.annual_date == undefined) {
           this.can_export_performances = false;
         } else {

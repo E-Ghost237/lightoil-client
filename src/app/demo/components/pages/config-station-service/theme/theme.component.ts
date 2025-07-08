@@ -28,17 +28,17 @@ export class ThemeComponent {
 
   constructor(
     private messageService: MessageService,
-    private themeService: ThemeService, 
+    private themeService: ThemeService,
     private authService: AuthService,
     private router: Router,
   ) {
     this.user_details = this.authService.getUserData();
   }
 
-  
+
 
   onSelectedFile(event:any) {
-    console.log("the selected file is: ", event);
+
     const reader = new FileReader();
 
     reader.onload = (e: any) => {
@@ -46,54 +46,54 @@ export class ThemeComponent {
       image.src = e.target.result;
       image.onload = rs => {
         this.uploadImageBase64 = e.target.result;
-        //console.log("le fichier: ", this.uploadImageBase64);
+        //;
       };
     };
     reader.readAsDataURL( event.files[0]);
 
     this.messageService.add(
       {
-        severity: 'info', 
-        summary: 'Fichier charge', 
+        severity: 'info',
+        summary: 'Fichier charge',
         detail: 'le fichier est uploade avec succes. Rechargez svp'
       }
-    );  
+    );
   }
 
   onCustomUpload(event:FileUploadHandlerEvent) {
     let file:any =this.uploadImageBase64;
     let file1:any =event.files[0];
     if(file != null){
-      console.log("The files is: ",this.uploadImageBase64);
+
       this.themeService.setBackgroundImage(
         {
           background:this.uploadImageBase64,
           stationId: this?.user_details?.service_station_id
         }
       ).subscribe((response)=>{
-        console.log("The response when uploaded is: ",response);
+
       });
       this.messageService.add(
         {
-          severity: 'info', 
-          summary: 'Fichier charge', 
+          severity: 'info',
+          summary: 'Fichier charge',
           detail: 'le fichier est uploade avec succes. Rechargez svp'
         }
-      );  
+      );
     }else{
       this.messageService.add(
         {
-          severity: 'warn', 
-          summary: 'Fichier', 
+          severity: 'warn',
+          summary: 'Fichier',
           detail: 'Choississez un fichier svp et reessayez svp'
         }
-      ); 
+      );
     }
-    
+
   }
 
-  
-  
+
+
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
   }

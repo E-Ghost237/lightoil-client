@@ -88,7 +88,7 @@ export class SalesReportsComponent implements OnInit {
 
   initFilters() {
     this.daily_date = new Date();
-    
+
     if (this.company_id !== undefined && this.company_id !== null) {
       this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
         (response) => {
@@ -101,7 +101,7 @@ export class SalesReportsComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleType error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -115,7 +115,7 @@ export class SalesReportsComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleOfCompany error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -128,7 +128,7 @@ export class SalesReportsComponent implements OnInit {
         }
       },
       (err) => {
-        // console.log("An error occure while getting all products: ", err.error);
+        // ;
         this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message, life: 3000 });
       }
     );
@@ -146,17 +146,17 @@ export class SalesReportsComponent implements OnInit {
     if (this.selected_sale_points.length === 0 || this.selected_sale_points.length === null || this.selected_sale_points.length === undefined) {
       this.sale_point_ids = undefined;
       this.select_all_sale_points = false;
-      // console.log('No sale points selected.', this.selected_sale_points);
+      // ('No sale points selected.', this.selected_sale_points);
     } else if (this.selected_sale_points.length === this.sale_points_matching_type.length) {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = true;
-      // console.log('All sale points selected selected.', this.selected_sale_points);
-      // console.log('Sale points IDs.', this.sale_point_ids);
+      // ('All sale points selected selected.', this.selected_sale_points);
+      // ('Sale points IDs.', this.sale_point_ids);
     } else {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = false;
-      // console.log('Some sale points selected.', this.selected_sale_points);
-      // console.log('Sale points IDs.', this.sale_point_ids);
+      // ('Some sale points selected.', this.selected_sale_points);
+      // ('Sale points IDs.', this.sale_point_ids);
     }
   }
 
@@ -167,13 +167,13 @@ export class SalesReportsComponent implements OnInit {
       this.selected_sale_points = this.sale_points_matching_type;
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = event.checked;
-      // console.log('All sale points selected selected.', this.selected_sale_points);
-      // console.log('Sale points IDs.', this.sale_point_ids);
+      // ('All sale points selected selected.', this.selected_sale_points);
+      // ('Sale points IDs.', this.sale_point_ids);
     } else {
       this.selected_sale_points = undefined;
       this.sale_point_ids = undefined;
       this.select_all_sale_points = event.checked;
-      // console.log('No sale points selected.', this.selected_sale_points);
+      // ('No sale points selected.', this.selected_sale_points);
     }
   }
 
@@ -184,17 +184,17 @@ export class SalesReportsComponent implements OnInit {
     if (this.selected_products.length === 0 || this.selected_products.length === null || this.selected_products.length === undefined) {
       this.product_ids = undefined;
       this.select_all_products = false;
-      // console.log('No products selected.', this.selected_products);
+      // ('No products selected.', this.selected_products);
     } else if (this.selected_products.length === this.products.length) {
       this.product_ids = this.getIdsOfSelectedProducts(this.selected_products);
       this.select_all_products = true;
-      // console.log('All products selected selected.', this.selected_products);
-      // console.log('Products IDs.', this.product_ids);
+      // ('All products selected selected.', this.selected_products);
+      // ('Products IDs.', this.product_ids);
     } else {
       this.product_ids = this.getIdsOfSelectedProducts(this.selected_products);
       this.select_all_products = false;
-      // console.log('Some products selected.', this.selected_products);
-      // console.log('Products IDs.', this.product_ids);
+      // ('Some products selected.', this.selected_products);
+      // ('Products IDs.', this.product_ids);
     }
   }
 
@@ -205,13 +205,13 @@ export class SalesReportsComponent implements OnInit {
       this.selected_products = this.products;
       this.product_ids = this.getIdsOfSelectedProducts(this.selected_products);
       this.select_all_products = event.checked;
-      // console.log('All products selected selected.', this.selected_products);
-      // console.log('Products IDs.', this.product_ids);
+      // ('All products selected selected.', this.selected_products);
+      // ('Products IDs.', this.product_ids);
     } else {
       this.selected_products = undefined;
       this.product_ids = undefined;
       this.select_all_products = event.checked;
-      // console.log('No products selected.', this.selected_products);
+      // ('No products selected.', this.selected_products);
     }
   }
 
@@ -220,11 +220,11 @@ export class SalesReportsComponent implements OnInit {
     if (this.is_daily_report) {
       this.daily_date = event;
     } else if (this.is_weekly_report) {
-      console.log('this.weekly_date', this.weekly_date);
+
     } else if (this.is_monthly_report) {
-      
+
     } else if (this.is_annual_report) {
-      
+
     }
   }
 
@@ -277,14 +277,14 @@ export class SalesReportsComponent implements OnInit {
       this.getWeeklySalesReport();
     } else if (this.is_monthly_report) {
       this.messageService.add(
-        { key: 'tst', severity: 'info', summary: 'Info. Message', 
-          detail: 'Generate monthly sales report feature is under developement. It will be available soon.', life: 5000 
+        { key: 'tst', severity: 'info', summary: 'Info. Message',
+          detail: 'Generate monthly sales report feature is under developement. It will be available soon.', life: 5000
         }
       );
     } else if (this.is_annual_report) {
       this.messageService.add(
-        { key: 'tst', severity: 'info', summary: 'Info. Message', 
-          detail: 'Generate annual sales report feature is under developement. It will be available soon.', life: 5000 
+        { key: 'tst', severity: 'info', summary: 'Info. Message',
+          detail: 'Generate annual sales report feature is under developement. It will be available soon.', life: 5000
         }
       );
     }
@@ -307,13 +307,13 @@ export class SalesReportsComponent implements OnInit {
             }
           },
           (err) => {
-            console.log("An error occure while getting daily sales report: ", err.error);
+
             this.loading_icon = false;
             this.lightoil_loading = false;
             this.messageService.add(
-              { 
-                key: 'tst', severity: 'error', summary: 'Error Message', 
-                detail: 'An error occure while generatting daily sales report. Please try again later.', life: 10000 
+              {
+                key: 'tst', severity: 'error', summary: 'Error Message',
+                detail: 'An error occure while generatting daily sales report. Please try again later.', life: 10000
               }
             );
           }
@@ -322,10 +322,10 @@ export class SalesReportsComponent implements OnInit {
         this.loading_icon = false;
         this.lightoil_loading = false;
         this.messageService.add(
-          { 
+          {
             key: 'tst', severity: 'error', summary: 'Error Message',
-            detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.', 
-            life: 10000 
+            detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.',
+            life: 10000
           }
         );
       }
@@ -349,14 +349,14 @@ export class SalesReportsComponent implements OnInit {
             }
           },
           (err) => {
-            console.log("An error occure while getting weekly sales report: ", err.error);
+
             this.loading_icon = false;
             this.lightoil_loading = false;
             this.messageService.add(
-              { 
-                key: 'tst', severity: 'error', summary: 'Error Message', 
-                detail: 'An error occure while generatting weekly sales report. Please try again later.', 
-                life: 10000 
+              {
+                key: 'tst', severity: 'error', summary: 'Error Message',
+                detail: 'An error occure while generatting weekly sales report. Please try again later.',
+                life: 10000
               }
             );
           }
@@ -365,10 +365,10 @@ export class SalesReportsComponent implements OnInit {
         this.loading_icon = false;
         this.lightoil_loading = false;
         this.messageService.add(
-          { 
+          {
             key: 'tst', severity: 'error', summary: 'Error Message',
-            detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.', 
-            life: 10000 
+            detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.',
+            life: 10000
           }
         );
       }
@@ -377,16 +377,16 @@ export class SalesReportsComponent implements OnInit {
 
   exportReportToPDFFormat() {
     this.messageService.add(
-      { key: 'tst', severity: 'info', summary: 'Info. Message', 
-        detail: 'Export to PDF feature is under developement. It will be available soon.', life: 5000 
+      { key: 'tst', severity: 'info', summary: 'Info. Message',
+        detail: 'Export to PDF feature is under developement. It will be available soon.', life: 5000
       }
     );
   }
 
   exportReportToExcelFormat() {
     this.messageService.add(
-      { key: 'tst', severity: 'info', summary: 'Info. Message', 
-        detail: 'Export to Excel feature is under developement. It will be available soon.', life: 5000 
+      { key: 'tst', severity: 'info', summary: 'Info. Message',
+        detail: 'Export to Excel feature is under developement. It will be available soon.', life: 5000
       }
     );
   }
@@ -399,17 +399,17 @@ export class SalesReportsComponent implements OnInit {
     if (report === 'daily') {
       this.is_daily_report = true;
       this.is_weekly_report = false;
-      this.is_monthly_report = false; 
+      this.is_monthly_report = false;
       this.is_annual_report = false;
     }
     else if (report === 'weekly') {
       this.is_weekly_report = true;
       this.is_daily_report = false;
-      this.is_monthly_report = false; 
+      this.is_monthly_report = false;
       this.is_annual_report = false;
     }
     else if (report === 'monthly') {
-      this.is_monthly_report = true; 
+      this.is_monthly_report = true;
       this.is_daily_report = false;
       this.is_weekly_report = false;
       this.is_annual_report = false;

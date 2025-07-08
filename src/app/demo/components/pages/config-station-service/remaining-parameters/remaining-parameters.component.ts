@@ -33,14 +33,14 @@ export class RemainingParametersComponent {
 
     this.user_details = this.authService.getUserData();
     this.getRemainingParameters();
-    console.log("user remaining parameters: ", this.user_details);
+
   }
 
 
   getRemainingParameters(){
     this.remainingParametersService.getRemainingParameters(this?.user_details?.service_station_id).subscribe((res)=>{
       if(res.status == true){
-        //console.log("Remaining parameter: ", res);
+        //;
         this.remainingParameters = res.data;
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Paramètres chargés', life: 3000 });
       }else{
@@ -89,10 +89,10 @@ export class RemainingParametersComponent {
     return Utility.toLocalDateTime(date1);
   }
 
-  
+
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 }

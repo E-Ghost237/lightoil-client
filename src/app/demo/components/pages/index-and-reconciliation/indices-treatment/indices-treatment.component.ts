@@ -37,7 +37,7 @@ export class IndicesTreatmentComponent {
   selectedQuartWorking:any=null;
   listQuartWorkings:any[]=[];
 
-  toggleDialogBox = false; 
+  toggleDialogBox = false;
   activeExport = true;
 
   user_details:any;
@@ -64,7 +64,7 @@ export class IndicesTreatmentComponent {
   ngOnInit(){
     this.user_details = this.authService.getUserData();
     this.getServiceStation();
-    console.log("user data is: ", this.user_details);
+    ;
     this.getListProduct();
     this.getListPumps();
     this.getListQaurtByStationId();
@@ -73,7 +73,7 @@ export class IndicesTreatmentComponent {
 
   backToDshboard(){
     this.router.navigate(['/pages/dashboard']);
-    //console.log(this.listCuve);
+    //(this.listCuve);
   }
 
   generateIndexDataPdf(){
@@ -82,7 +82,7 @@ export class IndicesTreatmentComponent {
 
   getServiceStation(){
     this.stationService.getServiceStation(this.user_details.service_station_id).subscribe((res)=>{
-      console.log("station details pump index: ", res);
+      ;
       this.station = res;
     });
   }
@@ -92,18 +92,18 @@ export class IndicesTreatmentComponent {
   }
 
   onDropDownPumpChange(event:any){
-    console.log("show event pump: ", event.value);
+    ;
     this.getPeriodIndexByPumpId();
     this.getListGuns();
   }
 
   onDropDownGunChange(event: any){
-    console.log("show event gun: ", event.value);
+    ;
     this.getPeriodIndex();
   }
 
   onDropDownQuartWorkingChange(event: any){
-    console.log("show event: ", event.value);
+    ;
     this.getPeriodIndex();
   }
 
@@ -121,22 +121,22 @@ export class IndicesTreatmentComponent {
                         (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
           };
           this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-          //console.log("usefullData: ",usefullData);
+          //;
 
           this.indexService.getListIndicesByPumpId(usefullData).subscribe((res)=>{
               this.listIndices = res;
-              //console.log("res indices: ", res);
+              //;
               if(this.listIndices?.length > 0){
                 this.sendListIndicesByInteractionMsg(this.listIndices);
                 this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
               }else{
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              console.log("res day indices: ",res);
+              ;
           });
       }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
           usefullData = {
@@ -151,22 +151,22 @@ export class IndicesTreatmentComponent {
                         (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
           };
           this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-          //console.log("usefullData: ",usefullData);
+          //;
 
           this.indexService.getListIndicesByPumpId(usefullData).subscribe((res)=>{
               this.listIndices = res;
-              console.log("je lance la echerche pump id");
+              ("je lance la echerche pump id");
               if(this.listIndices?.length > 0){
                 this.sendListIndicesByInteractionMsg(this.listIndices);
                 this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
               }else{
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              console.log("res period indices pump: ",res);
+              ;
           });
       }else{
           this.listIndices=[];
@@ -193,22 +193,22 @@ export class IndicesTreatmentComponent {
                         (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
           };
           this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-          //console.log("usefullData: ",usefullData);
+          //;
 
           this.indexService.getListIndicesByPeriodAndGunIdAndQuartId(usefullData).subscribe((res)=>{
               this.listIndices = res;
-              //console.log("res indices: ", res);
+              //;
               if(this.listIndices?.length > 0){
                 this.sendListIndicesByInteractionMsg(this.listIndices);
                 this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
               }else{
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              console.log("res day indices: ",res);
+              ;
           });
       }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
           usefullData = {
@@ -223,22 +223,22 @@ export class IndicesTreatmentComponent {
                         (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
           };
           this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-          //console.log("usefullData: ",usefullData);
+          //;
 
           this.indexService.getListIndicesByPeriodAndGunIdAndQuartId(usefullData).subscribe((res)=>{
               this.listIndices = res;
-              //console.log("res indices: ", res);
+              //;
               if(this.listIndices?.length > 0){
                 this.sendListIndicesByInteractionMsg(this.listIndices);
                 this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
               }else{
-                this.messageService.add({ 
-                  severity: 'error', 
-                  summary: "Informations", 
-                  detail: "Aucune données disponible dans la période" 
+                this.messageService.add({
+                  severity: 'error',
+                  summary: "Informations",
+                  detail: "Aucune données disponible dans la période"
                 });
               }
-              console.log("res period indices: ",res);
+              ;
           });
       }else{
           this.listIndices=[];
@@ -254,22 +254,22 @@ export class IndicesTreatmentComponent {
                       (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
         };
         this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-        //console.log("usefullData: ",usefullData);
+        //;
 
         this.indexService.getListIndicesByPeriodAndGunId(usefullData).subscribe((res)=>{
           this.listIndices = res;
-          //console.log("res indices: ", res);
+          //;
           if(this.listIndices?.length > 0){
             this.sendListIndicesByInteractionMsg(this.listIndices);
             this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
           }else{
-            this.messageService.add({ 
-              severity: 'error', 
-              summary: "Informations", 
-              detail: "Aucune données disponible dans la période" 
+            this.messageService.add({
+              severity: 'error',
+              summary: "Informations",
+              detail: "Aucune données disponible dans la période"
             });
           }
-          console.log("res day indices: ",res);
+          ;
         });
       }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
         usefullData = {
@@ -284,22 +284,22 @@ export class IndicesTreatmentComponent {
                       (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
         };
         this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-        //console.log("usefullData: ",usefullData);
+        //;
 
         this.indexService.getListIndicesByPeriodAndGunId(usefullData).subscribe((res)=>{
             this.listIndices = res;
-            //console.log("res indices: ", res);
+            //;
             if(this.listIndices?.length > 0){
               this.sendListIndicesByInteractionMsg(this.listIndices);
               this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
             }else{
-              this.messageService.add({ 
-                severity: 'error', 
-                summary: "Informations", 
-                detail: "Aucune données disponible dans la période" 
+              this.messageService.add({
+                severity: 'error',
+                summary: "Informations",
+                detail: "Aucune données disponible dans la période"
               });
             }
-            console.log("res period indices: ",res);
+            ;
         });
       }else{
         this.listIndices=[];
@@ -315,22 +315,22 @@ export class IndicesTreatmentComponent {
                       (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
         };
         this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-        //console.log("usefullData: ",usefullData);
+        //;
 
         this.indexService.getListIndicesByPeriodAndQuartId(usefullData).subscribe((res)=>{
           this.listIndices = res;
-          //console.log("res indices: ", res);
+          //;
           if(this.listIndices?.length > 0){
             this.sendListIndicesByInteractionMsg(this.listIndices);
             this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
           }else{
-            this.messageService.add({ 
-              severity: 'error', 
-              summary: "Informations", 
-              detail: "Aucune données disponible dans la période" 
+            this.messageService.add({
+              severity: 'error',
+              summary: "Informations",
+              detail: "Aucune données disponible dans la période"
             });
           }
-          console.log("res day indices: ",res);
+          ;
         });
       }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
         usefullData = {
@@ -345,22 +345,22 @@ export class IndicesTreatmentComponent {
                       (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
         };
         this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-        //console.log("usefullData: ",usefullData);
+        //;
 
         this.indexService.getListIndicesByPeriodAndQuartId(usefullData).subscribe((res)=>{
           this.listIndices = res;
-          //console.log("res indices: ", res);
+          //;
           if(this.listIndices?.length > 0){
             this.sendListIndicesByInteractionMsg(this.listIndices);
             this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
           }else{
-            this.messageService.add({ 
-              severity: 'error', 
-              summary: "Informations", 
-              detail: "Aucune données disponible dans la période" 
+            this.messageService.add({
+              severity: 'error',
+              summary: "Informations",
+              detail: "Aucune données disponible dans la période"
             });
           }
-          console.log("res period indices: ",res);
+          ;
         });
       }else{
         this.listIndices=[];
@@ -376,22 +376,22 @@ export class IndicesTreatmentComponent {
                       (this.rangeDates[0].getDate() <= 9 ? '0'+this.rangeDates[0].getDate() : this.rangeDates[0].getDate())
         };
         this.period = "Date : "+Utility.toLocalDate(this.rangeDates[0].toDateString());
-        //console.log("usefullData: ",usefullData);
+        //;
 
         this.indexService.getListIndicesByPeriod(usefullData).subscribe((res)=>{
           this.listIndices = res;
-          //console.log("res indices: ", res);
+          //;
           if(this.listIndices?.length > 0){
             this.sendListIndicesByInteractionMsg(this.listIndices);
             this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
           }else{
-            this.messageService.add({ 
-              severity: 'error', 
-              summary: "Informations", 
-              detail: "Aucune données disponible dans la période" 
+            this.messageService.add({
+              severity: 'error',
+              summary: "Informations",
+              detail: "Aucune données disponible dans la période"
             });
           }
-          console.log("res day indices: ",res);
+          ;
         });
       }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
         usefullData = {
@@ -406,21 +406,21 @@ export class IndicesTreatmentComponent {
                       (this.rangeDates[1].getDate() <= 9 ? '0'+this.rangeDates[1].getDate() : this.rangeDates[1].getDate())
         };
         this.period = "Periode du "+Utility.toLocalDate(this.rangeDates[0].toDateString())+" au "+Utility.toLocalDate(this.rangeDates[1].toDateString());
-        //console.log("usefullData: ",usefullData);
+        //;
         this.indexService.getListIndicesByPeriod(usefullData).subscribe((res)=>{
           this.listIndices = res;
-          //console.log("res indices: ", res);
+          //;
           if(this.listIndices?.length > 0){
             this.sendListIndicesByInteractionMsg(this.listIndices);
             this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
           }else{
-            this.messageService.add({ 
-              severity: 'error', 
-              summary: "Informations", 
-              detail: "Aucune données disponible dans la période" 
+            this.messageService.add({
+              severity: 'error',
+              summary: "Informations",
+              detail: "Aucune données disponible dans la période"
             });
           }
-          console.log("res period indices: ",res);
+          ;
         });
       }else{
         this.listIndices=[];
@@ -437,7 +437,7 @@ export class IndicesTreatmentComponent {
   }
 
   addNewIndex(){
-    console.log("j'ajoute un index");
+    ("j'ajoute un index");
     this.interactionService.addNewDataToShare({
       from: "pump-index",
       for: "custom-table-index",
@@ -448,15 +448,15 @@ export class IndicesTreatmentComponent {
 
   getListQaurtByStationId(){
     this.quartService.getListQuarts(this.user_details.service_station_id).subscribe((res)=>{
-      console.log("list quart: ", res);
+      ;
       if(res.length > 0){
         this.listQuartWorkings = res;
       }else{
         this.messageService.add(
-          { 
-            severity: 'error', 
-            summary: "Informations", 
-            detail: "Aucun quart de travail trouvé" 
+          {
+            severity: 'error',
+            summary: "Informations",
+            detail: "Aucun quart de travail trouvé"
           }
         );
       }
@@ -470,14 +470,14 @@ export class IndicesTreatmentComponent {
         res?.listStationProducts.forEach((stationProduct: any) => {
           listPro.push(stationProduct.product);
         });
-        console.log("list product:", listPro); 
+        ;
         this.listProducts = listPro;
       }else{
         this.messageService.add(
-          { 
-            severity: 'error', 
-            summary: "Informations", 
-            detail: "Aucun produit disponible" 
+          {
+            severity: 'error',
+            summary: "Informations",
+            detail: "Aucun produit disponible"
           }
         );
       }
@@ -486,19 +486,19 @@ export class IndicesTreatmentComponent {
 
   getListPumps(){
     let listPumps:any[]=[];
-    //console.log("station id : ", this.user_details.service_station_id);
+    //;
     this.pumpService.getListPumpsByStationId(this.user_details.service_station_id).subscribe((res)=>{
       if(res.status && res?.data.length > 0){
         this.listPumps = res?.data;
         //this.selectedPump = this.listPumps[0];
         this.getListGuns();
-        console.log("list pump:", listPumps); 
+        ;
       }else{
         this.messageService.add(
-          { 
-            severity: 'error', 
-            summary: "Informations", 
-            detail: "Aucune pompe enregistrée" 
+          {
+            severity: 'error',
+            summary: "Informations",
+            detail: "Aucune pompe enregistrée"
           }
         );
       }
@@ -508,26 +508,26 @@ export class IndicesTreatmentComponent {
   getListGuns(){
     if(this.selectedPump && this.selectedPump != null){
       this.gunService.getListGunsByPumpId(this.selectedPump.id).subscribe((res)=>{
-        console.log("liste des pistolets: ", res);
+        ;
         if(res.status && res?.data.length > 0){
           this.listGuns = res?.data;
           //this.selectedGun = this.listGuns[0];
-          console.log("list gun:", this.listGuns); 
+          ;
           this.messageService.add(
-            { 
-              severity: 'success', 
-              summary: "Informations", 
-              detail: "Pistolet disponible." 
+            {
+              severity: 'success',
+              summary: "Informations",
+              detail: "Pistolet disponible."
             }
           );
         }else{
           this.listGuns = [];
           //this.selectedGun = null;
           this.messageService.add(
-            { 
-              severity: 'error', 
-              summary: "Informations", 
-              detail: "Aucun pistolet disponible pour cette pompe." 
+            {
+              severity: 'error',
+              summary: "Informations",
+              detail: "Aucun pistolet disponible pour cette pompe."
             }
           );
         }
@@ -573,11 +573,11 @@ export class IndicesTreatmentComponent {
     action: 'recharge-list-indices-in-table' */
     this.interactionService.dataToShare$.subscribe((msg)=>{
       if(msg.from == "table-index" &&
-      msg.for == "pump-index" && 
+      msg.for == "pump-index" &&
       msg.action == "recharge-list-indices-in-table"
       ){
         this.getPeriodIndex();
       }
-    });  
+    });
   }
 }

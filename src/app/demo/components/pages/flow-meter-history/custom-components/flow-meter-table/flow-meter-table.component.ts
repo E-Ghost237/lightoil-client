@@ -24,12 +24,12 @@ export class FlowMeterTableComponent {
   }
 
   ngOnInit(){
-      console.log("");
+      ("");
   }
 
   getListDayRecord(){
       if(this.flowMeterDetailsData?.listLastRecord?.length > 0){
-          //console.log("list last record: ", this.tankDetailsData.listLastRecord);
+          //;
           return this.flowMeterDetailsData.listLastRecord;
       }
       return [];
@@ -46,7 +46,7 @@ export class FlowMeterTableComponent {
     return Utility.toLocalDateTime(date1);
   }
 
-  
+
   getRoundValue(num:number){
       return Math.round(num*100)/100;
   }

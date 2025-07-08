@@ -27,7 +27,7 @@ interface LayoutState {
 })
 export class AdminLayoutService {
     position: string = 'center';
-    
+
     _config: AdminConfig = {
         ripple: false,
         inputStyle: 'outlined',
@@ -57,7 +57,7 @@ export class AdminLayoutService {
     overlayOpen$ = this.overlayOpen.asObservable();
 
     constructor(
-        private confirmationService: ConfirmationService, 
+        private confirmationService: ConfirmationService,
         private messageService: MessageService,
         private authService: AuthService,
         public router: Router
@@ -194,7 +194,7 @@ export class AdminLayoutService {
     logout() {
       this.authService.logout().subscribe(
         (response: any) => {
-        //   console.log("Logout response: ", response);
+        //   ;
           if (response.success === true) {
             this.clearCurrentUser();
             this.messageService.add({severity: 'success', summary: 'Success', detail: response.message, life: 3000});
@@ -206,12 +206,12 @@ export class AdminLayoutService {
           }
         },
         (error) => {
-          console.log("Logout error: ", error);
+
           this.messageService.add({severity: 'error', summary: 'Error', detail: error.message, life: 3000});
         }
       );
     }
-    
+
     // Delete athenticated user's data to the Local Storage
     private clearCurrentUser(): void {
       localStorage.removeItem('user_details');

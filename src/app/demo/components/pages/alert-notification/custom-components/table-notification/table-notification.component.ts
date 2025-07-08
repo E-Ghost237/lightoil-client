@@ -22,7 +22,7 @@ export class TableNotificationComponent {
   }
 
   ngOnInit(){
-      console.log("");
+      ("");
   }
 
   getToLocalDateTime(date1:string){

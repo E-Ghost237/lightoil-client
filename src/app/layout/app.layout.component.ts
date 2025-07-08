@@ -28,25 +28,25 @@ export class AppLayoutComponent implements OnDestroy {
     @ViewChild(AppTopBarComponent) appTopbar!: AppTopBarComponent;
 
     constructor(
-        public layoutService: LayoutService, 
-        public renderer: Renderer2, 
+        public layoutService: LayoutService,
+        public renderer: Renderer2,
         public router: Router,
         private authService: AuthService,
         private stationService: StationService
-        
+
     ) {
         this.user_details = this.authService.getUserData();
         this.station = this.stationService.getServiceStation(this?.user_details?.service_station_id).subscribe((res)=>{
-            console.log("station layout app: ",res);
+
             this.back_image = res.back_image_link;
-            console.log("station layout app: ",this.back_image);
+
         });
         this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
             if (!this.menuOutsideClickListener) {
                 this.menuOutsideClickListener = this.renderer.listen('document', 'click', event => {
-                    const isOutsideClicked = !(this.appSidebar.el.nativeElement.isSameNode(event.target) || this.appSidebar.el.nativeElement.contains(event.target) 
+                    const isOutsideClicked = !(this.appSidebar.el.nativeElement.isSameNode(event.target) || this.appSidebar.el.nativeElement.contains(event.target)
                         || this.appTopbar.menuButton.nativeElement.isSameNode(event.target) || this.appTopbar.menuButton.nativeElement.contains(event.target));
-                    
+
                     if (isOutsideClicked) {
                         this.hideMenu();
                     }

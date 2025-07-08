@@ -30,8 +30,8 @@ export class CustomTableQuartComponent {
   selectedOpenedHour!:string;
 
   constructor(
-    private quartService: QuartService, 
-    private messageService: MessageService, 
+    private quartService: QuartService,
+    private messageService: MessageService,
     private confirmationService: ConfirmationService
     ) {}
 
@@ -44,7 +44,7 @@ export class CustomTableQuartComponent {
 
   initWorkingData(){
     this.listHours=[
-      
+
       "00:00:00"
       ,
       "01:00:00"
@@ -92,7 +92,7 @@ export class CustomTableQuartComponent {
        "22:00:00"
       ,
        "23:00:00"
-      
+
     ];
     this.selectedOpenedHour = this.listHours[0];
     this.selectedClosedHour = this.listHours[5];
@@ -100,11 +100,11 @@ export class CustomTableQuartComponent {
 
   getListQuartWorking(){
     this.quartService.getListQuarts(this.stationId).subscribe((res)=>{
-      //console.log("Liste des quarts: ", res);
+      //;
       this.quarts = res;
       /* if(this.quarts.length > 0){
         this.quarts.forEach((quart)=>{
-          console.log("tab quart: ",this.getHourQuartFromQuartString(quart));
+          ("tab quart: ",this.getHourQuartFromQuartString(quart));
         });
       } */
     });
@@ -180,7 +180,7 @@ export class CustomTableQuartComponent {
 
   saveQuart() {
     this.submitted = true;
-    console.log("edit quart: ",this.quart);
+
     if (this.quart.time_start?.trim()) {
       if (this.quart.id) {
         this.quartService.updateQuart(this.quart).subscribe((res)=>{
@@ -200,7 +200,7 @@ export class CustomTableQuartComponent {
             this.messageService.add({ severity: 'error', summary: 'Echec', detail: 'Quart working not Created', life: 3000 });
           }
         });
-        
+
       }
       //this.getListQuartWorking();
       //this.quarts = [...this.quarts];

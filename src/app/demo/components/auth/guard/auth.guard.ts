@@ -16,10 +16,9 @@ export const authGuard: CanActivateFn = (route, state) => {
         return false;
     }
 
-    // console.log("user from cookie: ",cookies.get('User'));
-    // console.log("user from cookie: ",cookies.get('token'));
+    // ("user from cookie: ",cookies.get('User'));
+    // ("user from cookie: ",cookies.get('token'));
 
-    console.log("user_details from local storage: ", user_details);
-    console.log("token from local storage: ", token);
+
     return true;
 };

@@ -115,7 +115,7 @@ export class DashboardComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleType error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -129,7 +129,7 @@ export class DashboardComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleOfCompany error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -144,12 +144,12 @@ export class DashboardComponent implements OnInit {
         this.companiesService.getStockOfProductsOfPointsOfSaleOfCompany(this.company_id, daily_date).subscribe(
           (response) => {
             if (response.success == true) {
-              // console.log("getStockOfProductsOfPointsOfSaleOfCompany: ", response.data);
+              // ;
               this.stock_of_products = response.data;
             }
           },
           (err) => {
-            // console.log("getStockOfProductsOfPointsOfCompany error: ", err.error);
+            // ;
             this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
           }
         );
@@ -157,12 +157,12 @@ export class DashboardComponent implements OnInit {
         this.companiesService.getWeeklyDumpingPerProductOfPointsOfSale(this.company_id, this.selected_sale_point_type.id, daily_date).subscribe(
           (response) => {
             if (response.success == true) {
-              // console.log("getWeeklyDumpingPerProductOfPointsOfSale: ", response.data);
+              // ;
               this.weekly_dumping_of_products = response.data;
             }
           },
           (err) => {
-            // console.log("getWeeklyDumpingPerProductOfPointsOfSale error: ", err.error);
+            // ;
             this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
           }
         )
@@ -171,12 +171,12 @@ export class DashboardComponent implements OnInit {
           this.companiesService.getDailySalesOfPointsOfSaleOfCompany(this.company_id, this.sale_point_ids, this.selected_sale_point_type.id, daily_date).subscribe(
             (response) => {
               if (response.success == true) {
-                console.log("getDailySalesOfPointsOfSaleOfCompany: ", response.data);
+
                 this.daily_sales_of_sale_points_of_company = response.data;
               }
             },
             (err) => {
-              // console.log("getDailySalesOfPointsOfSaleOfCompany error: ", err.error);
+              // ;
               this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
             }
           );
@@ -184,12 +184,12 @@ export class DashboardComponent implements OnInit {
           this.companiesService.getLastTenDaysSalesOfPointsOfSaleOfCompany(this.company_id, this.sale_point_ids, this.selected_sale_point_type.id, daily_date).subscribe(
             (response) => {
               if (response.success == true) {
-                // console.log("getLastTenDaysSalesOfPointsOfSaleOfCompany: ", response.data);
+                // ;
                 this.last_ten_days_sales_of_sale_points_of_company = response.data;
               }
             },
             (err) => {
-              // console.log("getLastTenDaysSalesOfPointsOfSaleOfCompany error: ", err.error);
+              // ;
               this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
             }
           )
@@ -210,19 +210,19 @@ export class DashboardComponent implements OnInit {
     if (this.selected_sale_points.length === 0 || this.selected_sale_points.length === null || this.selected_sale_points.length === undefined) {
       this.sale_point_ids = undefined;
       this.select_all_sale_points = false;
-      // console.log('No sale points selected.', this.selected_sale_points);
+      // ('No sale points selected.', this.selected_sale_points);
     } else if (this.selected_sale_points.length === this.sale_points_matching_type.length) {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = true;
       this.loadData(this.getGoodDate(this.daily_date));
-      // console.log('All sale points selected selected.', this.selected_sale_points);
-      // console.log('Sale points IDs.', this.sale_point_ids);
+      // ('All sale points selected selected.', this.selected_sale_points);
+      // ('Sale points IDs.', this.sale_point_ids);
     } else {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = false;
       this.loadData(this.getGoodDate(this.daily_date));
-      // console.log('Some sale points selected.', this.selected_sale_points);
-      // console.log('Sale points IDs.', this.sale_point_ids);
+      // ('Some sale points selected.', this.selected_sale_points);
+      // ('Sale points IDs.', this.sale_point_ids);
     }
   }
 
@@ -234,13 +234,13 @@ export class DashboardComponent implements OnInit {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = event.checked;
       this.loadData(this.getGoodDate(this.daily_date));
-      // console.log('All sale points selected selected.', this.selected_sale_points);
-      // console.log('Sale points IDs.', this.sale_point_ids);
+      // ('All sale points selected selected.', this.selected_sale_points);
+      // ('Sale points IDs.', this.sale_point_ids);
     } else {
       this.selected_sale_points = undefined;
       this.sale_point_ids = undefined;
       this.select_all_sale_points = event.checked;
-      // console.log('No sale points selected.', this.selected_sale_points);
+      // ('No sale points selected.', this.selected_sale_points);
     }
   }
 
@@ -304,7 +304,7 @@ export class DashboardComponent implements OnInit {
         },
         (err) => {
           this.loading = false;
-          console.log("Update password error: ", err.error);
+
           this.messageService.add({ severity: 'error', summary: 'Update password failed', detail: err.error.message, life: 8000 });
         }
       );

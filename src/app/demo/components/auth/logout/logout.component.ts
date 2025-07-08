@@ -16,8 +16,8 @@ export class LogoutComponent {
   hideSecondBlock: boolean = true;
 
   constructor(
-    private messageService: MessageService, 
-    public layoutService: AdminLayoutService, 
+    private messageService: MessageService,
+    public layoutService: AdminLayoutService,
     private authService: AuthService,
     public router: Router,
   ) { }
@@ -29,15 +29,15 @@ export class LogoutComponent {
       this.loading = false;
       this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: 'Someting wrong. Please try again later.', life: 5000 });
     } else {
-      // setTimeout(() => { 
+      // setTimeout(() => {
       //   this.messageService.add({ key: 'tst', severity: 'info', summary: 'Info', detail: 'Logout in progress. Please wait a moment.', life: 5000 });
       // }, 10000);
     }
-    console.log("All Devices Checked: ", this.checked);
-    
+
+
     this.authService.logoutFormAllDevices(this.checked).subscribe(
       (response: any) => {
-        // console.log("Logout response: ", response);
+        // ;
         if (response.success === true) {
           this.loading = false;
           this.hideFirstBlock = true;
@@ -49,12 +49,12 @@ export class LogoutComponent {
       },
       (err) => {
         this.loading = false;
-        console.log("Logout error: ", err.error);
+
         this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message, life: 8000 });
       }
     );
   }
-  
+
   // Delete athenticated user's data to the Local Storage
   private clearCurrentUser(): void {
     localStorage.removeItem('user_details');

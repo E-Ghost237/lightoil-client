@@ -33,11 +33,11 @@ export class CustomFmhGraphComponent {
   }
 
   ngOnInit(){
-      this.initData(this.listRecord?.speed, 
+      this.initData(this.listRecord?.speed,
         this.listRecord?.listDate);
       this.getInteractionMsg();
 
-    
+
   }
 
   computeTheListDateToRightGmt(listDate:any[]){
@@ -65,7 +65,7 @@ export class CustomFmhGraphComponent {
             borderColor: documentStyle.getPropertyValue('--blue-800'),
             tension: 0.4
         }
-        
+
       ]
     };
 
@@ -102,8 +102,8 @@ export class CustomFmhGraphComponent {
     };
 
     this.graph1?.refresh();
-    
-    
+
+
   }
 
   getInteractionMsg(){
@@ -114,15 +114,15 @@ export class CustomFmhGraphComponent {
     selectedTank: this.selectedTank,
     period: this.period */
     this.interactionService.dataToShare$.subscribe((msg)=>{
-      //console.log("j'ai recu le msg de graphe: ", msg);
+      //;
       if(msg.from == "fmh-graph" &&
         msg.for == "custom-fmh-graph" &&
         msg.action == "reinitialize the graph"){
-          console.log("j'ai recu le msg de graphe");
+          ("j'ai recu le msg de graphe");
           this.listRecord = msg.listRecord;
           this.flowMeter = msg.selectedflowMeter;
           this.period = msg.period;
-          this.initData(this.listRecord?.speed, 
+          this.initData(this.listRecord?.speed,
             this.listRecord?.listDate);
       }else if(msg.from == "fmh-graph" &&
               msg.for == "custom-fmh-graph" &&
@@ -131,7 +131,7 @@ export class CustomFmhGraphComponent {
         for: "custom-hbt-graph",
         action: "empty the graph" */
         this.listRecord = {};
-        console.log("je vide le graphe");
+        ("je vide le graphe");
       }else if(msg.from == "fmh-graph" &&
               msg.for == "custom-fmh-graph" &&
               msg.action == "export the graph"){
@@ -142,7 +142,7 @@ export class CustomFmhGraphComponent {
         a.href = this.graph1.getBase64Image();
         a.download = 'Graphe '+this.flowMeter?.sensor_reference+'.png';
         a.click();
-        console.log("j'exporte les graphes: ");
+        ("j'exporte les graphes: ");
       }
     });
   }

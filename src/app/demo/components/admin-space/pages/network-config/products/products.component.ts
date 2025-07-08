@@ -43,7 +43,7 @@ export class ProductsComponent implements OnInit {
     private messageService: MessageService,
     private productsService: ProductsService,
     private pointsOfSaleService: PointsOfSaleService,
-    private companiesService: CompaniesService, 
+    private companiesService: CompaniesService,
     private localStorageService: LocalStorageService
   ) {
     this.updatePriceOfProductForm = new FormGroup({
@@ -66,7 +66,7 @@ export class ProductsComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("getAllPointsOfSaleType error: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -78,7 +78,7 @@ export class ProductsComponent implements OnInit {
           }
         },
         (err) => {
-          // console.log("An error occure while getting all products: ", err.error);
+          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message, life: 3000 });
         }
       );
@@ -92,14 +92,14 @@ export class ProductsComponent implements OnInit {
       this.companiesService.getAllProductsOfEachPointOfSaleOfCompany(this.company_id).subscribe(
         (response) => {
           if (response.success == true) {
-            this.points_of_sale = response.data.map(point_of_sale => { 
+            this.points_of_sale = response.data.map(point_of_sale => {
               return {
                 id: point_of_sale.id,
                 name: point_of_sale.name,
                 town: point_of_sale.town
               }
             });
-            // console.log("points_of_sale: ", this.points_of_sale);
+            // ;
 
             this.products_of_points_of_sale = response.data.map(point_of_sale => {
               return point_of_sale.products.map(product => ({
@@ -112,22 +112,22 @@ export class ProductsComponent implements OnInit {
                 point_of_sale_type: point_of_sale.type.name
               }));
             }).flat();
-            // console.log("products_of_points_of_sale: ", this.products_of_points_of_sale);
-          
+            // ;
+
             this.loading_logo = false;
             this.loading_icon = false;
             this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
           }
         },
         (err) => {
-          console.log("An error occure while loading all products of each point of sale of company: ", err.error);
+
           this.loading_logo = false;
           this.loading_icon = false;
           this.messageService.add(
-            { 
-              key: 'tst', severity: 'error', summary: 'Error Message', 
-              detail: 'An error occure while loading all products of each point of sale of company. Please try again later.', 
-              life: 10000 
+            {
+              key: 'tst', severity: 'error', summary: 'Error Message',
+              detail: 'An error occure while loading all products of each point of sale of company. Please try again later.',
+              life: 10000
             }
           );
         }
@@ -153,7 +153,7 @@ export class ProductsComponent implements OnInit {
   }
 
   onPointsOfSaleChange(selected_option: any[]): string[] {
-    // console.log("selected_points_of_sale: ", selected_option);
+    // ;
     if (!selected_option || selected_option.length === 0) {
       this.selected_points_of_sale = [];
       return [];
@@ -177,7 +177,7 @@ export class ProductsComponent implements OnInit {
   }
 
   onPointsOfSaleTypesChange(selected_options: any[]): string[] {
-    // console.log("selected_point_of_sale_types: ", selected_options);
+    // ;
     if (!selected_options || selected_options.length === 0) {
       this.selected_point_of_sale_types = [];
       return [];
@@ -201,7 +201,7 @@ export class ProductsComponent implements OnInit {
   }
 
   onProductsChange(selected_options: any[]): string[] {
-    // console.log("selected_products: ", selected_options);
+    // ;
     if (!selected_options || selected_options.length === 0) {
       this.selected_products = [];
       return [];
@@ -231,7 +231,7 @@ export class ProductsComponent implements OnInit {
   hideModal() {
     this.show_modal = false;
   }
-  
+
   editPriceOfProduct(product: any) {
     this.selected_product = product;
     this.show_modal = true;
@@ -241,7 +241,7 @@ export class ProductsComponent implements OnInit {
     if (this.updatePriceOfProductForm.valid) {
       this.loading_icon = true;
       this.selected_product.price = this.updatePriceOfProductForm.get('product_price')?.value;
-  
+
       this.productsService.updatePriceOfProductOfPointOfSale(this.selected_product.point_of_sale_id, this.selected_product.id, this.selected_product.price).subscribe(
         (response) => {
           if (response.success == true) {
@@ -252,13 +252,13 @@ export class ProductsComponent implements OnInit {
           }
         },
         (err) => {
-          console.log("An error occure while updating price of product of point of sale: ", err.error);
+
           this.loading_icon = false;
           this.messageService.add(
-            { 
-              key: 'tst', severity: 'error', summary: 'Error Message', 
-              detail: 'An error occure while updating price of product of point of sale. Please try again later.', 
-              life: 10000 
+            {
+              key: 'tst', severity: 'error', summary: 'Error Message',
+              detail: 'An error occure while updating price of product of point of sale. Please try again later.',
+              life: 10000
             }
           );
         }

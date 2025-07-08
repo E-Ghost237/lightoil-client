@@ -26,7 +26,7 @@ export class NotificationComponent {
 
 
     ngOnInit(): void {
-        console.log("noti data: ", this.notiData.percent);
+
     }
 
     getDateTimeToLocale(date1:string){

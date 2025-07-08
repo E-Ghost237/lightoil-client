@@ -52,7 +52,7 @@ export class HbtDumpingsComponent implements OnInit {
     ngOnInit() {
         this.maxDate = new Date();
         this.user_details = this.authService.getUserData();
-        console.log("station id: ", this.user_details?.service_station_id);
+
         this.getListQuartWorking();
         this.getListTanks();
     }
@@ -65,33 +65,33 @@ export class HbtDumpingsComponent implements OnInit {
                 this.selectedTankDep = this.listTanks[0];
                 this.selectedTankRap = this.listTanks[0];
             }
-            //console.log("list tank: ", this.listTanks);
+            //;
         });
-        //console.log("user is: ", this.user);
+        //;
     }
 
     getListQuartWorking(){
         this.quartService.getListQuarts(this.user_details?.service_station_id).subscribe((res)=>{
             this.listQuarter = res;
-            //console.log("list quarts: ", res);
+            //;
         });
     }
 
     onDropDownChangeQuart(event:any){
         this.getOutputsOnPeriod();
-        console.log("show event: ", this.selectedQuart);
+
         //this.getPeriodRecords();
     }
 
     onDropDownChangeTank(event:any){
         this.getOutputsOnPeriod();
-        console.log("show event: ", this.selectedTank);
+
         //this.getPeriodRecords();
     }
 
     onDateSelect(event:any){
         this.getOutputsOnPeriod();
-        console.log("show event: ", this.rangeDates);
+
         //this.getPeriodRecords();
     }
 
@@ -128,16 +128,15 @@ export class HbtDumpingsComponent implements OnInit {
                 this.recordService.getOutPutsOnPeriod(usefullData).subscribe((res)=>{
                     this.dataOutputs = res;
                     if(this.dataOutputs?.periodRecord?.length <= 0){
-                        this.messageService.add({ 
-                                severity: 'error', 
-                                summary: "Informations", 
-                                detail: "Aucune sortie dans la période" 
+                        this.messageService.add({
+                                severity: 'error',
+                                summary: "Informations",
+                                detail: "Aucune sortie dans la période"
                             });
                     }else{
-                        this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" }); 
+                        this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" });
                     }
-                    console.log("usefull data js: ", usefullData);
-                    console.log("usefull data: ", res);
+
                 });
             }else if(this.rangeDates?.length == 2 && this.rangeDates[1] != null){
                 if (this.selectedQuart) {
@@ -169,16 +168,15 @@ export class HbtDumpingsComponent implements OnInit {
                 this.recordService.getOutPutsOnPeriod(usefullData).subscribe((res)=>{
                     this.dataOutputs = res;
                     if(this.dataOutputs?.periodRecord?.length <= 0){
-                        this.messageService.add({ 
-                                severity: 'error', 
-                                summary: "Informations", 
-                                detail: "Aucune sortie dans la période" 
+                        this.messageService.add({
+                                severity: 'error',
+                                summary: "Informations",
+                                detail: "Aucune sortie dans la période"
                             });
                     }else{
-                        this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" }); 
+                        this.messageService.add({ severity: 'info', summary: "Informations", detail: "Sorties chargées" });
                     }
-                    console.log("usefull data js: ", usefullData);
-                    console.log("usefull data: ", res);
+
                 });
             }else{
                 this.dataOutputs = {};
@@ -202,14 +200,12 @@ export class HbtDumpingsComponent implements OnInit {
 
     onDateSelectDep(event:any){
         this.getInputsOnPeriod();
-        console.log("show event dep: ", this.rangeDatesDep);
-        //this.getPeriodRecords();
+
     }
 
     onDropDownChangeTankDep(event:any){
         this.getInputsOnPeriod();
-        console.log("show event dep: ", this.selectedTankDep);
-        //this.getPeriodRecords();
+
     }
 
     getInputsOnPeriod(){
@@ -247,15 +243,15 @@ export class HbtDumpingsComponent implements OnInit {
             this.depotageService.getInputsOnPeriod(usefullData).subscribe((res)=>{
                 this.dataInputs = res;
                 if(this.dataInputs?.periodInputs?.length <= 0){
-                    this.messageService.add({ 
-                            severity: 'error', 
-                            summary: "Informations", 
-                            detail: "Aucun dépotage dans la période" 
+                    this.messageService.add({
+                            severity: 'error',
+                            summary: "Informations",
+                            detail: "Aucun dépotage dans la période"
                         });
                 }else{
-                    this.messageService.add({ severity: 'info', summary: "Informations", detail: "Depotages chargés" }); 
+                    this.messageService.add({ severity: 'info', summary: "Informations", detail: "Depotages chargés" });
                 }
-                console.log("usefull Data depotage: ", this.dataInputs);
+
 
             });
         }
@@ -273,13 +269,13 @@ export class HbtDumpingsComponent implements OnInit {
     // rapports
     onDateSelectRap(event:any){
         this.getReportOnPeriod();
-        console.log("show event rap: ", this.rangeDatesRap);
+
         //this.getPeriodRecords();
     }
 
     onDropDownChangeTankRap(event:any){
         this.getReportOnPeriod();
-        console.log("show event rap: ", this.selectedTankRap);
+
         //this.getPeriodRecords();
     }
 
@@ -318,15 +314,15 @@ export class HbtDumpingsComponent implements OnInit {
             this.recordService.getReportOnPeriod(usefullData).subscribe((res)=>{
                 this.dataReport = res;
                 if(this.dataReport?.listDayRecord?.length <= 0){
-                    this.messageService.add({ 
-                            severity: 'error', 
-                            summary: "Informations", 
-                            detail: "Aucun rapport dans la période" 
+                    this.messageService.add({
+                            severity: 'error',
+                            summary: "Informations",
+                            detail: "Aucun rapport dans la période"
                         });
                 }else{
-                    this.messageService.add({ severity: 'info', summary: "Informations", detail: "Rapports chargés" }); 
+                    this.messageService.add({ severity: 'info', summary: "Informations", detail: "Rapports chargés" });
                 }
-                console.log("usefull Data report: ", this.dataReport);
+
             });
         }
     }
@@ -340,7 +336,7 @@ export class HbtDumpingsComponent implements OnInit {
         this.pdfService.generateTankReportsPdf(usefullData);
     }
 
-    
+
 
 
 }

@@ -16,7 +16,7 @@ import { QuartService } from '../../../services/quart.service';
   providers: [MessageService, ConfirmationService],
 })
 export class TableIndexComponent {
-  
+
   @Input({ required: true, transform: booleanAttribute }) activeEditAndDeleteButton: boolean = false;
   indexDialog: boolean = false;
 
@@ -55,12 +55,12 @@ export class TableIndexComponent {
   ngOnInit(){
     this.user_details = this.authService.getUserData();
     this.stationId = this.user_details.service_station_id;
-    console.log("user data is: ", this.user_details);
+
     this.getListProduct();
     this.getListPumps();
     this.getListQuarts();
     this.getInteractionMsg();
-    
+
   }
 
   getInteractionMsg(){
@@ -70,10 +70,10 @@ export class TableIndexComponent {
       action: "toggle de index dialog box",
       data: true */
       if(msg.from == "pump-index" &&
-        msg.for == "custom-table-index" && 
+        msg.for == "custom-table-index" &&
         msg.action == "toggle de index dialog box"
       ){
-        console.log("interaction data: ", msg.data);
+
         if(this.listProducts.length > 0 && this.listPumps.length > 0){
           this.indexForDialog = {
             product :  this.listProducts[0],
@@ -91,17 +91,17 @@ export class TableIndexComponent {
         //this.indexForDialog = {};
         this.submitted = false;
       }else if(msg.from == "pump-index" &&
-        msg.for == "table-index" && 
+        msg.for == "table-index" &&
         msg.action == "charge-list-indices-in-table"){
         /* from: 'pump-index',
         for: 'table-index',
         action: 'charge-list-indices-in-table',
         data: listIndices */
-        console.log("list from interaction msg: ", msg.data);
+
         this.listIndexes = msg.data;
 
       }else if(msg.from == "pump-index" &&
-        msg.for == "table-index" && 
+        msg.for == "table-index" &&
         msg.action == "empty-list-indices-in-table"){
         /* from: 'pump-index',
         for: 'table-index',
@@ -122,32 +122,32 @@ export class TableIndexComponent {
 
   getListProduct(){
     let listPro:any[]=[];
-    //console.log("station id : ", this.user_details.service_station_id);
+    //;
     this.productService.getListStationProductsByStationId(this.user_details.service_station_id).subscribe((res)=>{
-      //console.log("la res de product est : ", res);
+      //;
       if(res.status && res?.listStationProducts.length > 0){
         res?.listStationProducts.forEach((stationProduct: any) => {
-          //console.log("stationProduct.product:", stationProduct.product); 
+          //;
           listPro.push(stationProduct.product);
         });
-        
+
         this.listProducts = listPro;
-        //console.log("list product:", this.listProducts); 
+        //;
         this.indexForDialog.product = this.listProducts[0];
         this.indexForDialog.index_start = 25;
         this.indexForDialog.index_end = 58;
-        //console.log("this.indexForDialog:", this.indexForDialog); 
+        //;
       }
     });
   }
 
   getListPumps(){
     let listPumps:any[]=[];
-    //console.log("station id : ", this.user_details.service_station_id);
+    //;
     this.pumpService.getListPumpsByStationId(this.user_details.service_station_id).subscribe((res)=>{
       if(res.status && res?.data.length > 0){
         this.listPumps = res?.data;
-        console.log("list pump:", listPumps); 
+        ;
       }
     });
   }
@@ -157,18 +157,18 @@ export class TableIndexComponent {
       this.gunService.getListGunsByPumpId(this.indexForDialog.pump.id).subscribe((res)=>{
         if(res.status && res?.data.length > 0){
           this.listGuns = res?.data;
-          console.log("list guns:", this.listGuns); 
+          ;
         }
       });
     }
-    
+
   }
 
   getListQuarts(){
     this.quartService.getListQuarts(this.user_details.service_station_id).subscribe((res)=>{
       if(res?.length > 0){
         this.listQuarts = res;
-        console.log("list quart:", this.listQuarts); 
+        ;
       }
     });
   }
@@ -197,7 +197,7 @@ export class TableIndexComponent {
       }else{
         this.indexService.getLastIndexByQuartIdGunIdStationId(
           this.stationId, this.indexForDialog.quart.id, this.indexForDialog.gun.id).subscribe((res)=>{
-            console.log("res form three id: ", res);
+            ;
             if(res.status == "success"){
               this.indexForDialog.index_start = res.data.index_end;
               this.disabledInputIndexStart = true;
@@ -206,37 +206,37 @@ export class TableIndexComponent {
             }
         });
       }
-      
+
     }
   }
 
   saveIndex(){
-    console.log("je sauvegarde l'index");
-    console.log("indexForDialog: ", this.indexForDialog);
+    ("je sauvegarde l'index");
+    ;
     this.submitted = true;
     if (this.indexForDialog.index_start >= 0 && this.indexForDialog.index_end >= this.indexForDialog.index_start) {
       if (this.indexForDialog.id) {
         this.indexForDialog.userId = this.user_details.user.id;
         // TODO save in database
-        //console.log("index modifie: ",this.indexForDialog);
+        //;
         this.indexService.editIndex(this.indexForDialog).subscribe((res)=>{
-          console.log("res modifie: ", res);
+          ;
           if(res.status == true){
             this.messageService.add(
-              { 
-                severity: 'success', 
-                summary: 'Successful', 
-                detail: 'Index modifié', 
-                life: 3000 
+              {
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Index modifié',
+                life: 3000
               });
           }else{
-            
+
             this.messageService.add(
-              { 
-                severity: 'success', 
-                summary: 'Successful', 
-                detail: 'Echec de la modification de l\'index', 
-                life: 3000 
+              {
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Echec de la modification de l\'index',
+                life: 3000
               });
           }
           this.askForRechargeListByInteractionMsg();
@@ -250,20 +250,20 @@ export class TableIndexComponent {
         this.indexService.saveIndex(this.indexForDialog).subscribe((res)=>{
           if(res.status == 'success'){
             this.messageService.add(
-              { 
-                severity: 'success', 
-                summary: 'Successful', 
-                detail: 'Index créé', 
-                life: 3000 
+              {
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Index créé',
+                life: 3000
               });
 
           }else{
             this.messageService.add(
-              { 
-                severity: 'error', 
-                summary: 'Erreur', 
-                detail: 'Echec de creation de l\'index', 
-                life: 3000 
+              {
+                severity: 'error',
+                summary: 'Erreur',
+                detail: 'Echec de creation de l\'index',
+                life: 3000
               });
           }
           this.askForRechargeListByInteractionMsg();
@@ -273,14 +273,14 @@ export class TableIndexComponent {
       this.indexDialog = false;
       this.isEdit = false;
       this.indexForDialog = {};
-      
+
     }else{
       this.messageService.add(
-        { 
-          severity: 'error', 
-          summary: 'Erreur', 
-          detail: 'Verifiez la valeur des index', 
-          life: 3000 
+        {
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Verifiez la valeur des index',
+          life: 3000
         });
     }
   }
@@ -291,16 +291,16 @@ export class TableIndexComponent {
     this.indexForDialog.gun = this.indexForDialog.gun_pump;
     this.indexForDialog.quart = this.indexForDialog.quart_working;
     this.indexForDialog.userId = this.user_details.user.id;
-    console.log("index edit: ", this.indexForDialog);
+    ;
     this.indexDialog = true;
     this.isEdit = true;
   }
 
   deleteIndex(indexDel:any){
     this.confirmationService.confirm({
-      message: 'Etes vous certain de vouloir supprimer l\'index du: ' + 
+      message: 'Etes vous certain de vouloir supprimer l\'index du: ' +
                 this.getToLocalDateTime(indexDel.created_at) +" du quart "+
-                indexDel.quart_working.time_start +"--"+ 
+                indexDel.quart_working.time_start +"--"+
                 indexDel.quart_working.time_close+ '?',
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
@@ -311,20 +311,20 @@ export class TableIndexComponent {
         this.indexService.deleteIndex(indexDel).subscribe((res)=>{
           if(res.status == true){
             this.messageService.add(
-              { 
-                severity: 'success', 
-                summary: 'Successful', 
-                detail: 'Index supprimé avec succes', 
-                life: 3000 
+              {
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Index supprimé avec succes',
+                life: 3000
               });
               this.askForRechargeListByInteractionMsg();
           }else{
             this.messageService.add(
-              { 
-                severity: 'error', 
-                summary: 'Erreur', 
-                detail: 'Echec de la suppression de l\'index', 
-                life: 3000 
+              {
+                severity: 'error',
+                summary: 'Erreur',
+                detail: 'Echec de la suppression de l\'index',
+                life: 3000
               });
           }
 

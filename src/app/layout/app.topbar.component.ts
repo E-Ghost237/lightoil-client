@@ -27,7 +27,7 @@ export class AppTopBarComponent {
     role:any;
 
     sidebarVisible: boolean = false;
-    typeSensor: string = "sonde"; 
+    typeSensor: string = "sonde";
 
     listNoti:any[]=[];
 
@@ -51,7 +51,7 @@ export class AppTopBarComponent {
     @ViewChild('topbarmenu') menu!: ElementRef;
 
     constructor(
-        private messageService: MessageService, 
+        private messageService: MessageService,
         private localStorageService: LocalStorageService,
         public layoutService: LayoutService,
         private interactionService: InteractionService,
@@ -62,18 +62,18 @@ export class AppTopBarComponent {
 
 
     showTestText(){
-        console.log("reussi");
+        ("reussi");
     }
 
     ngOnInit() {
 
         // this.user = JSON.parse(this.cookieService.get('User'));
         // this.stationId = this.user['station'];
-        
+
         this.user = this.localStorageService.getUser();
         this.stationId = this.localStorageService.getServiceStationId();
         this.role = this.localStorageService.getRole();
-        console.log("user top bar: ", this.user);
+
 
         this.languages = [
             { name: 'Francais', code: 'Fr' },
@@ -107,10 +107,10 @@ export class AppTopBarComponent {
         this.getListTank(this.stationId);
         this.getServiceStationData(this.stationId);
         this.getInteractionMsg();
-        
+
     }
 
-    
+
 
 
 
@@ -183,7 +183,7 @@ export class AppTopBarComponent {
                     this.listNoti = res;
                 }
                 this.sidebarVisible = true;
-                //console.log("list noti: ",this.listNoti);
+                //;
             });
         }else{
             this.layoutService.getListNotificationByTankId(this.selectedTank.id).subscribe((res)=>{
@@ -191,7 +191,7 @@ export class AppTopBarComponent {
                     this.listNoti = res;
                 }
                 this.sidebarVisible = true;
-                //console.log("list noti: ",this.listNoti);
+                //;
             });
         }
     }
@@ -199,13 +199,13 @@ export class AppTopBarComponent {
     getServiceStationData(stationId:number){
         this.layoutService.getServiceStationData(stationId).subscribe((res)=>{
             this.serviceStationData = res;
-            console.log("serv statio: ", res);
+
         });
     }
 
     getListTank(stationId:number){
         this.layoutService.getListTank(stationId).subscribe((res)=>{
-            //console.log("list tank: ", res);
+            //;
             if(res?.length > 0){
                 this.listTank.push({
                     sensor_reference: 'Dashboard',
@@ -226,7 +226,7 @@ export class AppTopBarComponent {
 
 
     onChangeSelectedTank($event:any){
-        console.log("value: ", $event.value);
+
         if($event?.value){
             if($event.value?.sensor_reference == 'Dashboard'){
                 this.router.navigate(
@@ -271,7 +271,7 @@ export class AppTopBarComponent {
     logout() {
       this.authService.logout().subscribe(
         (response: any) => {
-          console.log("Logout response: ", response);
+
           if (response.success === true) {
             this.clearCurrentUser();
             this.messageService.add({severity: 'success', detail: response.message});
@@ -282,12 +282,12 @@ export class AppTopBarComponent {
           }
         },
         (error) => {
-          console.log("Logout error: ", error);
+
           this.messageService.add({severity: 'error', detail: error.message});
         }
       );
     }
-    
+
     // Delete athenticated user's data to the Local Storage
     private clearCurrentUser(): void {
       localStorage.removeItem('user_details');

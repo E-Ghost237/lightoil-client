@@ -57,10 +57,10 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         // this.stationId = this.user['station'];
         this.user_details = this.localStorageService.getUserDetails();
         this.stationId = this.localStorageService.getServiceStationId();
-        //console.log("user: ", this.user);
+        //;
         this.tankId = this.route.snapshot.paramMap.get('id');
         this.getTankDetailsData();
-        //console.log("tank id: ",this.tankId);
+        //;
         this.subscribeToChannelSocket();
         this.t1=interval(1000).subscribe(n => this.getStringDate());
         this.getSubscribeData();
@@ -194,7 +194,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         a.href = this.line.getBase64Image();
         a.download = 'Graphe '+this.tankDetailsData?.tank?.sensor_reference+'.png';
         a.click();
-        console.log("j'exporte les graphes: ");
+        ("j'exporte les graphes: ");
     }
 
     generateTankDataDetailsPdf(){
@@ -222,7 +222,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     getListDayRecord(){
         if(this.tankDetailsData?.listLastRecord?.length > 0){
-            console.log("list last record: ", this.tankDetailsData.listLastRecord);
+
             return this.tankDetailsData.listLastRecord;
         }
         return [];
@@ -242,7 +242,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         let new_volume: number;
         let output_volume: number;
         let records = this.tankDetailsData.listLastRecord;
-        // console.log("records: ", records);
+        // ;
 
         if (records.length > 0) {
             new_volume = records[0].volume;
@@ -250,10 +250,10 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
             if (new_volume <= last_volume) {
                 output_volume = last_volume - new_volume;
-                // console.log("Home Output Volume: ", output_volume);
+                // ;
             }
             return Math.round(output_volume*100)/100;
-        } 
+        }
         else {
             return '---';
         }
@@ -469,7 +469,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     subscribeToChannelSocket(){
         this.pusherService.echo1.listen('record_channel.tank'+this.tankId,'Recorded',(e: any)=>{
-            //console.log(e);
+            //(e);
             this.getTankDetailsData();
         });
     }
@@ -481,7 +481,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     getStringDate(){
         this.d = new Date().toLocaleString();
-        //console.log("date: ",this.d);
+        //;
     }
 
     backToDashboard(){
@@ -500,13 +500,13 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         let last_volume: number;
         let new_volume: number;
         records = this.tankDetailsData.listLastRecord;
-        // console.log("Incoming records:", records);
+        // ;
 
         if (records.length > 0) {
             records.forEach(record => {
                 if (i < (records.length - 1)) {
                     i = i+1;
-                    // console.log("Record "+[i]+":", records[i]);
+                    // ("Record "+[i]+":", records[i]);
                 }
                 new_volume = record.volume;
                 last_volume = records[i].volume;
@@ -519,7 +519,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 }
             });
         }
-        console.log("Output Volumes:", this.output_volumes);
+
     }
 
     ajustedRecords() {
@@ -545,7 +545,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 deleted_at: record.deleted_at
             };
         });
-        // console.log("ajusted_records:", this.ajusted_records);
+        // ;
     }
 
     getTankDetailsData(){
@@ -559,7 +559,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 this.initGraphData();
                 //this.ref.detectChanges();
             }
-            console.log("tank details from server: ", this.tankDetailsData);
+
         });
     }
 
@@ -569,12 +569,12 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         "action":"refresh the page",
         "data":$event.value */
         this.interactionService.dataToShare$.subscribe((dataToShare)=>{
-            
+
             if(dataToShare['from'] == "app-topbar" &&
                 dataToShare['for'] == "tank-details" &&
                 dataToShare['action'] == "refresh the page" ){
                 let shareData = dataToShare["data"];
-                //console.log("i try to share this data: ", shareData);
+                //;
                 this.tankId = shareData.id;
                 this.getTankDetailsData();
                 this.pusherService.echo1.leaveChannel('record_channel.tank'+this.tankId);

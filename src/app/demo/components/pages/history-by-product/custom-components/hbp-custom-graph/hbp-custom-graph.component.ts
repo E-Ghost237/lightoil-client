@@ -42,15 +42,15 @@ export class HbpCustomGraphComponent {
     "level" => $level,
     "listDate" => $date, */
 
-    /* this.initData(this.listRecord?.temp, 
-      this.listRecord?.volume, 
-      this.listRecord?.volume15, 
-      this.listRecord?.density, this.listRecord?.level, 
+    /* this.initData(this.listRecord?.temp,
+      this.listRecord?.volume,
+      this.listRecord?.volume15,
+      this.listRecord?.density, this.listRecord?.level,
       this.listRecord?.listDate); */
       this.initData(this.listRecord);
       this.getInteractionMsg();
 
-    
+
   }
 
   computeTheListDateToRightGmt(listDate:any[]){
@@ -134,9 +134,9 @@ export class HbpCustomGraphComponent {
           tension: 0.4
         });
       }else {
-        
+
       }
-      
+
     }
 
 
@@ -181,20 +181,20 @@ export class HbpCustomGraphComponent {
   }
 
   getInteractionMsg(){
-    
+
     this.interactionService.dataToShare$.subscribe((msg)=>{
-      //console.log("j'ai recu le msg de graphe: ", msg);
+      //;
       /* from: "hbp-graph",
       for: "hbp-custom-graph",
       action: "reinitialize the graph",
       listRecord: this.listRecords,
       selectedStationProduct: this.selectedStationProduct,
       period: this.period */
-      //console.log("j'ai recu le msg de graphe: ",msg);
+      //;
       if(msg.from == "hbp-graph" &&
         msg.for == "hbp-custom-graph" &&
         msg.action == "reinitialize the graph"){
-          //console.log("j'ai recu le msg de graphe");
+          //("j'ai recu le msg de graphe");
           this.listRecord = msg.listRecord;
           this.stationProduct = msg.selectedStationProduct;
           this.period = msg.period;
@@ -202,9 +202,9 @@ export class HbpCustomGraphComponent {
       }else if(msg.from == "hbp-graph" &&
               msg.for == "hbp-custom-graph" &&
               msg.action == "empty the graph"){
-        
+
         this.listRecord = [];
-        //console.log("je vide le graphe");
+        //("je vide le graphe");
       }else if(msg.from == "hbp-graph" &&
               msg.for == "hbp-custom-graph" &&
               msg.action == "export the graph"){
@@ -215,10 +215,10 @@ export class HbpCustomGraphComponent {
         a.href = this.graph1.getBase64Image();
         a.download = 'Graphe '+this.stationProduct?.product?.name+'.png';
         a.click();
-        console.log("j'exporte les graphes: ");
+        ("j'exporte les graphes: ");
       }
     });
   }
 
-  
+
 }

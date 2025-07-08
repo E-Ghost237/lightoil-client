@@ -4,7 +4,7 @@ import {CookieService} from 'ngx-cookie-service';
 import { InteractionService } from '../services/interaction.service';
 
 export const isFirstConnGuard: CanActivateFn = (route, state) => {
-  
+
   const user_details = JSON.parse(localStorage.getItem('user_details'));
   let isFirstConn = user_details.user.is_first_conn;
 
@@ -13,7 +13,7 @@ export const isFirstConnGuard: CanActivateFn = (route, state) => {
   //const interactionService = inject(InteractionService);
   // let cookieValue = cookies.get('User');
   // let isFirstConn = JSON.parse(cookieValue).user.is_first_conn;
-  //console.log("cookie value: ", JSON.parse(cookieValue).user.is_first_conn);
+  //("cookie value: ", JSON.parse(cookieValue).user.is_first_conn);
   if(isFirstConn){
     /* interactionService.addNewDataToShare({
       from: 'is first conn guard',
@@ -22,7 +22,7 @@ export const isFirstConnGuard: CanActivateFn = (route, state) => {
       data: isFirstConn
     }); */
     router.navigateByUrl('/pages/configuration-account/config-profil');
-    //console.log("it is my first connection");
+    //("it is my first connection");
     return false;
   }
   return true;

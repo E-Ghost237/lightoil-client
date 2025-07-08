@@ -22,7 +22,7 @@ export class HbpTableDumpingsInputComponent {
   }
 
   ngOnInit(){
-      //console.log("on table: ", this.listOutputs);
+      //;
   }
 
 
