@@ -16,29 +16,29 @@
                         </tr>
                     </thead>
                     <ng-container
-                        *ngIf="stock_per_product_of_sale_points !== undefined && stock_per_product_of_sale_points.length > 0; else elseTemplate">
-                        <tbody class="table-group-divider align-middle" *ngFor="let sale_point of stock_per_product_of_sale_points">
+                        *ngIf="stock_per_tank_of_sale_points !== undefined && stock_per_tank_of_sale_points.length > 0; else elseTemplate">
+                        <tbody class="table-group-divider align-middle" *ngFor="let sale_point of stock_per_tank_of_sale_points">
                             <tr>
                                 <td>
                                     <b>{{ sale_point.name }}</b> <br><i>{{ sale_point.town }}</i>
                                 </td>
                                 <td>
-                                    <table *ngFor="let product of sale_point.products">
+                                    <table *ngFor="let tank of sale_point?.tanks">
                                         <tr>
-                                            <td [ngStyle]="{'color': getProductColor(product.name)}">
-                                                <strong>{{ product.name }} :</strong>
+                                            <td [ngStyle]="{'color': getProductColor(tank?.product?.name)}">
+                                                <strong>{{ tank?.product?.name }} :</strong>
                                             </td>
                                         </tr>
                                     </table>
                                 </td>
                                 <td>
-                                    <table *ngFor="let product of sale_point.products" class="flex justify-content-start"> <!-- flex justify-content-end -->
+                                    <table *ngFor="let tank of sale_point?.tanks" class="flex justify-content-start"> <!-- flex justify-content-end -->
                                         <tr>
                                             <ng-container
-                                                *ngIf="(product.volume != undefined && product.tank_volume != undefined) && (product.volume != 0 && product.tank_volume != 0); else noVolume">
+                                                *ngIf="(tank?.product?.volume != undefined && tank?.volume != undefined) && (tank?.product?.volume != 0 && tank?.volume != 0); else noVolume">
                                                 <td class="font-medium">
-                                                    {{ product.volume | number:'1.2-2':'fr' }} <span class="font-semibold">L / </span>
-                                                    {{ product.tank_volume | number:'1.0-0':'fr' }} <span class="font-semibold">L</span>
+                                                    {{ tank?.product?.volume | number:'1.2-2':'fr' }} <span class="font-semibold">L / </span>
+                                                    {{ tank?.volume | number:'1.0-0':'fr' }} <span class="font-semibold">L</span>
                                                 </td>
                                             </ng-container>
                                             <ng-template #noVolume>

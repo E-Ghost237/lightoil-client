@@ -42,4 +42,12 @@ export class TableDumpingsIntputsComponent {
     getRoundValue(num:number){
         return Math.round(num*100)/100;
     }
+
+    getDepotage(report:any){
+        const input = this.getRoundValue(report?.start_volume ?? 0);
+        const output = this.getRoundValue(report?.end_volume ?? 0);
+        const result =  output - input;
+        return this.getRoundValue(result > 0 ? result : 0);
+
+    }
 }

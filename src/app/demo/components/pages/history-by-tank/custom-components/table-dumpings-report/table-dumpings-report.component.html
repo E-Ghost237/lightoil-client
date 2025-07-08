@@ -128,7 +128,6 @@
                     </div>
                 </td>
 
-
                 <td
                     pTooltip="en litres volume entrées"
                     tooltipPosition="bottom"
@@ -144,19 +143,22 @@
                     {{ getRoundValue(report?.output) }}
                 </td>
 
-
-                <td pTooltip="en litres remises en cuves" tooltipPosition="bottom" class="text-center">
+                <td
+                    pTooltip="en litres remises en cuves"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
                     <div *ngIf="report?.lastPeriodRecord?.id">
                         <span class="text-center">
-                            {{
-                                getRoundValue(
-                                    report?.lastPeriodRecord?.liquid_temperature
-                                )
-                            }}
+                            {{ getstockPhysique(report ? 0 : 0) }}
                         </span>
                     </div>
                 </td>
-                <td pTooltip="en litres cumul ventes" tooltipPosition="bottom" class="text-center">
+                <td
+                    pTooltip="en litres cumul ventes"
+                    tooltipPosition="bottom"
+                    class="text-center"
+                >
                     <div>
                         <span class="text-center">
                             {{ getRoundValue(report?.cumulVentes) }}
@@ -168,7 +170,7 @@
                     tooltipPosition="bottom"
                     class="text-center"
                 >
-                    {{ getstockTherorique(report??0) }}
+                    {{ getstockTherorique(report ?? 0) }}
                 </td>
 
                 <td
@@ -176,7 +178,7 @@
                     tooltipPosition="bottom"
                     class="text-center"
                 >
-                    {{ getstockPhysique(report??0) }}
+                    {{ getstockPhysique(report ?? 0) }}
                 </td>
 
                 <td

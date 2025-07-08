@@ -2,93 +2,94 @@ import { Component, Input } from '@angular/core';
 import * as Utility from '../../../../../utilities/utility';
 
 @Component({
-  selector: 'app-hbp-table-dumpings-report',
-  templateUrl: './hbp-table-dumpings-report.component.html',
-  styleUrls: ['./hbp-table-dumpings-report.component.scss']
+    selector: 'app-hbp-table-dumpings-report',
+    templateUrl: './hbp-table-dumpings-report.component.html',
+    styleUrls: ['./hbp-table-dumpings-report.component.scss'],
 })
 export class HbpTableDumpingsReportComponent {
+    @Input()
+    listReport!: any;
 
-  @Input()
-  listReport!:any;
+    @Input()
+    stationProduct: any = {};
 
-  @Input()
-  stationProduct:any={};
+    constructor() {}
 
-  constructor(){
+    ngOnInit() {
+        console.log('list report by table: ', this.listReport);
+        console.log('tank by table: ', this.stationProduct);
+    }
 
-  }
+    ngOnChanges() {
+        if (this.listReport?.listDayRecord) {
+            this.prepareListDayRecord();
+        }
+    }
 
-  ngOnInit(){
-    console.log("list report by table: ", this.listReport);
-    console.log("tank by table: ", this.stationProduct);
-  }
+    getToLocalDateTime(date1: string) {
+        return Utility.toLocalDateTime(date1) ?? '';
+    }
 
-   ngOnChanges() {
-  if (this.listReport?.listDayRecord) {
-    this.prepareListDayRecord();
-  }
-}
+    getToLocalDate(date1: string) {
+        return Utility.toLocalDate(date1) ?? '';
+    }
 
-  getToLocalDateTime(date1:string){
-    return Utility.toLocalDateTime(date1)??"";
-  }
+    getToLocalTime(date1: string) {
+        return Utility.toLocalTime(date1) ?? '';
+    }
 
-  getToLocalDate(date1:string){
-    return Utility.toLocalDate(date1)??"";
-  }
+    getRoundValue(num: number) {
+        return Math.round(num * 100) / 100;
+    }
 
-  getToLocalTime(date1:string){
-    return Utility.toLocalTime(date1)??"";
-  }
+    getstockTherorique(report: any) {
+        const volume = this.getRoundValue(
+            report?.firstPeriodRecord?.volume ?? 0
+        );
+        const input = this.getRoundValue(report?.input ?? 0);
+        const output = this.getRoundValue(report?.output ?? 0);
+        const result = volume + input - output;
+        return this.getRoundValue(result);
+    }
 
-  getRoundValue(num:number){
-    return Math.round(num*100)/100;
-  }
+    getstockPhysique(report: any) {
+        const volume = this.getRoundValue(
+            report?.firstPeriodRecord?.volume ?? 0
+        );
+        const input = this.getRoundValue(report?.input ?? 0);
+        const output = this.getRoundValue(report?.output ?? 0);
+        const result = volume + input - output;
+        return this.getRoundValue(result);
+    }
 
-   getstockTherorique(report:any){
-    const volume  = this.getRoundValue(report?.firstPeriodRecord?.volume?? 0);
-    const input = this.getRoundValue(report?.input?? 0)
-    const output = this.getRoundValue(report?.output?? 0)
-    return volume + input - output;
-  }
+    getEcart(report: any): number {
+        const stockTheorique = this.getstockTherorique(report) ?? 0;
+        const stockPhysique = this.getstockPhysique(report) ?? 0; // ou autre champ
+        return stockPhysique - stockTheorique;
+    }
 
-  getstockPhysique(report:any){
-    const volume  = this.getRoundValue(report?.firstPeriodRecord?.volume?? 0);
-    const input = this.getRoundValue(report?.input?? 0)
-    const output = this.getRoundValue(report?.output?? 0)
-    return volume + input - output;
-  }
+    prepareListDayRecord(): void {
+        if (!this.listReport?.listDayRecord) return;
 
-  getEcart(report: any): number {
-  const stockTheorique = this.getstockTherorique(report)?? 0;
-  const stockPhysique = this.getstockPhysique(report)?? 0; // ou autre champ
-  return stockPhysique - stockTheorique;
-}
+        let cumulVentes = 0;
+        let cumulEcarts = 0;
 
-prepareListDayRecord(): void {
-  if (!this.listReport?.listDayRecord) return;
+        const newList = this.listReport.listDayRecord.map((record) => {
+            const output = Number(record.output ?? 0);
 
-  let cumulVentes = 0;
-  let cumulEcarts = 0;
+            cumulVentes += output;
+            const ecart = this.getEcart(record);
 
-  const newList = this.listReport.listDayRecord.map((record) => {
+            cumulEcarts += ecart;
 
-    const output = Number(record.output ?? 0);
+            return {
+                ...record,
+                cumulVentes: Number(cumulVentes),
+                ecart: Number(ecart),
+                cumulEcarts: Number(cumulEcarts),
+            };
+        });
 
-    cumulVentes += output;
-    const ecart = this.getEcart(record);
-
-    cumulEcarts += ecart;
-
-    return {
-      ...record,
-      cumulVentes: Number(cumulVentes),
-      ecart: Number(ecart),
-      cumulEcarts: Number(cumulEcarts),
-    };
-  });
-
-
-  this.listReport.listDayRecord = [...newList];
-}
+        this.listReport.listDayRecord = [...newList];
+    }
 }
