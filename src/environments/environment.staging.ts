@@ -6,8 +6,8 @@ export const environment = {
     cluster: "eu",
   },
 
-  client_id: "9d501d86-dadf-44f9-ad07-7556c9f8253f",
-  client_secret: "wKC01DjwSSUPDlLVzKqzuyot4YWIwexxa17Xjwn7",
+  client_id: "9ff1d596-7f13-4075-84f8-ab0080700642",
+  client_secret: "SbttAGexm7zHjO2sZilBShRuF1ODxYgLJRZUtqcc",
   apiUrl: "https://api.staging.lightoil.cm/api/",
   apiAuthUrl : "https://api.staging.lightoil.cm/api/",
   authUrl: "https://staging.lightoil.cm/auth/login",

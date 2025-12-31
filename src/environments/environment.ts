@@ -16,8 +16,8 @@ export const environment = {
 
   
   oauth: "http://localhost:8000/oauth/token",
-  client_id: "9deb2f64-c310-4f43-9dcb-2c99213800dd",
-  client_secret: "xqNbktj94DlMTtswPOI00PmkB3qy6Rv9XNfgkGpI",
+  client_id: "9ff1d596-7f13-4075-84f8-ab0080700642",
+  client_secret: "SbttAGexm7zHjO2sZilBShRuF1ODxYgLJRZUtqcc",
   redirect_uri_path: "http://localhost:4200/auth/login",
   admin_view: "http://localhost:4202/",
   light_oil:  "http://localhost:4200/",
@@ -25,7 +25,7 @@ export const environment = {
 };
 
 /*
- * For easier debugging in development mode, you can import the following file
+ * For easier debugging in development mode, you can import the following file i am
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
  *
  * This import should be commented out in production mode because it will have a negative impact
