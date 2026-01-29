@@ -50,6 +50,11 @@ const routes: Routes =[
                 path: 'configuration-account',
                 loadChildren: () => import('../../components/pages/config-account/config-account.module').then(m => m.ConfigAccountModule)
             },
+            {
+                canActivate: [isFirstConnGuard],
+                path: 'stock-sheet-by-product',
+                loadChildren: () => import('../../components/pages/stock-sheet-by-products/stock-sheet-by-product.module').then(m => m.StockSheetModule)
+            },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'notfound', component: NotfoundComponent },
             { path: '**', redirectTo: '/notfound' },
