@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .p-tag {
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  white-space: nowrap;
+}

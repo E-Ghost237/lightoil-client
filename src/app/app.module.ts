@@ -14,7 +14,6 @@ import { PagesModule } from './demo/components/pages/pages.module';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AuthService } from './demo/components/auth/services/auth.service';
-import { StockSheetByProductsComponent } from './demo/components/pages/stock-sheet-by-products/stock-sheet-by-products.component';
 
 
 registerLocaleData(localeFr);

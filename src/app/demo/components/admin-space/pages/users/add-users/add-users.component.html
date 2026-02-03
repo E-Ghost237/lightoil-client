@@ -1,0 +1,179 @@
+<!-- Show message -->
+<p-toast key="tst"></p-toast>
+
+<!-- Page header -->
+<div class="card pb-0 mb-5">
+  <div class="card-body align-content-center justify-content-between pt-0">
+    <div class="text-center align-content-center text-xl text-uppercase">
+      <h1 class="font-bold">Créer un utilisateur</h1>
+      <p class="text-sm text-600 mt-2 mb-0">
+        Renseignez les informations ci-dessous et attribuez un rôle à l'utilisateur.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="card p-3">
+  <ng-container *ngIf="!loadingContext; else loadingTpl">
+
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="p-fluid">
+      <div class="grid">
+        <!-- Identity -->
+        <div class="col-12 lg:col-6">
+          <div class="form-section">
+            <h3 class="section-title">Informations personnelles</h3>
+
+            <div class="field">
+              <label for="firstName">Prénom <span class="required">*</span></label>
+              <input id="firstName" pInputText type="text" formControlName="firstName" placeholder="Ex: Jean" />
+              <small class="p-error" *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.invalid">
+                Le prénom est requis (min 3 caractères).
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="lastName">Nom <span class="required">*</span></label>
+              <input id="lastName" pInputText type="text" formControlName="lastName" placeholder="Ex: Dupont" />
+              <small class="p-error" *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.invalid">
+                Le nom est requis (min 3 caractères).
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="email">Email <span class="required">*</span></label>
+              <input id="email" pInputText type="email" formControlName="email" placeholder="Ex: jean.dupont@mail.com" />
+              <small class="p-error" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid">
+                Email invalide.
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="phone">Téléphone <span class="required">*</span></label>
+              <input id="phone" pInputText type="text" formControlName="phone" placeholder="Ex: 6 99 99 99 99" />
+              <small class="p-error" *ngIf="userForm.get('phone')?.touched && userForm.get('phone')?.invalid">
+                Téléphone requis (min 9 caractères).
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="address">Adresse</label>
+              <input id="address" pInputText type="text" formControlName="address" placeholder="Adresse (optionnel)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Access -->
+        <div class="col-12 lg:col-6">
+          <div class="form-section">
+            <h3 class="section-title">Accès & affectation</h3>
+
+            <div class="field" *ngIf="isAdminLike(); else fixedCompanyTpl">
+              <label for="company">Entreprise <span class="required">*</span></label>
+              <p-dropdown
+                inputId="company"
+                [options]="companyOptions"
+                formControlName="company_id"
+                placeholder="Sélectionner une entreprise"
+                [filter]="true"
+                filterBy="label"
+                [showClear]="true">
+              </p-dropdown>
+              <small class="p-error" *ngIf="userForm.get('company_id')?.touched && userForm.get('company_id')?.invalid">
+                Sélectionnez une entreprise.
+              </small>
+            </div>
+
+            <ng-template #fixedCompanyTpl>
+              <div class="field">
+                <label>Entreprise</label>
+                <input pInputText type="text" [value]="currentCompany?.name || '-'" disabled />
+                <small class="text-600">Votre rôle vous limite à votre entreprise.</small>
+              </div>
+            </ng-template>
+
+            <div class="field">
+              <label for="role">Rôle <span class="required">*</span></label>
+              <p-dropdown
+                inputId="role"
+                [options]="allowedRoles"
+                optionLabel="name"
+                optionValue="id"
+                formControlName="role_id"
+                placeholder="Sélectionner un rôle"
+                [filter]="true"
+                filterBy="name"
+                [showClear]="true">
+              </p-dropdown>
+
+              <small class="p-error" *ngIf="userForm.get('role_id')?.touched && userForm.get('role_id')?.invalid">
+                Sélectionnez un rôle.
+              </small>
+
+              <small class="text-600" *ngIf="getSelectedRoleName()">
+                Rôle sélectionné : <strong>{{ getSelectedRoleName() }}</strong>
+              </small>
+            </div>
+
+            <div class="field">
+              <label for="stations">
+                Station(s) service
+                <span class="required" *ngIf="isGeneralDirector() || getSelectedRoleName().toLowerCase().includes('gérant station service')">*</span>
+              </label>
+
+              <p-multiSelect
+                inputId="stations"
+                [options]="serviceStationOptions"
+                formControlName="serviceStations"
+                defaultLabel="Sélectionner une ou plusieurs stations"
+                [filter]="true"
+                filterBy="label"
+                display="chip"
+                [showClear]="true">
+              </p-multiSelect>
+
+              <small class="text-600">
+                {{ isGeneralDirector()
+                  ? 'En tant que Directeur Général, les utilisateurs sont rattachés à une ou plusieurs stations.'
+                  : 'Optionnel sauf si le rôle est « Gérant Station Service ».'
+                }}
+              </small>
+
+              <small class="p-error" *ngIf="userForm.get('serviceStations')?.touched && userForm.get('serviceStations')?.invalid">
+                Sélectionnez au moins une station.
+              </small>
+            </div>
+
+            <div class="divider my-4"></div>
+
+            <div class="flex gap-2 justify-content-end">
+              <p-button
+                type="button"
+                label="Annuler"
+                severity="secondary"
+                icon="pi pi-times"
+                (click)="router.navigateByUrl('/admin/users/list-users')">
+              </p-button>
+
+              <p-button
+                type="submit"
+                label="Créer l'utilisateur"
+                icon="pi pi-check"
+                [loading]="loading"
+                loadingIcon="pi pi-spin pi-spinner">
+              </p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </ng-container>
+
+  <ng-template #loadingTpl>
+    <div class="flex align-items-center justify-content-center" style="min-height: 220px;">
+      <i class="pi pi-spin pi-spinner" style="font-size: 1.6rem;"></i>
+      <span class="ml-2 text-600">Chargement...</span>
+    </div>
+  </ng-template>
+</div>
