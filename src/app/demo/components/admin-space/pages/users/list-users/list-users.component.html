@@ -1,0 +1,313 @@
+<!-- Show message -->
+<p-toast key="tst"></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Page header -->
+<div class="card pb-0 mb-5">
+  <div class="card-body align-content-center justify-content-between pt-0">
+    <div class="text-center align-content-center text-xl text-uppercase">
+      <h1 class="font-bold">Liste des utilisateurs</h1>
+      <p class="text-sm text-600 mt-2 mb-0">
+        {{ getScopeLabel() }}
+      </p>
+      <p class="text-xs text-500 mt-1 mb-0" *ngIf="isGeneralDirector() && stationScopeNames.length">
+        Stations : {{ stationScopeNames.join(' • ') }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card p-2 pb-3">
+  <p-table
+    #dt
+    [value]="users"
+    [rowHover]="true"
+    dataKey="id"
+    styleClass="p-datatable-striped mt-5"
+    [scrollable]="true"
+    scrollHeight="30rem"
+    [paginator]="true"
+    [rows]="10"
+    [first]="first_page"
+    [showCurrentPageReport]="true"
+    (onPage)="onPageChange($event)"
+    currentPageReportTemplate="Affichage de {first} à {last} utilisateur(s) sur {totalRecords}"
+    [rowsPerPageOptions]="[10, 15, 25]"
+    responsiveLayout="stack"
+    [breakpoint]="'960px'"
+    [globalFilterFields]="['full_name', 'email', 'phone', 'company_name']"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <p-button
+          (click)="loadData()"
+          styleClass="font-semibold align-content-center mr-2"
+          label="Actualiser"
+          severity="primary"
+          icon="pi pi-refresh"
+          iconPos="right"
+          [loading]="loading"
+          loadingIcon="pi pi-spin pi-refresh"
+        />
+
+        <span class="block p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." class="w-full sm:w-auto" />
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr class="table-dark font-bold text-lg">
+        <th scope="col" class="text-center" style="width: 70px;">#</th>
+        <th scope="col">Nom</th>
+        <th scope="col">Email</th>
+        <th scope="col">Téléphone</th>
+        <th scope="col">Rôle(s)</th>
+        <th scope="col">Station(s)</th>
+        <th scope="col" class="text-center" style="width: 120px;">Statut</th>
+        <th scope="col" class="text-center" style="width: 110px;">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-u let-rowIndex="rowIndex">
+      <tr class="cursor-pointer" (click)="openView(u)">
+        <td class="text-center">
+          <span class="p-column-title">#</span>
+          {{ rowIndex + 1 + first_page }}
+        </td>
+
+        <td>
+          <span class="p-column-title">Nom</span>
+          <div class="font-semibold">{{ u.full_name || '-' }}</div>
+          <div class="text-xs text-500" *ngIf="u.company_name && u.company_name !== '-'">
+            {{ u.company_name }}
+          </div>
+        </td>
+
+        <td>
+          <span class="p-column-title">Email</span>
+          {{ u.email }}
+        </td>
+
+        <td>
+          <span class="p-column-title">Téléphone</span>
+          {{ u.phone }}
+        </td>
+
+        <td>
+          <span class="p-column-title">Rôle(s)</span>
+          <div class="flex flex-wrap gap-2">
+            <p-tag *ngFor="let r of u.roles" [value]="r" severity="info">{{ r }}</p-tag>
+            <span *ngIf="!u.roles?.length" class="text-500">-</span>
+          </div>
+        </td>
+
+        <td>
+          <span class="p-column-title">Station(s)</span>
+          <div class="flex flex-wrap gap-2">
+            <p-tag *ngFor="let s of u.stations" [value]="s" severity="warning">{{ s }}</p-tag>
+            <span *ngIf="!u.stations?.length" class="text-500">-</span>
+          </div>
+        </td>
+
+        <td class="text-center">
+          <span class="p-column-title">Statut</span>
+          <p-tag [value]="u.status" [severity]="getStatusSeverity(u.status)">{{ u.status }}</p-tag>
+        </td>
+
+        <td class="text-center">
+          <ng-container *ngIf="canManageUser(u); else noActions">
+            <div class="flex align-items-center justify-content-center gap-1">
+              <p-button
+                icon="pi pi-pencil"
+                styleClass="p-button-rounded p-button-text p-button-sm"
+                severity="info"
+                pTooltip="Modifier"
+                tooltipPosition="top"
+                (click)="openEdit(u); $event.stopPropagation()"
+              ></p-button>
+              <p-button
+                [icon]="(u.status || '').toLowerCase() === 'enabled' ? 'pi pi-ban' : 'pi pi-check'"
+                styleClass="p-button-rounded p-button-text p-button-sm"
+                [severity]="(u.status || '').toLowerCase() === 'enabled' ? 'warning' : 'success'"
+                [pTooltip]="(u.status || '').toLowerCase() === 'enabled' ? 'Désactiver' : 'Activer'"
+                tooltipPosition="top"
+                (click)="confirmToggleStatus(u); $event.stopPropagation()"
+              ></p-button>
+              <p-button
+                *ngIf="canDeleteUser(u)"
+                icon="pi pi-trash"
+                styleClass="p-button-rounded p-button-text p-button-sm"
+                severity="danger"
+                pTooltip="Supprimer"
+                tooltipPosition="top"
+                (click)="confirmDelete(u); $event.stopPropagation()"
+              ></p-button>
+            </div>
+          </ng-container>
+          <ng-template #noActions>
+            <span class="text-500">-</span>
+          </ng-template>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8">
+          <div class="text-center py-5 text-600">
+            Aucun utilisateur à afficher.
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- View Dialog -->
+<p-dialog
+  header="Détails utilisateur"
+  [(visible)]="viewDialogVisible"
+  [modal]="true"
+  [style]="{ width: '40rem' }"
+  [breakpoints]="{ '960px': '95vw' }"
+  (onHide)="closeDialogs()"
+>
+  <ng-container *ngIf="selectedUser as u">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <div class="text-500 text-xs">Nom</div>
+        <div class="font-semibold">{{ u.full_name || '-' }}</div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="text-500 text-xs">Statut</div>
+        <p-tag [value]="u.status" [severity]="getStatusSeverity(u.status)">{{ u.status }}</p-tag>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="text-500 text-xs">Email</div>
+        <div>{{ u.email || '-' }}</div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="text-500 text-xs">Téléphone</div>
+        <div>{{ u.phone || '-' }}</div>
+      </div>
+
+      <div class="col-12">
+        <div class="text-500 text-xs">Adresse</div>
+        <div>{{ u.address || '-' }}</div>
+      </div>
+
+      <div class="col-12">
+        <div class="text-500 text-xs">Entreprise</div>
+        <div>{{ u.company_name || '-' }}</div>
+      </div>
+
+      <div class="col-12">
+        <div class="text-500 text-xs">Rôle(s)</div>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <p-tag *ngFor="let r of u.roles" [value]="r" severity="info">{{ r }}</p-tag>
+          <span *ngIf="!u.roles?.length" class="text-500">-</span>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="text-500 text-xs">Station(s)</div>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <p-tag *ngFor="let s of u.stations" [value]="s" severity="warning">{{ s }}</p-tag>
+          <span *ngIf="!u.stations?.length" class="text-500">-</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Fermer" severity="secondary" (click)="viewDialogVisible=false"></p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- Edit Dialog -->
+<p-dialog
+  header="Modifier utilisateur"
+  [(visible)]="editDialogVisible"
+  [modal]="true"
+  [style]="{ width: '46rem' }"
+  [breakpoints]="{ '960px': '95vw' }"
+  (onHide)="closeDialogs()"
+>
+  <form [formGroup]="editForm" class="grid">
+    <div class="col-12 md:col-6">
+      <label class="block text-600 font-semibold mb-2">Prénom</label>
+      <input pInputText formControlName="firstName" class="w-full" />
+      <small class="text-red-500" *ngIf="editForm.get('firstName')?.touched && editForm.get('firstName')?.invalid">Prénom requis.</small>
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block text-600 font-semibold mb-2">Nom</label>
+      <input pInputText formControlName="lastName" class="w-full" />
+      <small class="text-red-500" *ngIf="editForm.get('lastName')?.touched && editForm.get('lastName')?.invalid">Nom requis.</small>
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block text-600 font-semibold mb-2">Email</label>
+      <input pInputText formControlName="email" class="w-full" />
+      <small class="text-red-500" *ngIf="editForm.get('email')?.touched && editForm.get('email')?.invalid">Email invalide.</small>
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block text-600 font-semibold mb-2">Téléphone</label>
+      <input pInputText formControlName="phone" class="w-full" />
+      <small class="text-red-500" *ngIf="editForm.get('phone')?.touched && editForm.get('phone')?.invalid">Téléphone requis.</small>
+    </div>
+
+    <div class="col-12">
+      <label class="block text-600 font-semibold mb-2">Adresse</label>
+      <input pInputText formControlName="address" class="w-full" />
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block text-600 font-semibold mb-2">Rôle(s)</label>
+      <p-multiSelect
+        [options]="roleOptions"
+        formControlName="roles"
+        optionLabel="label"
+        optionValue="value"
+        display="chip"
+        [filter]="true"
+        appendTo="body"
+        [autoZIndex]="true"
+        [scrollHeight]="'260px'"
+        placeholder="Sélectionner..."
+        class="w-full"
+      ></p-multiSelect>
+      <small class="text-red-500" *ngIf="editForm.get('roles')?.touched && editForm.get('roles')?.invalid">Au moins un rôle.</small>
+    </div>
+
+    <div class="col-12 md:col-6">
+      <label class="block text-600 font-semibold mb-2">Station(s)</label>
+      <p-multiSelect
+        [options]="stationOptions"
+        formControlName="serviceStations"
+        optionLabel="label"
+        optionValue="value"
+        display="chip"
+        [filter]="true"
+        appendTo="body"
+        [autoZIndex]="true"
+        [scrollHeight]="'260px'"
+        placeholder="Sélectionner..."
+        class="w-full"
+      ></p-multiSelect>
+      <small class="text-500">(Requis pour certains profils selon la configuration)</small>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Annuler" severity="secondary" (click)="editDialogVisible=false" class="mr-2"></p-button>
+    <p-button label="Enregistrer" severity="primary" (click)="submitEdit()" [loading]="saving" icon="pi pi-save"></p-button>
+  </ng-template>
+</p-dialog>

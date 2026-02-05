@@ -20,6 +20,8 @@ import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ChatbotModule } from '../../../chatbot/chatbot.module';
+import { TabViewModule } from "primeng/tabview";
+import { DividerModule } from "primeng/divider";
 
 
 @NgModule({
@@ -45,9 +47,11 @@ import { ChatbotModule } from '../../../chatbot/chatbot.module';
     MultiSelectModule,
     CalendarModule,
     DropdownModule,
-    FormsModule, 
+    FormsModule,
     ReactiveFormsModule,
-    ChatbotModule
-  ]
+    ChatbotModule,
+    TabViewModule,
+    DividerModule
+]
 })
 export class ReportsModule { }

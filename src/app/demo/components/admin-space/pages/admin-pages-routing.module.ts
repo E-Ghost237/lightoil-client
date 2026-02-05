@@ -14,6 +14,7 @@ import { AdminPagesComponent } from './admin-pages.component';
           { path: 'network-config', loadChildren: () => import('./network-config/network-config.module').then(m => m.NetworkConfigModule) },
           { path: 'reports', loadChildren: () => import('./reports/reports.module').then(m => m.ReportsModule) },
           { path: 'performances', loadChildren: () => import('./sales-performances/sales-performances.module').then(m => m.SalesPerformancesModule) },
+          { path: 'users', loadChildren: () => import('./users/user.module').then(m => m.UsersModule)},
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
         ]
       }

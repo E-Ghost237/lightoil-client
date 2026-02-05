@@ -20,7 +20,7 @@ registerLocaleData(localeFr);
 
 @NgModule({
     declarations: [
-        AppComponent, NotfoundComponent
+        AppComponent, NotfoundComponent,
     ],
     imports: [
         CalendarModule,

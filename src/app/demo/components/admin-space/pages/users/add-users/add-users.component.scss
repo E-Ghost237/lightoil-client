@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.section-title {
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: 0.95rem;
+}
+
+.form-section {
+  padding: 0.25rem 0.75rem;
+}
+
+.required {
+  color: var(--red-500);
+}
+
+.divider {
+  height: 1px;
+  background: var(--surface-border);
+  opacity: 0.8;
+}
+
+.field small {
+  display: block;
+  margin-top: 0.35rem;
+}

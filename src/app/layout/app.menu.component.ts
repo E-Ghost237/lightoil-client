@@ -127,6 +127,7 @@ export class AppMenuComponent implements OnInit {
         let itemProductHistory: any[] = [];
         let tableFlowMeterHistory: any;
         let itemFlowMeterHistory: any[] = [];
+        let stockSheetHistory: any[] =[];
         //cuve
         if(this.listTypePermissions.includes("Historiques par cuve")  ){
             if(this.listFeatures.includes('historique par cuves - jauges')){
@@ -245,6 +246,28 @@ export class AppMenuComponent implements OnInit {
                 itemHistory.push(tableFlowMeterHistory);
             }
         }
+
+        //fiche de stock
+        if(this.listTypePermissions.includes("Historiques par debimetre") ){
+            if(this.listFeatures.includes('historique par debimetre - debimetres')){
+                stockSheetHistory.push(
+                    {
+                        label: 'Fiche de stock',
+                        icon: 'pi pi-fw pi-file',
+                        routerLink: ['/pages/stock-sheet-by-product/stock-sheet']
+                    },
+                );
+            }
+
+            if(stockSheetHistory.length > 0){
+                itemHistory.push({
+                    label: 'Fiches de stock par produit',
+                    icon: 'pi pi-fw pi-file',
+                    items: stockSheetHistory,
+                });
+            }
+        }
+        
 
         if(itemHistory.length > 0){
             tableHistory = {
@@ -434,7 +457,6 @@ export class AppMenuComponent implements OnInit {
             itemConfig.push(tableAccountConfig);
         }
 
-
         if(itemConfig.length > 0){
             tableConfig = {
                 label: 'Configuration',
@@ -461,6 +483,7 @@ export class AppMenuComponent implements OnInit {
         }
 
         data = this.formTheHistoryMenu();
+        console.log('History Menu:', data); // Debugging: Check the history menu
         if(data.status == true){
             model.push(data.data);
         }
@@ -484,6 +507,7 @@ export class AppMenuComponent implements OnInit {
             model.push(this.admin_space_menu);
         }
 
+        console.log('Final Menu Model:', model); // Debugging: Check the final menu model
         return model;
     }
 
@@ -496,6 +520,11 @@ export class AppMenuComponent implements OnInit {
                     this.listFeatures.push(permission.permission.name);
                     this.listTypePermissions.push(permission.permission.type_permission.name);
                 });
+
+                            // Debugging: Log the permissions and features
+            console.log('listFeatures:', this.listFeatures);
+            console.log('listTypePermissions:', this.listTypePermissions);
+
                 this.model = this.formTheModel();
             }
 

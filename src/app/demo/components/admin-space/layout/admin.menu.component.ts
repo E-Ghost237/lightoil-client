@@ -71,12 +71,12 @@ export class AdminMenuComponent implements OnInit {
                             {
                                 label: 'Lister les utilisateurs',
                                 icon: 'pi pi-fw pi-users',
-                                // routerLink: ['/auth/login']
+                                routerLink: ['/admin/users/list-users']
                             },
                             {
                                 label: 'Ajouter un utilisateur',
                                 icon: 'pi pi-fw pi-user-plus',
-                                // routerLink: ['/auth/error']
+                                routerLink: ['/admin/users/add-users']
                             }
                         ]
                     },
