@@ -1,103 +1,135 @@
-<div class="card pb-0 mb-3">
-  <div class="card-body align-content-center justify-content-between pt-0">
-    <div class="text-center align-content-center text-xl text-uppercase">
+<div class="card pb-0 mb-5">
+  <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
+    <div class="col-12 xl:col-7 lg:col-7 md:col-7 text-center align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
       <h1 class="font-bold">Rapport des sorties de cuves</h1>
       <p class="text-sm text-600 mt-2 mb-0">
-        Sélectionnez une période et un produit, puis générez le rapport.
+        Sélectionnez une période et un produit, le rapport se génère automatiquement.
       </p>
+    </div>
+    <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
+      <label class="block font-bold text-lg">Produit :</label>
+      <p-dropdown (onChange)="onFilterChange()"
+                  styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase"
+                  [options]="productOptions" optionLabel="label" optionValue="value"
+                  placeholder="Sélectionner un produit" [(ngModel)]="selectedProductId" [showClear]="true"
+                  [filter]="true"></p-dropdown>
+
+      <div class="mt-3" *ngIf="isAdminLike() || (isGeneralDirector() && stationOptions.length > 1)">
+        <label class="block font-bold text-lg">Point de vente :</label>
+        <p-dropdown (onChange)="onFilterChange()"
+                    styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase"
+                    [options]="stationOptions" optionLabel="label" optionValue="value"
+                    placeholder="Sélectionner un point de vente" [(ngModel)]="selectedStationId" [filter]="true"></p-dropdown>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="grid">
-  <div class="col-12">
-    <div class="card">
-      <p-divider class="my-0"></p-divider>
+<div class="card p-2 pb-2 mb-5">
+  <div class="card-header font-bold text-xl pt-0">
+    <ul class="nav nav-tabs nav-justified card-header-tabs" role="tablist" id="tank-outlet-tab">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link text-uppercase" [class.active]="activeTab === 0" type="button"
+                (click)="activeTab = 0; onTabChange({ index: 0 })">
+          Journalières
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link text-uppercase" [class.active]="activeTab === 1" type="button"
+                (click)="activeTab = 1; onTabChange({ index: 1 })">
+          Hebdomadaires
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link text-uppercase" [class.active]="activeTab === 2" type="button"
+                (click)="activeTab = 2; onTabChange({ index: 2 })">
+          Mensuelles
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link text-uppercase" [class.active]="activeTab === 3" type="button"
+                (click)="activeTab = 3; onTabChange({ index: 3 })">
+          Annuelles
+        </button>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body justify-content-center">
+    <div class="grid mt-1">
+      <div class="col-12 xl:col-4 lg:col-4 md:col-4">
+        <p-tabView [(activeIndex)]="activeTab" class="report-tabview" (onChange)="onTabChange($event)">
+          <p-tabPanel header="Journalier">
+              <ng-container *ngIf="activeTab === 0">
+                  <label class="block font-bold mb-1"> Journée du : </label>
+                  <p-calendar [(ngModel)]="dayDate" dateFormat="yy-mm-dd" [showIcon]="true" styleClass="report-calendar w-full"
+                              (onSelect)="onFilterChange()"></p-calendar>
+                  <div class="text-500 mt-2" *ngIf="!report">
+                  Le rapport sera généré pour la journée sélectionnée.
+                  </div>
+              </ng-container>
+          </p-tabPanel>
 
-      <div class="grid align-items-end">
-        <div class="col-12 md:col-4">
-          <label class="block text-600 mb-2 font-bold">Produit</label>
-          <p-dropdown [options]="productOptions" optionLabel="label" optionValue="value"
-                      placeholder="Sélectionner un produit" [(ngModel)]="selectedProductId" [showClear]="true"
-                      [filter]="true"></p-dropdown>
-        </div>
+          <p-tabPanel header="Hebdomadaires">
+              <ng-container *ngIf="activeTab === 1">
+                  <label class="block font-bold mb-1"> Semaine du : </label>
+                  <p-calendar [(ngModel)]="weekDate" dateFormat="yy-mm-dd" [showIcon]="true" styleClass="report-calendar w-full"
+                              (onSelect)="onFilterChange()"></p-calendar>
+                  <div class="text-500 mt-2" *ngIf="!report">
+                  Le rapport couvre automatiquement du lundi au dimanche de la semaine sélectionnée.
+                  </div>
+              </ng-container>
+          </p-tabPanel>
 
-        <div class="col-12 md:col-4" *ngIf="isAdminLike()">
-          <label class="block text-600 mb-2 font-bold">Point de vente</label>
-          <p-dropdown [options]="stationOptions" optionLabel="label" optionValue="value"
-                      placeholder="Sélectionner un point de vente" [(ngModel)]="selectedStationId" [filter]="true"></p-dropdown>
-        </div>
+          <p-tabPanel header="Mensuelles">
+              <ng-container *ngIf="activeTab === 2">
+                  <label class="block font-bold mb-1"> Mois de : </label>
+                  <p-calendar [(ngModel)]="monthDate" view="month" dateFormat="yy-mm" [showIcon]="true" styleClass="report-calendar w-full"
+                              (onSelect)="onFilterChange()"></p-calendar>
+                  <div class="text-500 mt-2" *ngIf="!report">
+                  Le rapport couvrira l’ensemble du mois sélectionné.
+                  </div>
+              </ng-container>
+          </p-tabPanel>
 
-        <div class="col-12 md:col-4 flex align-items-center gap-2">
-          <button pButton type="button" label="Générer" icon="pi pi-play" [loading]="loading" [disabled]="loading" (click)="generate()"></button>
-          <button pButton type="button" class="p-button-outlined" label="PDF" icon="pi pi-file-pdf" [disabled]="!report || exporting" [loading]="exporting" (click)="exportPdf()"></button>
-          <button pButton type="button" class="p-button-outlined" label="Excel" icon="pi pi-file-excel" [disabled]="!report || exporting" [loading]="exporting" (click)="exportExcel()"></button>
-        </div>
+          <p-tabPanel header="Annuelles">
+              <ng-container *ngIf="activeTab === 3">
+                  <label class="block font-bold mb-1"> Année : </label>
+                  <p-calendar [(ngModel)]="yearDate" view="year" dateFormat="yy" [showIcon]="true" styleClass="report-calendar w-full"
+                              (onSelect)="onFilterChange()"></p-calendar>
+                  <div class="text-500 mt-2" *ngIf="!report">
+                  Le rapport couvrira l’ensemble de l’année sélectionnée.
+                  </div>
+              </ng-container>
+          </p-tabPanel>
+        </p-tabView>
       </div>
 
-      <p-tabView [(activeIndex)]="activeTab" class="mt-3" (onChange)="onTabChange($event)">
-        <p-tabPanel header="Journalier">
-            <ng-container *ngIf="activeTab === 0">
-                <div class="grid align-items-end">
-                    <div class="col-12 md:col-4">
-                    <label class="block text-600 mb-2">Date</label>
-                    <p-calendar [(ngModel)]="dayDate" dateFormat="yy-mm-dd" [showIcon]="true"></p-calendar>
-                    </div>
-                    <div class="col-12 md:col-8 text-500" *ngIf="!report">
-                    Le rapport sera généré pour la journée sélectionnée.
-                    </div>
-                </div>
-            </ng-container>
-        </p-tabPanel>
+      <div class="col-12 xl:col-2 lg:col-2 md:col-2">
+        <span class="block font-bold mb-1">Exporter : </span>
+        <div class="flex flex-wrap gap-2">
+          <p-button (onClick)="exportPdf()"
+                    styleClass="align-content-center text-lg"
+                    label="PDF" [raised]="true" severity="danger"
+                    [disabled]="!report || exporting" [loading]="exporting">
+            <img src="assets/img/pdf.png" class="mr-2 report-icon" alt="PDF" />
+          </p-button>
+          <p-button (onClick)="exportExcel()"
+                    styleClass="align-content-center text-lg"
+                    label="Excel" [raised]="true" severity="success"
+                    [disabled]="!report || exporting" [loading]="exporting">
+            <img src="assets/img/excel.png" class="mr-2 report-icon" alt="Excel" />
+          </p-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <p-tabPanel header="Hebdomadaires">
-            <ng-container *ngIf="activeTab === 1">
-                <div class="grid align-items-end">
-                    <div class="col-12 md:col-4">
-                    <label class="block text-600 mb-2">Date (semaine)</label>
-                    <p-calendar [(ngModel)]="weekDate" dateFormat="yy-mm-dd" [showIcon]="true"></p-calendar>
-                    </div>
-                    <div class="col-12 md:col-8 text-500" *ngIf="!report">
-                    Le rapport couvre automatiquement du lundi au dimanche de la semaine sélectionnée.
-                    </div>
-                </div>
-            </ng-container>
-        </p-tabPanel>
+<p-messages></p-messages>
 
-        <p-tabPanel header="Mensuelles">
-            <ng-container *ngIf="activeTab === 2">
-                <div class="grid align-items-end">
-                    <div class="col-12 md:col-4">
-                    <label class="block text-600 mb-2">Mois</label>
-                    <p-calendar [(ngModel)]="monthDate" view="month" dateFormat="yy-mm" [showIcon]="true"></p-calendar>
-                    </div>
-                    <div class="col-12 md:col-8 text-500" *ngIf="!report">
-                    Le rapport couvrira l’ensemble du mois sélectionné.
-                    </div>
-                </div>
-            </ng-container>
-        </p-tabPanel>
-
-        <p-tabPanel header="Annuelles">
-            <ng-container *ngIf="activeTab === 3">
-                <div class="grid align-items-end">
-                    <div class="col-12 md:col-4">
-                    <label class="block text-600 mb-2">Année</label>
-                    <p-calendar [(ngModel)]="yearDate" view="year" dateFormat="yy" [showIcon]="true"></p-calendar>
-                    </div>
-                    <div class="col-12 md:col-8 text-500" *ngIf="!report">
-                    Le rapport couvrira l’ensemble de l’année sélectionnée.
-                    </div>
-                </div>
-            </ng-container>
-        </p-tabPanel>
-      </p-tabView>
-
-      <p-divider class="my-3" *ngIf="report"></p-divider>
-
-      <div *ngIf="report" class="grid">
+<div *ngIf="report" class="grid">
         <div class="col-12 md:col-4">
-          <div class="p-3 border-round surface-50">
+          <div class="p-3 border-round surface-50 report-summary">
             <div class="text-600">Volume total des sorties</div>
             <div class="text-2xl font-semibold mt-1">{{ grandTotal | number:'1.0-2' }} L</div>
             <div class="text-500 mt-1">Période : {{ report?.date_start }} → {{ report?.date_end }}</div>
@@ -109,8 +141,8 @@
             <div class="card mb-3">
               <div class="flex align-items-center justify-content-between flex-wrap gap-2">
                 <div>
-                  <h6 class="m-0">{{ s.station?.formated_name || s.station?.name }}</h6>
-                  <small class="text-500">Produit : {{ s.product?.name }}</small>
+                  <h6 class="m-0 font-bold text-2xl">{{ s.station?.formated_name || s.station?.name }}</h6>
+                  <small class="text-500 report-summary">Produit : {{ s.product?.name }}</small>
                 </div>
                 <div class="text-right">
                   <div class="text-600">Total sorties</div>
@@ -120,18 +152,41 @@
 
               <p-divider class="my-3"></p-divider>
 
-              <h6 class="mt-0">Daily summary</h6>
-              <p-table [value]="s.daily || []" [paginator]="true" [rows]="10" responsiveLayout="scroll">
+              <h6 class="mt-0">Détails des sorties</h6>
+              <p-table
+                [value]="s.events || []"
+                [paginator]="true"
+                [rows]="10"
+                [rowsPerPageOptions]="[10, 20, 50]"
+                responsiveLayout="scroll"
+                styleClass="p-datatable-striped p-datatable-gridlines"
+                [rowHover]="true"
+              >
                 <ng-template pTemplate="header">
                   <tr>
                     <th>Date</th>
-                    <th class="text-right">Out (L)</th>
+                    <th>Cuve</th>
+                    <th class="text-right">Volume avant sortie (L)</th>
+                    <th>Heure de début</th>
+                    <th>Heure de fin</th>
+                    <th class="text-right">Volume après sortie (L)</th>
                   </tr>
                 </ng-template>
-                <ng-template pTemplate="body" let row>
+                <ng-template pTemplate="body" let-row>
                   <tr>
-                    <td>{{ row.date }}</td>
-                    <td class="text-right">{{ row.total_output | number:'1.0-2' }}</td>
+                    <td>{{ formatEventDate(row?.date ?? row?.start_at) }}</td>
+                    <td>{{ getTankLabel(row) }}</td>
+                    <td class="text-right">{{ formatNumber(getStartVolume(row)) }}</td>
+                    <td>{{ formatEventTime(row?.start_time ?? row?.start_at) }}</td>
+                    <td>{{ formatEventTime(row?.end_time ?? row?.end_at) }}</td>
+                    <td class="text-right">{{ formatNumber(getEndVolume(row)) }}</td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="6" class="text-center text-500">
+                      Aucune sortie pour cette période.
+                    </td>
                   </tr>
                 </ng-template>
               </p-table>
@@ -139,7 +194,3 @@
           </ng-container>
         </div>
       </div>
-
-    </div>
-  </div>
-</div>

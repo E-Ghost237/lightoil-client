@@ -21,6 +21,7 @@ export class DumpingReportsComponent implements OnInit {
 
   loading: boolean = false;
   exporting: boolean = false;
+  private readonly messageLifeMs = 8000;
 
   roleType: string = '';
   companyId: number | null = null;
@@ -44,6 +45,7 @@ export class DumpingReportsComponent implements OnInit {
   report: any = null; // backend response
   stationReports: any[] = [];
   grandTotal: number = 0;
+  private lastAutoPayloadKey: string | null = null;
 
   constructor(
     private msg: MessageService,
@@ -64,6 +66,7 @@ export class DumpingReportsComponent implements OnInit {
   onTabChange(event: any) {
   this.activeTab = event.index;
   this.msg.clear(); // if MessageService is used
+  this.onFilterChange();
 
   // Si tu veux que changer d’onglet "réinitialise" le rapport :
   // this.report = null;
@@ -86,8 +89,11 @@ export class DumpingReportsComponent implements OnInit {
         label: s.formated_name || s.name,
         value: s.id
       }));
-      // default = first
-      this.selectedStationId = this.stationOptions.length ? this.stationOptions[0].value : null;
+      if (this.stationOptions.length === 1) {
+        this.selectedStationId = this.stationOptions[0].value;
+      } else {
+        this.selectedStationId = null;
+      }
       return;
     }
 
@@ -174,15 +180,50 @@ export class DumpingReportsComponent implements OnInit {
     return { start, end, label: `${start.getFullYear()}` };
   }
 
+  private addMessage(severity: 'success' | 'info' | 'warn' | 'error', summary: string, detail: string): void {
+    this.msg.add({ severity, summary, detail, life: this.messageLifeMs });
+  }
+
+  private resetReport(): void {
+    this.report = null;
+    this.stationReports = [];
+    this.grandTotal = 0;
+  }
+
+  private hasActiveDate(): boolean {
+    if (this.activeTab === 0) return !!this.dayDate;
+    if (this.activeTab === 1) return !!this.weekDate;
+    if (this.activeTab === 2) return !!this.monthDate;
+    return !!this.yearDate;
+  }
+
+  onFilterChange(): void {
+    if (this.loading) return;
+    this.resetReport();
+
+    if (!this.selectedProductId || !this.selectedStationId || !this.hasActiveDate()) {
+      return;
+    }
+
+    const payload = this.buildPayload();
+    if (!payload) return;
+
+    const payloadKey = `${payload.product_id}|${payload.station_id}|${payload.date_start}|${payload.date_end}`;
+    if (payloadKey === this.lastAutoPayloadKey) return;
+
+    this.lastAutoPayloadKey = payloadKey;
+    void this.generate();
+  }
+
   private buildPayload(): FuelReportPayload | null {
     if (!this.selectedProductId) {
-      this.msg.add({ severity: 'warn', summary: 'Produit manquant', detail: 'Veuillez sélectionner un produit.' });
+      this.addMessage('warn', 'Produit manquant', 'Veuillez sélectionner un produit.');
       return null;
     }
 
         // Le point de vente est obligatoire pour tous (rapport par station)
     if (!this.selectedStationId) {
-      this.msg.add({ severity: 'warn', summary: 'Point de vente manquant', detail: 'Veuillez sélectionner un point de vente.' });
+      this.addMessage('warn', 'Point de vente manquant', 'Veuillez sélectionner un point de vente.');
       return null;
     }
 
@@ -204,25 +245,20 @@ export class DumpingReportsComponent implements OnInit {
     if (!payload) return;
 
     this.loading = true;
-    this.report = null;
-    this.stationReports = [];
-    this.grandTotal = 0;
+    this.resetReport();
 
     try {
       const res: any = await firstValueFrom(this.fuelReports.getDumpingReport(payload));
-      this.report = res;
-      this.stationReports = res?.stations || [];
-      this.grandTotal = res?.grand_total_input ?? 0;
+      const payloadData = res?.data ?? res;
+      this.report = payloadData;
+      this.stationReports = payloadData?.stations || [];
+      this.grandTotal = payloadData?.grand_total_input ?? 0;
 
       if (!this.stationReports.length) {
-        this.msg.add({ severity: 'info', summary: 'Aucune donnée', detail: 'Aucun dépôtage trouvé pour cette période.' });
+        this.addMessage('info', 'Aucune donnée', 'Aucun dépôtage trouvé pour cette période.');
       }
     } catch (err: any) {
-      this.msg.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: err?.error?.message || 'Impossible de générer le rapport.'
-      });
+      this.addMessage('error', 'Erreur', err?.error?.message || 'Impossible de générer le rapport.');
     } finally {
       this.loading = false;
     }
@@ -239,7 +275,7 @@ export class DumpingReportsComponent implements OnInit {
       const blob: Blob = await firstValueFrom(this.fuelReports.exportDumpingReportPdf(payload));
       this.downloadBlob(blob, `rapport-depotage_${payload.date_start}_au_${payload.date_end}.pdf`);
     } catch (err: any) {
-      this.msg.add({ severity: 'error', summary: 'Export échoué', detail: 'Impossible d’exporter le PDF.' });
+      this.addMessage('error', 'Export échoué', 'Impossible d’exporter le PDF.');
     } finally {
       this.exporting = false;
     }
@@ -256,7 +292,7 @@ export class DumpingReportsComponent implements OnInit {
       const blob: Blob = await firstValueFrom(this.fuelReports.exportDumpingReportExcel(payload));
       this.downloadBlob(blob, `rapport-depotage_${payload.date_start}_au_${payload.date_end}.csv`);
     } catch (err: any) {
-      this.msg.add({ severity: 'error', summary: 'Export échoué', detail: err?.error?.message || 'Impossible d’exporter Excel.' });
+      this.addMessage('error', 'Export échoué', err?.error?.message || 'Impossible d’exporter Excel.');
     } finally {
       this.exporting = false;
     }
@@ -269,6 +305,81 @@ export class DumpingReportsComponent implements OnInit {
     a.download = fileName;
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  private parseEventDate(value: any): Date | null {
+    if (!value) return null;
+    if (typeof value === 'string' && value.length <= 10 && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const dateOnly = new Date(`${value}T00:00:00`);
+      return Number.isNaN(dateOnly.getTime()) ? null : dateOnly;
+    }
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  formatEventDate(value: any): string {
+    const date = this.parseEventDate(value);
+    if (date) {
+      return new Intl.DateTimeFormat('fr-FR').format(date);
+    }
+    return value ? String(value) : '--';
+  }
+
+  formatEventTime(value: any): string {
+    if (typeof value === 'string' && value.length <= 5 && /^\d{2}:\d{2}$/.test(value)) {
+      return value;
+    }
+    const date = this.parseEventDate(value);
+    if (date) {
+      return new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(date);
+    }
+    return value ? String(value) : '--';
+  }
+
+  formatNumber(value: any): string {
+    const num = Number(value);
+    if (value === null || value === undefined || Number.isNaN(num)) {
+      return '--';
+    }
+    return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(num);
+  }
+
+  getDumpingVolume(event: any): number | null {
+    if (!event) return null;
+    const value =
+      event.volume_deposited ??
+      event.qty ??
+      event.volume ??
+      event.total_input ??
+      event.input ??
+      event.amount;
+    return value === undefined ? null : value;
+  }
+
+  getEndVolume(event: any): number | null {
+    if (!event) return null;
+    const value =
+      event.volume_after ??
+      event.end_volume ??
+      event.endVolume ??
+      event.volume_end ??
+      event.final_volume ??
+      event.end_tank_volume;
+    return value === undefined ? null : value;
+  }
+
+  getTankLabel(event: any): string {
+    if (!event) return '--';
+    const label =
+      event.tank_reference ??
+      event.tank?.sensor_reference ??
+      event.tank?.name ??
+      event.tank_label ??
+      event.tankLabel ??
+      event.tank_id ??
+      event.tankId;
+    if (label === null || label === undefined || label === '') return '--';
+    return typeof label === 'number' ? `#${label}` : String(label);
   }
 
   getStatusColor(status: string): string {
