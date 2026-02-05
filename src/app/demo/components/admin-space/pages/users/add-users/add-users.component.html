@@ -85,7 +85,7 @@
             </div>
 
             <ng-template #fixedCompanyTpl>
-              <div class="field">
+              <div class="field" *ngIf="!isGeneralDirector()">
                 <label>Entreprise</label>
                 <input pInputText type="text" [value]="currentCompany?.name || '-'" disabled />
                 <small class="text-600">Votre rôle vous limite à votre entreprise.</small>
