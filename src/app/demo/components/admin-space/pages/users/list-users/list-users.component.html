@@ -67,12 +67,12 @@
         <th scope="col">Rôle(s)</th>
         <th scope="col">Station(s)</th>
         <th scope="col" class="text-center" style="width: 120px;">Statut</th>
-        <th scope="col" class="text-center" style="width: 90px;">Actions</th>
+        <th scope="col" class="text-center" style="width: 110px;">Actions</th>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-u let-rowIndex="rowIndex">
-      <tr>
+      <tr class="cursor-pointer" (click)="openView(u)">
         <td class="text-center">
           <span class="p-column-title">#</span>
           {{ rowIndex + 1 + first_page }}
@@ -118,14 +118,38 @@
         </td>
 
         <td class="text-center">
-          <p-speedDial
-            [model]="getSpeedDialItems(u)"
-            direction="left"
-            type="linear"
-            showIcon="pi pi-ellipsis-v"
-            hideIcon="pi pi-times"
-            buttonClassName="p-button-rounded p-button-text"
-          ></p-speedDial>
+          <ng-container *ngIf="canManageUser(u); else noActions">
+            <div class="flex align-items-center justify-content-center gap-1">
+              <p-button
+                icon="pi pi-pencil"
+                styleClass="p-button-rounded p-button-text p-button-sm"
+                severity="info"
+                pTooltip="Modifier"
+                tooltipPosition="top"
+                (click)="openEdit(u); $event.stopPropagation()"
+              ></p-button>
+              <p-button
+                [icon]="(u.status || '').toLowerCase() === 'enabled' ? 'pi pi-ban' : 'pi pi-check'"
+                styleClass="p-button-rounded p-button-text p-button-sm"
+                [severity]="(u.status || '').toLowerCase() === 'enabled' ? 'warning' : 'success'"
+                [pTooltip]="(u.status || '').toLowerCase() === 'enabled' ? 'Désactiver' : 'Activer'"
+                tooltipPosition="top"
+                (click)="confirmToggleStatus(u); $event.stopPropagation()"
+              ></p-button>
+              <p-button
+                *ngIf="canDeleteUser(u)"
+                icon="pi pi-trash"
+                styleClass="p-button-rounded p-button-text p-button-sm"
+                severity="danger"
+                pTooltip="Supprimer"
+                tooltipPosition="top"
+                (click)="confirmDelete(u); $event.stopPropagation()"
+              ></p-button>
+            </div>
+          </ng-container>
+          <ng-template #noActions>
+            <span class="text-500">-</span>
+          </ng-template>
         </td>
       </tr>
     </ng-template>
@@ -254,6 +278,9 @@
         optionValue="value"
         display="chip"
         [filter]="true"
+        appendTo="body"
+        [autoZIndex]="true"
+        [scrollHeight]="'260px'"
         placeholder="Sélectionner..."
         class="w-full"
       ></p-multiSelect>
@@ -269,6 +296,9 @@
         optionValue="value"
         display="chip"
         [filter]="true"
+        appendTo="body"
+        [autoZIndex]="true"
+        [scrollHeight]="'260px'"
         placeholder="Sélectionner..."
         class="w-full"
       ></p-multiSelect>

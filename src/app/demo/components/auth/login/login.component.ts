@@ -50,6 +50,19 @@ export class LoginComponent {
                 (response) => {
                     // ;
                     if (response.success === true) {
+                        const status = (response?.data?.user_details?.user?.status || '').toLowerCase();
+                        if (status === 'disabled') {
+                            this.loading = false;
+                            this.messageService.add({
+                                key: 'tst',
+                                severity: 'error',
+                                summary: 'Compte désactivé',
+                                detail: 'Votre compte est désactivé. Veuillez contacter un administrateur.',
+                                life: 8000
+                            });
+                            return;
+                        }
+
                         this.loading = false;
                         this.setCurrentUser(response.data);
                         // this.setCurrentUserToCookies(response.data);

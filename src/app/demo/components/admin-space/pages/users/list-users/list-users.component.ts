@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Table } from 'primeng/table';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LocalStorageService } from 'src/app/demo/components/auth/services/local-storage.service';
 import { UsersService } from '../../../services/users.service';
@@ -94,6 +94,30 @@ export class ListUsersComponent implements OnInit {
 
   isGeneralDirector(): boolean {
     return this.roleType === 'Moderator';
+  }
+
+  private normalizeRoleName(name: string): string {
+    return (name || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+
+  private isUserGeneralDirector(u: UserRow): boolean {
+    return (u.roles || []).some((r) => {
+      const normalized = this.normalizeRoleName(r);
+      return normalized === 'directeur general' || normalized === 'dg';
+    });
+  }
+
+  canManageUser(u: UserRow): boolean {
+    return this.isAdminLike() || this.isGeneralDirector();
+  }
+
+  canDeleteUser(u: UserRow): boolean {
+    if (this.isAdminLike()) return true;
+    if (this.isGeneralDirector()) return !this.isUserGeneralDirector(u);
+    return false;
   }
 
   loadData(): void {
@@ -196,45 +220,16 @@ export class ListUsersComponent implements OnInit {
     return 'info';
   }
 
-  getSpeedDialItems(u: UserRow): MenuItem[] {
-    const items: MenuItem[] = [];
-
-    // view is always allowed
-    items.push({
-      tooltipOptions: { tooltipLabel: 'Voir', tooltipPosition: 'top' },
-      icon: 'pi pi-eye',
-      command: () => this.openView(u)
-    });
-
-    if (this.isAdminLike()) {
-      items.push({
-        tooltipOptions: { tooltipLabel: 'Modifier', tooltipPosition: 'top' },
-        icon: 'pi pi-pencil',
-        command: () => this.openEdit(u)
-      });
-
-      items.push({
-        tooltipOptions: { tooltipLabel: u.status?.toLowerCase() === 'enabled' ? 'Désactiver' : 'Activer', tooltipPosition: 'top' },
-        icon: u.status?.toLowerCase() === 'enabled' ? 'pi pi-ban' : 'pi pi-check',
-        command: () => this.confirmToggleStatus(u)
-      });
-
-      items.push({
-        tooltipOptions: { tooltipLabel: 'Supprimer', tooltipPosition: 'top' },
-        icon: 'pi pi-trash',
-        command: () => this.confirmDelete(u)
-      });
-    }
-
-    return items;
-  }
-
   openView(u: UserRow): void {
     this.selectedUser = u;
     this.viewDialogVisible = true;
   }
 
   openEdit(u: UserRow): void {
+    if (!this.canManageUser(u)) {
+      this.messageService.add({ key: 'tst', severity: 'warn', summary: 'Accès refusé', detail: 'Vous ne pouvez pas modifier cet utilisateur.', life: 6000 });
+      return;
+    }
     this.selectedUser = u;
     this.editForm.patchValue({
       firstName: u.first_name || '',
@@ -283,6 +278,10 @@ export class ListUsersComponent implements OnInit {
   }
 
   confirmToggleStatus(u: UserRow): void {
+    if (!this.canManageUser(u)) {
+      this.messageService.add({ key: 'tst', severity: 'warn', summary: 'Accès refusé', detail: 'Vous ne pouvez pas modifier le statut de cet utilisateur.', life: 6000 });
+      return;
+    }
     const isEnabled = (u.status || '').toLowerCase() === 'enabled';
     this.confirmationService.confirm({
       header: isEnabled ? 'Désactiver utilisateur' : 'Activer utilisateur',
@@ -308,6 +307,10 @@ export class ListUsersComponent implements OnInit {
   }
 
   confirmDelete(u: UserRow): void {
+    if (!this.canDeleteUser(u)) {
+      this.messageService.add({ key: 'tst', severity: 'warn', summary: 'Accès refusé', detail: 'Vous ne pouvez pas supprimer cet utilisateur.', life: 6000 });
+      return;
+    }
     this.confirmationService.confirm({
       header: 'Supprimer utilisateur',
       message: `Voulez-vous supprimer ${u.full_name || 'cet utilisateur'} ?`,

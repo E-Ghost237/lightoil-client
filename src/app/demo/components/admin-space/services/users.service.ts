@@ -11,7 +11,6 @@ export class UsersService {
 
   /**
    * Load users + roles + role types + service stations + pivot tables.
-   * API: GET /user
    */
   getUsersContext(): Observable<any> {
     return this.http.get<any>(environment.apiUrl + 'user');
