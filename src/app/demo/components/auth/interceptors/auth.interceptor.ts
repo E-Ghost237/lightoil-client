@@ -9,9 +9,14 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const auth = inject(AuthService);
     const token = auth.getAccessToken();
+    const isPublicAuthEndpoint = [
+      '/auth/login',
+      '/auth/password/forgot',
+      '/auth/password/reset'
+    ].some((path) => req.url.includes(path));
 
     // Pass the original request to the next handle if token does not exist
-    if (!token || token === null) {
+    if (!token || token === null || isPublicAuthEndpoint) {
       return next.handle(req).pipe(
         tap(event => {
           // Log the response for debugging
