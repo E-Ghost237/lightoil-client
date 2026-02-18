@@ -178,7 +178,7 @@
                   <tr>
                     <td>{{ formatEventDate(row?.date ?? row?.start_at) }}</td>
                     <td>{{ getTankLabel(row) }}</td>
-                    <td class="text-right">{{ formatNumber(getDumpingVolume(row)) }}</td>
+                    <td class="text-right">{{ formatNumber(getStartVolume(row)) }}</td>
                     <td>{{ formatEventTime(row?.start_time ?? row?.start_at) }}</td>
                     <td>{{ formatEventTime(row?.end_time ?? row?.end_at) }}</td>
                     <td class="text-right">{{ formatNumber(getEndVolume(row)) }}</td>

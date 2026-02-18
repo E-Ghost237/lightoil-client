@@ -344,6 +344,25 @@ export class DumpingReportsComponent implements OnInit {
     return new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(num);
   }
 
+  getStartVolume(event: any): number | null {
+    if (!event) return null;
+    const value =
+      event.volume_before ??
+      event.start_volume ??
+      event.startVolume ??
+      event.volume_start ??
+      event.initial_volume;
+    if (value !== undefined) return value;
+
+    const endVolume = Number(this.getEndVolume(event));
+    const dumpedVolume = Number(this.getDumpingVolume(event));
+    if (!Number.isNaN(endVolume) && !Number.isNaN(dumpedVolume)) {
+      return endVolume - dumpedVolume;
+    }
+
+    return null;
+  }
+
   getDumpingVolume(event: any): number | null {
     if (!event) return null;
     const value =
