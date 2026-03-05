@@ -1530,7 +1530,7 @@ export class PdfService {
                   style: "tableHeader"
                 },
                 {
-                  text: "Volume à T ambiant",
+                  text: "Volume carburant à T ambiant",
                   style: "tableHeader"
                 },
                 {
@@ -1622,6 +1622,7 @@ export class PdfService {
     let lines:any[]=[];
     for (let i = (listRecords.length-1); i >= 0; i--) {
       let record = listRecords[i];
+      const fuelVolume = record?.fuel_volume ?? record?.volume;
       lines.push([
         {
           text: (listRecords.length-i)+"",
@@ -1636,7 +1637,7 @@ export class PdfService {
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(record.volume),
+          text: this.getRoundValue(fuelVolume),
           style: "tableLine"
         },
         {
@@ -2590,7 +2591,7 @@ export class PdfService {
                   style: "tableHeader"
                 },
                 {
-                  text: "Volume à T ambiant",
+                  text: "Volume carburant à T ambiant",
                   style: "tableHeader"
                 },
                 {
@@ -2678,6 +2679,7 @@ export class PdfService {
     let lines:any[]=[];
     for (let i = (listRecords.length-1); i >= 0; i--) {
       let record = listRecords[i];
+      const fuelVolume = record?.fuel_volume ?? record?.volume;
       lines.push([
         {
           text: (listRecords.length-i)+"",
@@ -2696,7 +2698,7 @@ export class PdfService {
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(record.volume),
+          text: this.getRoundValue(fuelVolume),
           style: "tableLine"
         },
         {

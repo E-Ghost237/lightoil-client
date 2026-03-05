@@ -25,6 +25,12 @@ export class RecordService {
     return this.http.get<any>(environment.apiUrl+'servicestation/record/get-tank-details-data/'+tankId+'/get');
   }
 
+  getTankDayNotifications(tankId: number, date: string, timezone: string){
+    return this.http.get<any>(
+      environment.apiUrl + 'notification/tank/' + tankId + '/day?date=' + encodeURIComponent(date) + '&timezone=' + encodeURIComponent(timezone)
+    );
+  }
+
   getListRecordsForOneDay(usefullData:any){
     return this.http.post<any[]>(environment.apiUrl+'servicestation/record/get-list-records-for-one-day/post', usefullData);
   }

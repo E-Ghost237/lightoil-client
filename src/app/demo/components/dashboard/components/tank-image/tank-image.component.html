@@ -22,11 +22,11 @@
     </div>
     <div class="col-6 ">
         <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class="text-left "> Niveau(cm) </div>
+            <div class="text-left "> Hauteur carburant(cm) </div>
             <div class="text-right"> {{getLevel()}} </div>
         </div>
         <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Volume à {{getLiquidTemp()+ 'C(l)'}} </div>
+            <div class=" text-left "> Volume carburant à {{getLiquidTemp()+ 'C(l)'}} </div>
             <div class=" text-right"> {{getVolumeAtT()}}</div>
         </div>
         <div class="d-flex flex-row justify-content-between mb-1 line-info">
@@ -40,6 +40,14 @@
         <div class="d-flex flex-row justify-content-between mb-1 line-info">
             <div class=" text-left "> T.liquide(C) </div>
             <div class=" text-right"> {{getLiquidTemp()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Hauteur d'eau(cm) </div>
+            <div class=" text-right"> {{getWaterLevel()}}</div>
+        </div>
+        <div class="d-flex flex-row justify-content-between mb-1 line-info">
+            <div class=" text-left "> Volume d'eau(l) </div>
+            <div class=" text-right"> {{getWaterVolume()}}</div>
         </div>
         <!-- <div class="d-flex flex-row justify-content-between mb-1 line-info">
             <div class=" text-left "> T.ambiante(C) </div>
@@ -104,5 +112,3 @@
         
     </div>
 </div>
-
-

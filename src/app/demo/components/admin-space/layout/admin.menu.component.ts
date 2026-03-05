@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminLayoutService } from './service/admin.layout.service';
+import { LocalStorageService } from '../../auth/services/local-storage.service';
 
 @Component({
     selector: 'admin-menu',
@@ -8,10 +9,15 @@ import { AdminLayoutService } from './service/admin.layout.service';
 export class AdminMenuComponent implements OnInit {
 
     model: any[] = [];
+    roleType = '';
 
-    constructor(public layoutService: AdminLayoutService, ) { }
+    constructor(
+        public layoutService: AdminLayoutService,
+        private localStorageService: LocalStorageService
+    ) { }
 
     ngOnInit() {
+        this.roleType = this.localStorageService.getRoleType();
         this.model = [
             {
                 label: 'Accueil',
@@ -37,6 +43,11 @@ export class AdminMenuComponent implements OnInit {
                         icon: 'pi pi-fw pi-circle-on',
                         routerLink: ['/admin/network-config/products']
                     },
+                    ...(this.roleType === 'Super Admin' ? [{
+                        label: 'Onboarding reseau',
+                        icon: 'pi pi-fw pi-directions-alt',
+                        routerLink: ['/admin/onboarding']
+                    }] : []),
                     {
                         label: 'Rapports',
                         icon: 'pi pi-fw pi-chart-bar',

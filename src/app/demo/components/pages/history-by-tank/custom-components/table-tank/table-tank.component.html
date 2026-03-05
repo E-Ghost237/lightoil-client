@@ -22,9 +22,11 @@
             <tr>
                 <th>#</th>
                 <th>Relevé à</th>
-                <th pTooltip="en centimetres">Niveau(cm)</th>
-                <th pTooltip="en litres">Volume à T</th>
+                <th pTooltip="en centimetres">Hauteur carburant(cm)</th>
+                <th pTooltip="en litres">Volume carburant à T</th>
                 <th pTooltip="en litres">Volume à 15C</th>
+                <th>Hauteur d'eau(cm)</th>
+                <th pTooltip="en litres">Volume d'eau(l)</th>
                 <th pTooltip="en degres celsius">T(C) liquide</th>
                 <th pTooltip="rapport des masses volumiques">Densité</th>
             </tr>
@@ -34,8 +36,10 @@
                 <td>{{rowIndex+1}}</td>
                 <td>{{getToLocalDateTime(record.updated_at)}}</td>
                 <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
-                <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
+                <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeValue(record)}}</td>
                 <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume_at_fift)}}</td>
+                <td>{{getWaterLevelValue(record)}}</td>
+                <td>{{getWaterVolumeValue(record)}}</td>
                 <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
                 <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
             </tr>

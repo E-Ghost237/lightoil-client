@@ -164,4 +164,23 @@ export class HbpCustomTableTankComponent {
   getRoundValue(num:number){
       return Math.round(num*100)/100;
   }
+
+  private parseMetric(value: any): number | null {
+      if (value === null || value === undefined || value === '') {
+          return null;
+      }
+
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  getFuelVolumeValue(record: any) {
+      const fuelVolume = this.parseMetric(record?.fuel_volume ?? record?.volume);
+
+      if (fuelVolume === null) {
+          return '---';
+      }
+
+      return '' + this.getRoundValue(fuelVolume);
+  }
 }

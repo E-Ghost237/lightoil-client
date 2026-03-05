@@ -24,7 +24,7 @@
                 <th>Relevé à</th>
                 <th>Cuve</th>
                 <th pTooltip="en centimetres">Niveau(cm)</th>
-                <th pTooltip="en litres">Volume à T</th>
+                <th pTooltip="en litres">Volume carburant à T</th>
                 <th pTooltip="en litres">Volume à 15C</th>
                 <th pTooltip="en degres celsius">T(C) liquide</th>
                 <th pTooltip="rapport des masses volumiques">Densité</th>
@@ -36,7 +36,7 @@
                 <td>{{getToLocalDateTime(record.updated_at)}}</td>
                 <td pTooltip="reference de la cuve" tooltipPosition="bottom">{{record.tank.sensor_reference}}</td>
                 <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
-                <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
+                <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeValue(record)}}</td>
                 <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume_at_fift)}}</td>
                 <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
                 <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
@@ -44,4 +44,3 @@
         </ng-template>
     </p-table>
 </div>
-
