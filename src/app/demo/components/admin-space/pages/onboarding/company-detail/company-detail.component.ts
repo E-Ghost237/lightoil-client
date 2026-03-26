@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
@@ -268,5 +268,13 @@ export class CompanyDetailComponent implements OnInit {
     } finally {
       this.submitting = false;
     }
+  }
+
+  showControlError(control: AbstractControl | null): boolean {
+    return !!control && control.invalid && (control.touched || control.dirty);
+  }
+
+  controlHasError(control: AbstractControl | null, errorKey: string): boolean {
+    return !!control && control.hasError(errorKey) && (control.touched || control.dirty);
   }
 }

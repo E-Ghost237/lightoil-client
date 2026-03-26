@@ -8,10 +8,10 @@
       <p>{{ station?.company?.name || 'Entreprise inconnue' }} · {{ station?.town?.name || '-' }}</p>
     </div>
     <div class="actions">
-      <p-button label="Edit station" [text]="true" (onClick)="showEditStation = !showEditStation"></p-button>
-      <p-button label="Attach products" [text]="true" severity="secondary" (onClick)="showAttachProducts = !showAttachProducts"></p-button>
-      <p-button label="Add tank" [text]="true" severity="secondary" (onClick)="showAddTank = !showAddTank"></p-button>
-      <p-button label="Assign gauge" [text]="true" severity="secondary" (onClick)="showAssignGauge = !showAssignGauge"></p-button>
+      <p-button label="Modifier la station" [text]="true" (onClick)="showEditStation = !showEditStation"></p-button>
+      <p-button label="Attacher un produit" [text]="true" severity="secondary" (onClick)="showAttachProducts = !showAttachProducts"></p-button>
+      <p-button label="Ajouter une cuve" [text]="true" severity="secondary" (onClick)="showAddTank = !showAddTank"></p-button>
+      <p-button label="Assigner une jauge" [text]="true" severity="secondary" (onClick)="showAssignGauge = !showAssignGauge"></p-button>
       <p-button [label]="station?.status === 'enabled' ? 'Suspendre' : 'Reactiver'" severity="warning" (onClick)="toggleStationStatus()"></p-button>
       <p-button label="Rappel paiement" severity="help" (onClick)="sendPaymentReminder()"></p-button>
     </div>
@@ -21,13 +21,22 @@
     <div class="card section-card" *ngIf="showEditStation">
       <h2>Edit station</h2>
       <form [formGroup]="stationForm" class="form-grid">
+        <p class="required-hint field-span-2">
+          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
+        </p>
         <div class="field">
-          <label>Nom</label>
+          <label>Nom <span class="required-indicator">*</span></label>
           <input pInputText formControlName="name" />
+          <small class="field-error" *ngIf="showControlError(stationForm.get('name'))">
+            Le nom est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Type</label>
+          <label>Type <span class="required-indicator">*</span></label>
           <p-dropdown [options]="salePointTypes" optionLabel="name" optionValue="id" formControlName="sale_point_type_id"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('sale_point_type_id'))">
+            Le type est obligatoire.
+          </small>
         </div>
         <div class="field field-span-2">
           <label>Adresse</label>
@@ -38,28 +47,46 @@
           <textarea pInputTextarea rows="3" formControlName="description"></textarea>
         </div>
         <div class="field">
-          <label>Region</label>
+          <label>Region <span class="required-indicator">*</span></label>
           <p-dropdown [options]="regions" optionLabel="name" optionValue="id" formControlName="region_id"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('region_id'))">
+            La region est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Ville</label>
+          <label>Ville <span class="required-indicator">*</span></label>
           <p-dropdown [options]="filteredTowns" optionLabel="name" optionValue="id" formControlName="town_id"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('town_id'))">
+            La ville est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Latitude</label>
+          <label>Latitude <span class="required-indicator">*</span></label>
           <p-inputNumber formControlName="latitude" mode="decimal" [minFractionDigits]="4" [maxFractionDigits]="6"></p-inputNumber>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('latitude'))">
+            La latitude est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Longitude</label>
+          <label>Longitude <span class="required-indicator">*</span></label>
           <p-inputNumber formControlName="longitude" mode="decimal" [minFractionDigits]="4" [maxFractionDigits]="6"></p-inputNumber>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('longitude'))">
+            La longitude est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Fuseau horaire</label>
+          <label>Fuseau horaire <span class="required-indicator">*</span></label>
           <p-inputNumber formControlName="time_zone" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('time_zone'))">
+            Le fuseau horaire est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Statut</label>
+          <label>Statut <span class="required-indicator">*</span></label>
           <p-dropdown [options]="statusOptions" optionLabel="label" optionValue="value" formControlName="status"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('status'))">
+            Le statut est obligatoire.
+          </small>
         </div>
       </form>
       <div class="footer-actions">
@@ -70,6 +97,9 @@
     <div class="card section-card" *ngIf="showAttachProducts">
       <h2>Attach products</h2>
       <form [formGroup]="productsForm">
+        <p class="required-hint">
+          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
+        </p>
         <div formArrayName="items" class="stack-grid">
           <div class="line-card" *ngFor="let row of productItems.controls; index as i" [formGroupName]="i">
             <div class="line-head">
@@ -78,16 +108,31 @@
             </div>
             <div class="form-grid compact">
               <div class="field">
-                <label>Produit</label>
+                <label>Produit <span class="required-indicator">*</span></label>
                 <p-dropdown [options]="products" optionLabel="name" optionValue="id" formControlName="product_id"></p-dropdown>
+                <small class="field-error" *ngIf="showControlError(row.get('product_id'))">
+                  Le produit est obligatoire.
+                </small>
               </div>
               <div class="field">
-                <label>Pistolets</label>
+                <label>Pistolets <span class="required-indicator">*</span></label>
                 <p-inputNumber formControlName="pistolets" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+                <small class="field-error" *ngIf="controlHasError(row.get('pistolets'), 'required')">
+                  Le nombre de pistolets est obligatoire.
+                </small>
+                <small class="field-error" *ngIf="controlHasError(row.get('pistolets'), 'min')">
+                  La valeur ne peut pas etre negative.
+                </small>
               </div>
               <div class="field">
-                <label>Prix</label>
+                <label>Prix <span class="required-indicator">*</span></label>
                 <p-inputNumber formControlName="product_price" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="2"></p-inputNumber>
+                <small class="field-error" *ngIf="controlHasError(row.get('product_price'), 'required')">
+                  Le prix est obligatoire.
+                </small>
+                <small class="field-error" *ngIf="controlHasError(row.get('product_price'), 'min')">
+                  Le prix ne peut pas etre negatif.
+                </small>
               </div>
             </div>
           </div>
@@ -104,8 +149,11 @@
     <div class="card section-card" *ngIf="showAddTank">
       <h2>Add tank</h2>
       <form [formGroup]="tankForm">
+        <p class="required-hint">
+          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour creer la cuve.
+        </p>
         <div class="field selector-field">
-          <label>Produit de la station</label>
+          <label>Produit de la station <span class="required-indicator">*</span></label>
           <p-dropdown
             [options]="stationProducts"
             optionLabel="product.name"
@@ -119,6 +167,9 @@
               </div>
             </ng-template>
           </p-dropdown>
+          <small class="field-error" *ngIf="showControlError(tankForm.get('product_service_station_id'))">
+            Le produit de la station est obligatoire.
+          </small>
         </div>
         <div formArrayName="tanks" class="stack-grid">
           <div class="line-card" *ngFor="let tank of tankItems.controls; index as i" [formGroupName]="i">
@@ -128,16 +179,22 @@
             </div>
             <div class="form-grid compact">
               <div class="field field-span-2">
-                <label>Abaque</label>
+                <label>Abaque <span class="required-indicator">*</span></label>
                 <textarea pInputTextarea rows="2" formControlName="abacus"></textarea>
+                <small class="field-error" *ngIf="showControlError(tank.get('abacus'))">
+                  L'abaque est obligatoire.
+                </small>
               </div>
               <div class="field">
                 <label>Reference capteur</label>
                 <input pInputText formControlName="sensor_reference" />
               </div>
               <div class="field">
-                <label>Hauteur trou d’homme</label>
+                <label>Hauteur trou d’homme <span class="required-indicator">*</span></label>
                 <p-inputNumber formControlName="man_hole_height" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="2"></p-inputNumber>
+                <small class="field-error" *ngIf="showControlError(tank.get('man_hole_height'))">
+                  La hauteur du trou d'homme est obligatoire.
+                </small>
               </div>
               <div class="field">
                 <label>Diametre</label>
@@ -159,16 +216,25 @@
 
     <div class="card section-card" *ngIf="showAssignGauge">
       <h2>Assign gauge</h2>
+      <p class="required-hint">
+        Le champ <span class="required-indicator">*</span> doit etre renseigne avant l'affectation.
+      </p>
       <div [formGroup]="gaugeForm" formArrayName="assignments" class="stack-grid">
         <div class="gauge-row" *ngFor="let assignment of gaugeAssignments.controls; index as i" [formGroupName]="i">
           <div>
             <strong>{{ assignment.get('sensor_reference')?.value }}</strong>
           </div>
-          <p-dropdown [options]="gauges" optionLabel="name" optionValue="id" formControlName="jauge_id"></p-dropdown>
+          <div class="field">
+            <label>Jauge <span class="required-indicator">*</span></label>
+            <p-dropdown [options]="gauges" optionLabel="name" optionValue="id" formControlName="jauge_id"></p-dropdown>
+            <small class="field-error" *ngIf="showControlError(assignment.get('jauge_id'))">
+              La jauge est obligatoire.
+            </small>
+          </div>
           <p-button
             label="Affecter"
             [loading]="submitting"
-            (onClick)="assignGauge(assignment.get('tank_id')?.value, assignment.get('jauge_id')?.value)">
+            (onClick)="assignGauge(assignment.get('tank_id')?.value, assignment.get('jauge_id')?.value, i)">
           </p-button>
         </div>
       </div>
@@ -209,8 +275,13 @@
         <ng-template pTemplate="body" let-tank>
           <tr>
             <td>{{ tank.sensor_reference || '-' }}</td>
-            <td>{{ tank.liquid_type || '-' }}</td>
-            <td>{{ tank.jauge_id || '-' }}</td>
+            <td>{{ getTankProductLabel(tank) }}</td>
+            <td>{{ getTankGaugeLabel(tank) }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="3">Aucune cuve trouvee pour cette station.</td>
           </tr>
         </ng-template>
       </p-table>

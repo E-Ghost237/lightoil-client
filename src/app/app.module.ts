@@ -10,7 +10,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AuthInterceptor } from './demo/components/auth/interceptors/auth.interceptor';
 import { CalendarModule } from 'primeng/calendar';
-import { PagesModule } from './demo/components/pages/pages.module';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AuthService } from './demo/components/auth/services/auth.service';
@@ -27,7 +26,6 @@ registerLocaleData(localeFr);
         BrowserModule,
         BrowserAnimationsModule,
         AppRoutingModule,
-        PagesModule,
         HttpClientModule
     ],
     providers: [

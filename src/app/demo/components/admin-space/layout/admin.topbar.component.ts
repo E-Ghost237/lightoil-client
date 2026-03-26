@@ -15,6 +15,7 @@ export class AdminTopBarComponent {
     @ViewChild('topbarmenubutton') topbarMenuButton!: ElementRef;
 
     @ViewChild('topbarmenu') menu!: ElementRef;
+    homeRoute: string[] = ['/admin/dashboard'];
 
     constructor(public layoutService: AdminLayoutService) { }
 }

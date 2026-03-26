@@ -83,7 +83,7 @@ export class ListUsersComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.minLength(6)]],
       address: [''],
-      roles: [[], [Validators.required]],
+      role_id: [null, [Validators.required]],
       serviceStations: [[]]
     });
   }
@@ -237,7 +237,7 @@ export class ListUsersComponent implements OnInit {
       email: u.email || '',
       phone: u.phone || '',
       address: u.address || '',
-      roles: u.role_ids || [],
+      role_id: u.role_ids?.[0] ?? null,
       serviceStations: u.station_ids || []
     });
 
@@ -259,8 +259,15 @@ export class ListUsersComponent implements OnInit {
     }
 
     this.saving = true;
+    const raw = this.editForm.value;
     const payload = {
-      ...this.editForm.value
+      firstName: raw.firstName,
+      lastName: raw.lastName,
+      email: raw.email,
+      phone: raw.phone,
+      address: raw.address || null,
+      roles: raw.role_id ? [raw.role_id] : [],
+      serviceStations: raw.serviceStations || []
     };
 
     this.usersService.updateUser(this.selectedUser.id, payload).subscribe({

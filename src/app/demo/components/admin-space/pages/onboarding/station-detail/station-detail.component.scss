@@ -32,13 +32,18 @@
 
 .grid-two {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
   gap: 1rem;
+}
+
+.grid-two > * {
+  min-width: 0;
 }
 
 .section-card {
   display: grid;
   gap: 1rem;
+  min-width: 0;
 }
 
 .form-grid {
@@ -48,12 +53,29 @@
 }
 
 .form-grid.compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 }
 
 .field {
   display: grid;
   gap: 0.45rem;
+  min-width: 0;
+}
+
+.required-hint {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.required-indicator {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.8rem;
 }
 
 .field-span-2 {
@@ -74,6 +96,7 @@
   border-radius: 1rem;
   border: 1px solid #e5e7eb;
   background: #fbfdff;
+  min-width: 0;
 }
 
 .line-head,
@@ -82,6 +105,10 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: center;
+}
+
+.gauge-row .field {
+  flex: 1;
 }
 
 .ghost-action {
@@ -99,6 +126,20 @@
   color: #64748b;
 }
 
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber,
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-inputtextarea,
+:host ::ng-deep .p-inputnumber-input {
+  width: 100%;
+  max-width: 100%;
+}
+
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber {
+  display: block;
+}
+
 .loading-card {
   display: grid;
   place-items: center;
@@ -107,8 +148,7 @@
 
 @media (max-width: 1100px) {
   .grid-two,
-  .form-grid,
-  .form-grid.compact {
+  .form-grid {
     grid-template-columns: 1fr;
   }
 

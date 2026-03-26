@@ -16,8 +16,7 @@ export class OnboardingWizardComponent implements OnInit {
     'Entreprise',
     'Point de vente',
     'Produits',
-    'Cuves',
-    'Jauges'
+    'Cuves'
   ];
 
   loadingContext = true;
@@ -43,12 +42,13 @@ export class OnboardingWizardComponent implements OnInit {
   createdTanks: any[] = [];
   selectedCompanyId: number | null = null;
   selectedStationId: number | null = null;
+  companySelectionAttempted = false;
+  stationSelectionAttempted = false;
 
   companyForm: FormGroup;
   stationForm: FormGroup;
   productsForm: FormGroup;
   tanksForm: FormGroup;
-  gaugesForm: FormGroup;
 
   readonly statusOptions = [
     { label: 'Activé', value: 'enabled' },
@@ -94,10 +94,6 @@ export class OnboardingWizardComponent implements OnInit {
     this.tanksForm = this.fb.group({
       groups: this.fb.array([])
     });
-
-    this.gaugesForm = this.fb.group({
-      assignments: this.fb.array([])
-    });
   }
 
   ngOnInit(): void {
@@ -116,10 +112,6 @@ export class OnboardingWizardComponent implements OnInit {
 
   get tankGroups(): FormArray {
     return this.tanksForm.get('groups') as FormArray;
-  }
-
-  get gaugeAssignments(): FormArray {
-    return this.gaugesForm.get('assignments') as FormArray;
   }
 
   tankRows(groupIndex: number): FormArray {
@@ -171,6 +163,7 @@ export class OnboardingWizardComponent implements OnInit {
 
   setCompanyMode(mode: 'create' | 'existing'): void {
     this.companyMode = mode;
+    this.companySelectionAttempted = false;
 
     if (mode === 'create') {
       this.selectedCompanyId = null;
@@ -193,6 +186,7 @@ export class OnboardingWizardComponent implements OnInit {
 
   async onExistingCompanyChange(companyId: number | null): Promise<void> {
     this.selectedCompanyId = companyId;
+    this.companySelectionAttempted = false;
     if (!companyId) {
       this.createdCompany = null;
       this.companyStations = [];
@@ -247,6 +241,7 @@ export class OnboardingWizardComponent implements OnInit {
 
   setStationMode(mode: 'create' | 'existing'): void {
     this.stationMode = mode;
+    this.stationSelectionAttempted = false;
 
     if (mode === 'create') {
       this.selectedStationId = null;
@@ -271,6 +266,7 @@ export class OnboardingWizardComponent implements OnInit {
 
   onExistingStationChange(stationId: number | null): void {
     this.selectedStationId = stationId;
+    this.stationSelectionAttempted = false;
     const station = this.companyStations.find((item) => Number(item.id) === Number(stationId));
 
     if (!station) {
@@ -331,7 +327,6 @@ export class OnboardingWizardComponent implements OnInit {
 
     this.tankGroups.clear();
     this.createdTanks = [];
-    this.gaugeAssignments.clear();
     this.setupComplete = false;
   }
 
@@ -378,6 +373,7 @@ export class OnboardingWizardComponent implements OnInit {
     return this.fb.group({
       abacus: ['', Validators.required],
       diameter: [null],
+      jauge_id: [null, Validators.required],
       liquid_type: [productName || ''],
       file_path: [null],
       man_hole_height: [null, Validators.required],
@@ -404,15 +400,19 @@ export class OnboardingWizardComponent implements OnInit {
     return this.products.find((product) => Number(product.id) === Number(productId))?.name ?? 'Produit';
   }
 
-  getGaugeName(gaugeId: number): string {
-    return this.gauges.find((gauge) => Number(gauge.id) === Number(gaugeId))?.name ?? '-';
-  }
-
   markFormGroupTouched(control: AbstractControl): void {
     control.markAsTouched();
     if (control instanceof FormGroup || control instanceof FormArray) {
       Object.values(control.controls).forEach((child) => this.markFormGroupTouched(child));
     }
+  }
+
+  showControlError(control: AbstractControl | null): boolean {
+    return !!control && control.invalid && (control.touched || control.dirty);
+  }
+
+  controlHasError(control: AbstractControl | null, errorKey: string): boolean {
+    return !!control && control.hasError(errorKey) && (control.touched || control.dirty);
   }
 
   private normalizeValue(value: any): string {
@@ -457,7 +457,12 @@ export class OnboardingWizardComponent implements OnInit {
   }
 
   async updateCurrentCompany(): Promise<void> {
-    if (this.companyForm.invalid || !this.createdCompany?.id) {
+    if (!this.createdCompany?.id) {
+      this.companySelectionAttempted = this.companyMode === 'existing';
+      return;
+    }
+
+    if (this.companyForm.invalid) {
       this.markFormGroupTouched(this.companyForm);
       return;
     }
@@ -491,6 +496,7 @@ export class OnboardingWizardComponent implements OnInit {
 
   continueWithCompany(): void {
     if (!this.createdCompany?.id) {
+      this.companySelectionAttempted = this.companyMode === 'existing';
       return;
     }
 
@@ -556,7 +562,12 @@ export class OnboardingWizardComponent implements OnInit {
   }
 
   async updateCurrentStation(): Promise<void> {
-    if (this.stationForm.invalid || !this.createdCompany?.id || !this.createdStation?.id) {
+    if (!this.createdCompany?.id || !this.createdStation?.id) {
+      this.stationSelectionAttempted = this.stationMode === 'existing';
+      return;
+    }
+
+    if (this.stationForm.invalid) {
       this.markFormGroupTouched(this.stationForm);
       return;
     }
@@ -596,6 +607,7 @@ export class OnboardingWizardComponent implements OnInit {
 
   continueWithStation(): void {
     if (!this.createdStation?.id) {
+      this.stationSelectionAttempted = this.stationMode === 'existing';
       return;
     }
 
@@ -676,7 +688,12 @@ export class OnboardingWizardComponent implements OnInit {
       .map((group: any) => ({
         product_service_station_id: group.product_service_station_id,
         product_name: group.product_name,
-        tanks: (group.tanks || []).filter((tank: any) => tank.abacus && tank.man_hole_height !== null && tank.man_hole_height !== '')
+        tanks: (group.tanks || []).filter((tank: any) =>
+          tank.abacus
+          && tank.man_hole_height !== null
+          && tank.man_hole_height !== ''
+          && tank.jauge_id
+        )
       }))
       .filter((group: any) => group.tanks.length > 0);
 
@@ -685,38 +702,79 @@ export class OnboardingWizardComponent implements OnInit {
         key: 'tst',
         severity: 'warn',
         summary: 'Cuves incomplètes',
-        detail: 'Ajoutez au moins une cuve valide avec un abaque et une hauteur de trou d’homme.',
+        detail: 'Ajoutez au moins une cuve valide avec un abaque, une hauteur de trou d’homme et une jauge.',
         life: 6000
       });
       return;
     }
 
     this.submitting = true;
+    this.setupComplete = false;
 
     try {
       const createdTanks: any[] = [];
 
       for (const group of payloads) {
+        const pendingSelections = (group.tanks || []).map((tank: any, index: number) => ({
+          index,
+          gaugeId: Number(tank?.jauge_id ?? 0) || null,
+          sensorReference: this.normalizeValue(tank?.sensor_reference),
+          abacus: this.normalizeValue(tank?.abacus),
+          used: false
+        }));
+        const tanksPayload = (group.tanks || []).map((tank: any) => {
+          const { jauge_id, ...tankPayload } = tank;
+          return tankPayload;
+        });
         const response = await firstValueFrom(this.onboardingService.createTanks({
           product_service_station_id: group.product_service_station_id,
-          tanks: group.tanks
+          tanks: tanksPayload
         }));
 
-        const createdForGroup = (response?.data ?? []).map((tank: any) => ({
+        const createdForGroupRaw = response?.data ?? [];
+        const assignedGaugeByTankId = new Map<number, number>();
+        for (let index = 0; index < createdForGroupRaw.length; index += 1) {
+          const createdTank = createdForGroupRaw[index];
+          const sensorReference = this.normalizeValue(createdTank?.sensor_reference);
+          const abacus = this.normalizeValue(createdTank?.abacus);
+          const matchedSelection = pendingSelections.find((selection: any) =>
+            !selection.used
+            && (
+              (selection.sensorReference && selection.sensorReference === sensorReference)
+              || (selection.abacus && selection.abacus === abacus)
+              || selection.index === index
+            )
+          );
+          const selectedGaugeId = matchedSelection?.gaugeId ?? null;
+          if (matchedSelection) {
+            matchedSelection.used = true;
+          }
+          if (createdTank?.id && selectedGaugeId) {
+            assignedGaugeByTankId.set(Number(createdTank.id), selectedGaugeId);
+            await firstValueFrom(this.onboardingService.assignGauge(createdTank.id, {
+              jauge_id: selectedGaugeId
+            }));
+          }
+        }
+
+        const createdForGroup = createdForGroupRaw.map((tank: any, index: number) => ({
           ...tank,
-          product_name: group.product_name
+          product_name: group.product_name,
+          jauge_id: assignedGaugeByTankId.get(Number(tank?.id ?? 0))
+            ?? Number(group?.tanks?.[index]?.jauge_id ?? tank?.jauge_id ?? 0)
+            ?? null
         }));
         createdTanks.push(...createdForGroup);
       }
 
       this.createdTanks = createdTanks;
-      this.initializeGaugeAssignments();
-      this.currentStep = 4;
+      this.currentStep = 3;
+      this.setupComplete = true;
       this.messageService.add({
         key: 'tst',
         severity: 'success',
         summary: 'Cuves créées',
-        detail: 'Les cuves ont été enregistrées et sont prêtes pour l’affectation des jauges.',
+        detail: 'Les cuves ont été créées et les jauges sélectionnées ont été affectées.',
         life: 5000
       });
     } catch (error: any) {
@@ -724,56 +782,7 @@ export class OnboardingWizardComponent implements OnInit {
         key: 'tst',
         severity: 'error',
         summary: 'Création impossible',
-        detail: error?.error?.message || 'Les cuves n’ont pas pu être créées.',
-        life: 7000
-      });
-    } finally {
-      this.submitting = false;
-    }
-  }
-
-  initializeGaugeAssignments(): void {
-    this.gaugeAssignments.clear();
-
-    this.createdTanks.forEach((tank) => {
-      this.gaugeAssignments.push(this.fb.group({
-        tank_id: [tank.id],
-        sensor_reference: [tank.sensor_reference || 'Sans référence'],
-        product_name: [tank.product_name || 'Produit'],
-        jauge_id: [tank.jauge_id ?? null, Validators.required]
-      }));
-    });
-  }
-
-  async submitGaugeAssignments(): Promise<void> {
-    if (this.gaugesForm.invalid || !this.gaugeAssignments.length) {
-      this.markFormGroupTouched(this.gaugesForm);
-      return;
-    }
-
-    this.submitting = true;
-
-    try {
-      for (const assignment of this.gaugeAssignments.getRawValue()) {
-        await firstValueFrom(this.onboardingService.assignGauge(assignment.tank_id, {
-          jauge_id: assignment.jauge_id
-        }));
-      }
-
-      this.setupComplete = true;
-      this.messageService.add({
-        key: 'tst',
-        severity: 'success',
-        summary: 'Onboarding terminé',
-        detail: 'Entreprise, point de vente, produits, cuves et jauges ont été configurés.',
-        life: 7000
-      });
-    } catch (error: any) {
-      this.messageService.add({
-        key: 'tst',
-        severity: 'error',
-        summary: 'Affectation impossible',
-        detail: error?.error?.message || 'Une ou plusieurs jauges n’ont pas pu être affectées.',
+        detail: error?.error?.message || 'Les cuves ou l’affectation des jauges n’ont pas pu être finalisées.',
         life: 7000
       });
     } finally {

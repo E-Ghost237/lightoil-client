@@ -122,6 +122,7 @@
 .step-card {
   display: grid;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .mode-switch {
@@ -171,13 +172,30 @@
 }
 
 .form-grid.compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 }
 
 .field,
 .assignment-field {
   display: grid;
   gap: 0.45rem;
+  min-width: 0;
+}
+
+.required-hint {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.required-indicator {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.8rem;
 }
 
 .selector-field {
@@ -200,6 +218,7 @@
   border-radius: 1rem;
   border: 1px solid #e5e7eb;
   background: #fbfdff;
+  min-width: 0;
 }
 
 .line-header,
@@ -262,6 +281,20 @@
 .station-option small,
 .assignment-meta span {
   color: #64748b;
+}
+
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber,
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-inputtextarea,
+:host ::ng-deep .p-inputnumber-input {
+  width: 100%;
+  max-width: 100%;
+}
+
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber {
+  display: block;
 }
 
 @media (max-width: 1100px) {

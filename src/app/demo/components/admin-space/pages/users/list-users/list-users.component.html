@@ -270,21 +270,19 @@
     </div>
 
     <div class="col-12 md:col-6">
-      <label class="block text-600 font-semibold mb-2">Rôle(s)</label>
-      <p-multiSelect
+      <label class="block text-600 font-semibold mb-2">Rôle</label>
+      <p-dropdown
         [options]="roleOptions"
-        formControlName="roles"
+        formControlName="role_id"
         optionLabel="label"
         optionValue="value"
-        display="chip"
         [filter]="true"
         appendTo="body"
         [autoZIndex]="true"
-        [scrollHeight]="'260px'"
         placeholder="Sélectionner..."
         class="w-full"
-      ></p-multiSelect>
-      <small class="text-red-500" *ngIf="editForm.get('roles')?.touched && editForm.get('roles')?.invalid">Au moins un rôle.</small>
+      ></p-dropdown>
+      <small class="text-red-500" *ngIf="editForm.get('role_id')?.touched && editForm.get('role_id')?.invalid">Le rôle est requis.</small>
     </div>
 
     <div class="col-12 md:col-6">

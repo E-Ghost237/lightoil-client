@@ -4,7 +4,6 @@ import { MessageService } from 'primeng/api';
 import { PointsOfSaleService } from '../../../services/sale-points.service';
 import { CompaniesService } from '../../../services/companies.service';
 import { LocalStorageService } from 'src/app/demo/components/auth/services/local-storage.service';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-points-of-sale',
@@ -18,9 +17,9 @@ export class PointsOfSaleComponent implements OnInit {
 
   show_modal: boolean = false;
   position: string = 'center';
-  updatePointOfSaleInfosForm!: FormGroup;
 
   points_of_sale: Array<any> = [];
+  selected_point_of_sale: any;
   selected_points_of_sale: Array<any> = [];
   select_all_points_of_sale: boolean = false;
 
@@ -36,11 +35,7 @@ export class PointsOfSaleComponent implements OnInit {
     private pointsOfSaleService: PointsOfSaleService,
     private companiesService: CompaniesService,
     private localStorageService: LocalStorageService
-  ) {
-    // this.updatePointOfSaleInfosForm = new FormGroup({
-    //   product_price: new FormControl<number>(this.selected_product?.price, Validators.required)
-    // });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.company_id = this.localStorageService.getCompanyId();
@@ -49,50 +44,72 @@ export class PointsOfSaleComponent implements OnInit {
   }
 
   initFilters() {
-    if (this.company_id !== undefined && this.company_id !== null) {
-      this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
-        (response) => {
-          if (response.success == true) {
-            this.point_of_sale_types = response.data
-            // ;
-          }
-        },
-        (err) => {
-          // ;
-          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
-        }
-      );
+    if (!this.hasCompanyContext()) {
+      return;
     }
+
+    this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
+      (response) => {
+        if (response.success == true) {
+          this.point_of_sale_types = response.data;
+          return;
+        }
+
+        this.messageService.add({
+          key: 'tst',
+          severity: 'warn',
+          summary: 'Contexte invalide',
+          detail: response?.message || 'Impossible de charger les types de reseau sans entreprise active.',
+          life: 6000
+        });
+      },
+      (err) => {
+        this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
+      }
+    );
   }
 
   loadData() {
     this.loading_icon = true;
 
-    if (this.company_id !== null && this.company_id !== undefined) {
-      this.companiesService.getAllPointsOfSaleOfCompany(this.company_id).subscribe(
-        (response) => {
-          if (response.success == true) {
-            this.points_of_sale = response.data
-            // ;
-            this.loading_logo = false;
-            this.loading_icon = false;
-            this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
-          }
-        },
-        (err) => {
+    if (!this.hasCompanyContext(true)) {
+      this.loading_logo = false;
+      this.loading_icon = false;
+      return;
+    }
 
+    this.companiesService.getAllPointsOfSaleOfCompany(this.company_id).subscribe(
+      (response) => {
+        if (response.success == true) {
+          this.points_of_sale = response.data;
           this.loading_logo = false;
           this.loading_icon = false;
-          this.messageService.add(
-            {
-              key: 'tst', severity: 'error', summary: 'Error Message',
-              detail: 'An error occure while loading all points of sale of company. Please try again later.',
-              life: 10000
-            }
-          );
+          this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+          return;
         }
-      );
-    }
+
+        this.loading_logo = false;
+        this.loading_icon = false;
+        this.messageService.add({
+          key: 'tst',
+          severity: 'warn',
+          summary: 'Chargement incomplet',
+          detail: response?.message || 'Aucune donnee n a ete chargee pour cette entreprise.',
+          life: 7000
+        });
+      },
+      (err) => {
+        this.loading_logo = false;
+        this.loading_icon = false;
+        this.messageService.add(
+          {
+            key: 'tst', severity: 'error', summary: 'Error Message',
+            detail: 'An error occure while loading all points of sale of company. Please try again later.',
+            life: 10000
+          }
+        );
+      }
+    );
   }
 
   onPageChange(event: any) {
@@ -105,7 +122,6 @@ export class PointsOfSaleComponent implements OnInit {
   }
 
   onPointsOfSaleChange(selected_option: any[]): string[] {
-    // ;
     if (!selected_option || selected_option.length === 0) {
       this.selected_points_of_sale = [];
       return [];
@@ -129,7 +145,6 @@ export class PointsOfSaleComponent implements OnInit {
   }
 
   onPointsOfSaleTypesChange(selected_options: any[]): string[] {
-    // ;
     if (!selected_options || selected_options.length === 0) {
       this.selected_point_of_sale_types = [];
       return [];
@@ -157,10 +172,28 @@ export class PointsOfSaleComponent implements OnInit {
   }
 
   goToPointOfSaleSpace(point_of_sale_id: number) {
-    let user_details = JSON.parse(localStorage.getItem('user_details'));
+    let user_details = JSON.parse(localStorage.getItem('user_details') || 'null');
+    if (!user_details) {
+      return;
+    }
+
     user_details.service_station_id = point_of_sale_id;
     localStorage.setItem('user_details', JSON.stringify(user_details));
-    // window.location.href = '/pages/dashboard';
     window.open('/pages/dashboard', '_blank');
+  }
+
+  private hasCompanyContext(notify = false): boolean {
+    const hasContext = this.company_id !== undefined && this.company_id !== null;
+    if (!hasContext && notify) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Entreprise requise',
+        detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
+        life: 7000
+      });
+    }
+
+    return hasContext;
   }
 }

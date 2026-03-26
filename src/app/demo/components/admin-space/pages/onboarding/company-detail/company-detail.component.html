@@ -19,21 +19,36 @@
     <div class="card section-card" *ngIf="showEditCompany">
       <h2>Edit company</h2>
       <form [formGroup]="companyForm" class="form-grid">
+        <p class="required-hint field-span-2">
+          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
+        </p>
         <div class="field">
-          <label>Nom</label>
+          <label>Nom <span class="required-indicator">*</span></label>
           <input pInputText formControlName="name" />
+          <small class="field-error" *ngIf="showControlError(companyForm.get('name'))">
+            Le nom est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Email</label>
+          <label>Email <span class="required-indicator">*</span></label>
           <input pInputText formControlName="email" />
+          <small class="field-error" *ngIf="controlHasError(companyForm.get('email'), 'required')">
+            L'email est obligatoire.
+          </small>
+          <small class="field-error" *ngIf="controlHasError(companyForm.get('email'), 'email')">
+            Adresse email invalide.
+          </small>
         </div>
         <div class="field">
           <label>Telephone</label>
           <input pInputText formControlName="phone" />
         </div>
         <div class="field">
-          <label>Statut</label>
+          <label>Statut <span class="required-indicator">*</span></label>
           <p-dropdown [options]="statusOptions" optionLabel="label" optionValue="value" formControlName="status"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(companyForm.get('status'))">
+            Le statut est obligatoire.
+          </small>
         </div>
         <div class="field field-span-2">
           <label>Adresse</label>
@@ -65,13 +80,22 @@
       <h2>Add station</h2>
       <p class="muted">Le company_id de la station est deja fixe sur cette entreprise.</p>
       <form [formGroup]="stationForm" class="form-grid">
+        <p class="required-hint field-span-2">
+          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour creer la station.
+        </p>
         <div class="field">
-          <label>Nom</label>
+          <label>Nom <span class="required-indicator">*</span></label>
           <input pInputText formControlName="name" />
+          <small class="field-error" *ngIf="showControlError(stationForm.get('name'))">
+            Le nom est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Type</label>
+          <label>Type <span class="required-indicator">*</span></label>
           <p-dropdown [options]="salePointTypes" optionLabel="name" optionValue="id" formControlName="sale_point_type_id"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('sale_point_type_id'))">
+            Le type est obligatoire.
+          </small>
         </div>
         <div class="field field-span-2">
           <label>Adresse</label>
@@ -82,28 +106,46 @@
           <textarea pInputTextarea rows="3" formControlName="description"></textarea>
         </div>
         <div class="field">
-          <label>Region</label>
+          <label>Region <span class="required-indicator">*</span></label>
           <p-dropdown [options]="regions" optionLabel="name" optionValue="id" formControlName="region_id"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('region_id'))">
+            La region est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Ville</label>
+          <label>Ville <span class="required-indicator">*</span></label>
           <p-dropdown [options]="filteredTowns" optionLabel="name" optionValue="id" formControlName="town_id"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('town_id'))">
+            La ville est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Latitude</label>
+          <label>Latitude <span class="required-indicator">*</span></label>
           <p-inputNumber formControlName="latitude" mode="decimal" [minFractionDigits]="4" [maxFractionDigits]="6"></p-inputNumber>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('latitude'))">
+            La latitude est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Longitude</label>
+          <label>Longitude <span class="required-indicator">*</span></label>
           <p-inputNumber formControlName="longitude" mode="decimal" [minFractionDigits]="4" [maxFractionDigits]="6"></p-inputNumber>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('longitude'))">
+            La longitude est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Fuseau horaire</label>
+          <label>Fuseau horaire <span class="required-indicator">*</span></label>
           <p-inputNumber formControlName="time_zone" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="0"></p-inputNumber>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('time_zone'))">
+            Le fuseau horaire est obligatoire.
+          </small>
         </div>
         <div class="field">
-          <label>Statut</label>
+          <label>Statut <span class="required-indicator">*</span></label>
           <p-dropdown [options]="statusOptions" optionLabel="label" optionValue="value" formControlName="status"></p-dropdown>
+          <small class="field-error" *ngIf="showControlError(stationForm.get('status'))">
+            Le statut est obligatoire.
+          </small>
         </div>
       </form>
       <div class="footer-actions">

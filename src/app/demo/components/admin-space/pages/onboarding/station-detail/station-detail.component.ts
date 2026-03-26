@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { firstValueFrom } from 'rxjs';
@@ -122,6 +122,68 @@ export class StationDetailComponent implements OnInit {
     });
   }
 
+  private extractTankList(response: any): any[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    const payload = response?.data ?? response ?? {};
+    if (Array.isArray(payload)) {
+      return payload;
+    }
+
+    const station = payload?.station
+      ?? payload?.sale_point
+      ?? payload?.service_station
+      ?? payload?.point_of_sale
+      ?? null;
+    const stationProducts = payload?.station_products
+      ?? payload?.product_service_stations
+      ?? payload?.stationProducts
+      ?? payload?.products
+      ?? station?.product_service_stations
+      ?? [];
+    const nestedTanks = Array.isArray(stationProducts)
+      ? stationProducts.flatMap((row: any) => Array.isArray(row?.tanks) ? row.tanks : [])
+      : [];
+
+    const tanks = payload?.tanks
+      ?? payload?.station_tanks
+      ?? payload?.stationTanks
+      ?? payload?.service_station_tanks
+      ?? payload?.rows
+      ?? station?.tanks
+      ?? nestedTanks;
+
+    return Array.isArray(tanks) ? tanks : [];
+  }
+
+  private mergeTanks(primary: any[], secondary: any[]): any[] {
+    const byId = new Map<number, any>();
+    const noIdTanks: any[] = [];
+
+    const register = (tank: any, preferExisting = false): void => {
+      const id = Number(tank?.id ?? 0);
+      if (!id) {
+        noIdTanks.push(tank);
+        return;
+      }
+
+      const current = byId.get(id);
+      if (!current) {
+        byId.set(id, tank);
+        return;
+      }
+
+      byId.set(id, preferExisting ? { ...tank, ...current } : { ...current, ...tank });
+    };
+
+    secondary.forEach((tank) => register(tank, false));
+    primary.forEach((tank) => register(tank, true));
+
+    return [...byId.values(), ...noIdTanks];
+  }
+
   private extractStationContext(response: any): { company: any; station: any; stationProducts: any[]; tanks: any[] } {
     const payload = response?.data ?? response ?? {};
     const company = payload?.company ?? null;
@@ -136,7 +198,7 @@ export class StationDetailComponent implements OnInit {
       ?? payload?.products
       ?? station?.product_service_stations
       ?? [];
-    const tanks = payload?.tanks ?? payload?.station_tanks ?? payload?.stationTanks ?? station?.tanks ?? [];
+    const tanks = this.extractTankList(response);
 
     return {
       company,
@@ -183,13 +245,21 @@ export class StationDetailComponent implements OnInit {
       }
 
       const { company, station, stationProducts, tanks } = this.extractStationContext(contextResponse);
+      let stationTankList: any[] = [];
+
+      try {
+        const stationTankResponse = await firstValueFrom(this.onboardingService.getStationTanks(this.stationId));
+        stationTankList = this.extractTankList(stationTankResponse);
+      } catch {
+        stationTankList = [];
+      }
 
       this.station = {
         ...station,
         company: station?.company ?? company ?? null
       };
       this.stationProducts = stationProducts;
-      this.tanks = tanks;
+      this.tanks = this.mergeTanks(tanks, stationTankList);
       this.products = productsRes?.data ?? [];
       this.gauges = gaugesRes?.data ?? [];
       this.regions = regionRes?.data ?? [];
@@ -233,10 +303,18 @@ export class StationDetailComponent implements OnInit {
 
       this.gaugeAssignments.clear();
       this.tanks.forEach((tank: any) => {
+        const tankGaugeId = Number(
+          tank?.jauge_id
+          ?? tank?.gauge_id
+          ?? tank?.jauge?.id
+          ?? tank?.gauge?.id
+          ?? 0
+        ) || null;
+
         this.gaugeAssignments.push(this.fb.group({
           tank_id: [tank.id],
           sensor_reference: [tank.sensor_reference || 'Sans reference'],
-          jauge_id: [tank.jauge_id ?? null, Validators.required]
+          jauge_id: [tankGaugeId, Validators.required]
         }));
       });
     } catch (error: any) {
@@ -397,8 +475,11 @@ export class StationDetailComponent implements OnInit {
     }
   }
 
-  async assignGauge(tankId: number, jaugeId: number): Promise<void> {
+  async assignGauge(tankId: number, jaugeId: number, assignmentIndex?: number): Promise<void> {
     if (!jaugeId) {
+      if (assignmentIndex !== undefined) {
+        this.gaugeAssignments.at(assignmentIndex)?.get('jauge_id')?.markAsTouched();
+      }
       return;
     }
 
@@ -481,5 +562,49 @@ export class StationDetailComponent implements OnInit {
     } finally {
       this.submitting = false;
     }
+  }
+
+  showControlError(control: AbstractControl | null): boolean {
+    return !!control && control.invalid && (control.touched || control.dirty);
+  }
+
+  controlHasError(control: AbstractControl | null, errorKey: string): boolean {
+    return !!control && control.hasError(errorKey) && (control.touched || control.dirty);
+  }
+
+  getGaugeName(gaugeId: number | null | undefined): string {
+    const resolvedId = Number(gaugeId ?? 0);
+    if (!resolvedId) {
+      return '-';
+    }
+
+    return this.gauges.find((gauge) => Number(gauge.id) === resolvedId)?.name || `#${resolvedId}`;
+  }
+
+  getTankGaugeLabel(tank: any): string {
+    const directName = tank?.jauge?.name ?? tank?.gauge?.name ?? null;
+    if (directName) {
+      return directName;
+    }
+
+    const gaugeId = Number(
+      tank?.jauge_id
+      ?? tank?.gauge_id
+      ?? tank?.jauge?.id
+      ?? tank?.gauge?.id
+      ?? 0
+    ) || null;
+
+    return this.getGaugeName(gaugeId);
+  }
+
+  getTankProductLabel(tank: any): string {
+    const directLabel = tank?.liquid_type ?? tank?.product_name ?? tank?.product?.name ?? null;
+    if (directLabel) {
+      return directLabel;
+    }
+
+    const stationProduct = this.stationProducts.find((item) => Number(item.id) === Number(tank?.product_service_station_id));
+    return stationProduct?.product?.name || '-';
   }
 }

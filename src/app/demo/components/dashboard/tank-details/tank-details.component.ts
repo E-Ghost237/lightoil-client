@@ -13,6 +13,7 @@ import * as Utility from '../../../utilities/utility';
 import { UIChart } from 'primeng/chart';
 import { PdfService } from 'src/app/demo/services/pdf.service';
 import { LocalStorageService } from '../../auth/services/local-storage.service';
+import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
 
 @Component({
   selector: 'app-tank-details',
@@ -40,8 +41,10 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     ajusted_records: Array<any> = [];
     dayNotifications: any[] = [];
     dayNotificationTotal = 0;
-    notificationTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Douala';
+    dayOutputTotal = 0;
+    notificationTimezone = 'Africa/Douala';
     notificationDateKey = '';
+    private silentRefreshSubscription: Subscription | null = null;
 
     constructor(
         private messageService: MessageService,
@@ -53,7 +56,8 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         private ref: ChangeDetectorRef,
         private pusherService: PusherService,
         private localStorageService: LocalStorageService,
-        private pdfService: PdfService
+        private pdfService: PdfService,
+        private silentRefreshService: SilentRefreshService
         ) { }
 
     ngOnInit() {
@@ -63,11 +67,15 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         this.stationId = this.localStorageService.getServiceStationId();
         //;
         this.tankId = this.route.snapshot.paramMap.get('id');
+        this.notificationTimezone = this.resolveStationTimezone();
         this.notificationDateKey = this.getLocalDateKey();
         this.getTankDetailsData();
         //;
         this.subscribeToChannelSocket();
         this.t1=interval(1000).subscribe(n => this.getStringDate());
+        this.silentRefreshSubscription = this.silentRefreshService.create(300000).subscribe(() => {
+            this.getTankDetailsData(false);
+        });
         this.getSubscribeData();
 
     }
@@ -299,16 +307,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getOutputVolume() {
-        const latestRecord = this.getLatestRecord();
-        const previousRecord = this.getPreviousRecord();
-        const latestFuelVolume = this.getFuelVolume(latestRecord);
-        const previousFuelVolume = this.getFuelVolume(previousRecord);
-
-        if (latestFuelVolume !== null && previousFuelVolume !== null && latestFuelVolume <= previousFuelVolume) {
-            return Math.round((previousFuelVolume - latestFuelVolume) * 100) / 100;
-        }
-
-        return '---';
+        return this.getRoundValue(this.dayOutputTotal);
     }
 
     getPercentOccupation(){
@@ -441,11 +440,118 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         return Utility.toLocalDateTime(date1);
     }
 
-    private getLocalDateKey(date: Date = new Date()): string {
+    private resolveStationTimezone(): string {
+        const fallback = 'Africa/Douala';
+        const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
+        const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.stationId)) ?? null;
+
+        const candidates = [
+            this.user_details?.timezone,
+            this.user_details?.time_zone,
+            currentStation?.timezone,
+            currentStation?.time_zone
+        ].filter((value: any) => typeof value === 'string' && value.trim().length > 0);
+
+        for (const candidate of candidates) {
+            const timezone = String(candidate).trim();
+            try {
+                // Validate timezone identifier before using it.
+                Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+                return timezone;
+            } catch {
+                // Ignore invalid identifiers and keep searching.
+            }
+        }
+
+        return fallback;
+    }
+
+    private getLocalDateKey(date: Date = new Date(), timezone: string = this.notificationTimezone): string {
+        try {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+
+            const year = parts.find((part) => part.type === 'year')?.value;
+            const month = parts.find((part) => part.type === 'month')?.value;
+            const day = parts.find((part) => part.type === 'day')?.value;
+            if (year && month && day) {
+                return `${year}-${month}-${day}`;
+            }
+        } catch {
+            // Fallback to local timezone if Intl timezone formatting fails.
+        }
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    }
+
+    private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
+        const candidate = record?.updated_at ?? record?.created_at ?? null;
+        if (!candidate) {
+            return null;
+        }
+
+        const timestamp = new Date(candidate);
+        if (Number.isNaN(timestamp.getTime())) {
+            return null;
+        }
+
+        return this.getLocalDateKey(timestamp, timezone);
+    }
+
+    private computeOutputSumFromRecords(records: any[]): number {
+        if (!Array.isArray(records) || records.length < 2) {
+            return 0;
+        }
+
+        const sorted = this.getSortedRecords(records);
+        let total = 0;
+
+        for (let i = 0; i < sorted.length - 1; i++) {
+            const latestVolume = this.getFuelVolume(sorted[i]);
+            const previousVolume = this.getFuelVolume(sorted[i + 1]);
+
+            if (latestVolume !== null && previousVolume !== null && latestVolume <= previousVolume) {
+                total += (previousVolume - latestVolume);
+            }
+        }
+
+        return this.getRoundValue(total);
+    }
+
+    private computeDayOutputFromCurrentRecords(dayKey: string): number {
+        const sourceRecords = Array.isArray(this.records) ? this.records : [];
+        const sameDayRecords = sourceRecords.filter((record: any) => this.getRecordDateKey(record) === dayKey);
+        return this.computeOutputSumFromRecords(sameDayRecords);
+    }
+
+    private refreshDayOutputTotal(): void {
+        if (!this.tankId) {
+            this.dayOutputTotal = 0;
+            return;
+        }
+
+        const dayKey = this.getLocalDateKey();
+        const payload = {
+            tankId: Number(this.tankId),
+            dateStart: dayKey
+        };
+
+        this.recordService.getListRecordsForOneDay(payload).subscribe({
+            next: (response: any) => {
+                const dayRecords = Array.isArray(response) ? response : [];
+                this.dayOutputTotal = this.computeOutputSumFromRecords(dayRecords);
+            },
+            error: () => {
+                this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
+            }
+        });
     }
 
     private refreshDayNotifications(): void {
@@ -726,6 +832,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         const currentDayKey = this.getLocalDateKey();
         if (currentDayKey !== this.notificationDateKey) {
             this.refreshDayNotifications();
+            this.refreshDayOutputTotal();
         }
         //;
     }
@@ -800,18 +907,23 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         // ;
     }
 
-    getTankDetailsData(){
+    getTankDetailsData(showNotification = true){
         this.recordService.getTankDetailsData(this.tankId).subscribe((res)=>{
             if(res && res.length > 0){
                 this.tankDetailsData = res[0];
                 this.tankDetailsData.listLastRecord = this.getSortedRecords(this.tankDetailsData.listLastRecord);
                 this.records = this.tankDetailsData.listLastRecord;
                 this.refreshDayNotifications();
+                this.refreshDayOutputTotal();
                 this.getOutputVolumes(this.records);
                 this.ajustedRecords();
-                this.showNotificationMessage();
+                if (showNotification) {
+                    this.showNotificationMessage();
+                }
                 this.initGraphData();
                 //this.ref.detectChanges();
+            } else {
+                this.dayOutputTotal = 0;
             }
 
         });
@@ -844,6 +956,10 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.pusherService.echo1.leaveChannel('record_channel.tank'+this.tankId);
         this.t1.unsubscribe();
+        if (this.silentRefreshSubscription) {
+            this.silentRefreshSubscription.unsubscribe();
+            this.silentRefreshSubscription = null;
+        }
     }
 
 

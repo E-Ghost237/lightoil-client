@@ -7,6 +7,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { RecordService } from '../services/record.service';
 import { MessageService } from 'primeng/api';
 import { LocalStorageService } from '../../auth/services/local-storage.service';
+import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
 
 @Component({
   selector: 'app-tank-list',
@@ -22,6 +23,7 @@ export class TankListComponent implements OnInit, OnDestroy {
     user:any;
     dashboardData:any[]=[];
     exempleDashBoardData: any[]=[];
+    private silentRefreshSubscription: Subscription | null = null;
 
     constructor(
         private cookieService: CookieService,
@@ -31,6 +33,7 @@ export class TankListComponent implements OnInit, OnDestroy {
         private messageService: MessageService,
         private interactionService: InteractionService,
         private localStorageService: LocalStorageService,
+        private silentRefreshService: SilentRefreshService,
         ) {
 
     }
@@ -50,6 +53,9 @@ export class TankListComponent implements OnInit, OnDestroy {
         }); */
 
         this.getDashboardData();
+        this.silentRefreshSubscription = this.silentRefreshService.create(300000).subscribe(() => {
+            this.getDashboardData(false);
+        });
 
         this.t=interval(1000).subscribe(n => this.getStringDate());
 
@@ -80,12 +86,14 @@ export class TankListComponent implements OnInit, OnDestroy {
 
     }
 
-    getDashboardData(){
+    getDashboardData(showNotifications = true){
         this.recordService.getFirstDashboardDataByStationIdAndTypeSensor(this.stationId).subscribe((res)=>{
 
             this.dashboardData = res;
             this.exempleDashBoardData=res;
-            this.showNotificationMessage();
+            if (showNotifications) {
+                this.showNotificationMessage();
+            }
             //this.goToTankInfo(3,this.dashboardData[2]);
         });
     }
@@ -139,12 +147,15 @@ export class TankListComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.pusherService.echo1.leaveChannel('record_channel'+this.stationId);
         this.t.unsubscribe();
+        if (this.silentRefreshSubscription) {
+            this.silentRefreshSubscription.unsubscribe();
+            this.silentRefreshSubscription = null;
+        }
     }
 
 
 
 }
-
 
 
 

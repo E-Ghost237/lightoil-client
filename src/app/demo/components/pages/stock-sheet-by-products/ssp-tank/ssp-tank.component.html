@@ -71,7 +71,6 @@
         <th>Stock phys (L)</th>
         <th>Écart (L)</th>
         <th>Cumul écarts (L)</th>
-        <th></th>
       </tr>
     </ng-template>
 
@@ -98,13 +97,6 @@
           {{ row.ecart_l | number:'1.2-2':'fr' }}
         </td>
         <td class="text-center">{{ row.cumul_ecart_l | number:'1.2-2':'fr' }}</td>
-
-        <td>
-          <div class="flex align-items-center gap-2">
-            <button pButton type="button" icon="pi pi-save" class="p-button-sm" (click)="saveLine(row)" [disabled]="loading"></button>
-            <small class="text-600" *ngIf="savingByDate[isoDate(row.date)]">Sauvegarde...</small>
-          </div>
-        </td>
       </tr>
     </ng-template>
   </p-table>

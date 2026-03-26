@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { ReportsService } from '../../../services/reports.service';
 import { CompaniesService } from '../../../services/companies.service';
@@ -12,7 +12,7 @@ import { Product } from '../../../interfaces/models';
   templateUrl: './sales-reports.component.html',
   styleUrls: ['./sales-reports.component.scss']
 })
-export class SalesReportsComponent implements OnInit {
+export class SalesReportsComponent implements OnInit, OnDestroy {
   company_id!: number;
   sale_point_types!: Array<any>;
   selected_sale_point_type!: any;
@@ -51,6 +51,7 @@ export class SalesReportsComponent implements OnInit {
   is_weekly_report: boolean = false;
   is_monthly_report: boolean = false;
   is_annual_report: boolean = false;
+  private canGenerateIntervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private messageService: MessageService,
@@ -71,7 +72,7 @@ export class SalesReportsComponent implements OnInit {
       // { name: 'CSV', value: 'csv' },
     ];
 
-    setInterval(() => {
+    this.canGenerateIntervalId = setInterval(() => {
       if (this.selected_sale_points !== undefined && this.selected_products !== undefined) {
         if (this.is_daily_report && this.daily_date !== undefined) {
           this.can_generate_report = true;
@@ -84,6 +85,13 @@ export class SalesReportsComponent implements OnInit {
         }
       }
     }, 2000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.canGenerateIntervalId !== null) {
+      clearInterval(this.canGenerateIntervalId);
+      this.canGenerateIntervalId = null;
+    }
   }
 
   initFilters() {
@@ -304,10 +312,20 @@ export class SalesReportsComponent implements OnInit {
               this.lightoil_loading = false;
               this.can_export_report = true;
               this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+              return;
             }
+
+            this.loading_icon = false;
+            this.lightoil_loading = false;
+            this.messageService.add({
+              key: 'tst',
+              severity: 'warn',
+              summary: 'Chargement incomplet',
+              detail: response?.message || 'Le rapport journalier n a pas pu etre charge.',
+              life: 7000
+            });
           },
           (err) => {
-
             this.loading_icon = false;
             this.lightoil_loading = false;
             this.messageService.add(
@@ -329,7 +347,18 @@ export class SalesReportsComponent implements OnInit {
           }
         );
       }
+      return;
     }
+
+    this.loading_icon = false;
+    this.lightoil_loading = false;
+    this.messageService.add({
+      key: 'tst',
+      severity: 'warn',
+      summary: 'Entreprise requise',
+      detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
+      life: 7000
+    });
   }
 
   getWeeklySalesReport() {
@@ -346,10 +375,20 @@ export class SalesReportsComponent implements OnInit {
               this.lightoil_loading = false;
               this.can_export_report = true;
               this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+              return;
             }
+
+            this.loading_icon = false;
+            this.lightoil_loading = false;
+            this.messageService.add({
+              key: 'tst',
+              severity: 'warn',
+              summary: 'Chargement incomplet',
+              detail: response?.message || 'Le rapport hebdomadaire n a pas pu etre charge.',
+              life: 7000
+            });
           },
           (err) => {
-
             this.loading_icon = false;
             this.lightoil_loading = false;
             this.messageService.add(
@@ -372,7 +411,18 @@ export class SalesReportsComponent implements OnInit {
           }
         );
       }
+      return;
     }
+
+    this.loading_icon = false;
+    this.lightoil_loading = false;
+    this.messageService.add({
+      key: 'tst',
+      severity: 'warn',
+      summary: 'Entreprise requise',
+      detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
+      life: 7000
+    });
   }
 
   exportReportToPDFFormat() {

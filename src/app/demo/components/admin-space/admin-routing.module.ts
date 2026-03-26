@@ -3,15 +3,18 @@ import { RouterModule } from '@angular/router';
 import { AdminLayoutComponent } from './layout/admin.layout.component';
 import { authGuard } from '../auth/guard/auth.guard';
 
-
 @NgModule({
   imports: [
     RouterModule.forChild([
       {
-        path: '', component: AdminLayoutComponent,
+        path: '',
+        component: AdminLayoutComponent,
         canActivate: [authGuard],
-        children:[
-          { path: '', loadChildren: () => import('./pages/admin-pages.module').then(m => m.AdminPagesModule) },
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('./pages/admin-pages.module').then(m => m.AdminPagesModule)
+          }
         ]
       }
     ])

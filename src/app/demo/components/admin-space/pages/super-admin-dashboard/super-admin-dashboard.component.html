@@ -1,0 +1,246 @@
+<p-toast key="tst"></p-toast>
+
+<div class="super-dashboard">
+  <div class="card hero mb-1">
+    <div>
+      <p-tag value="Super Admin uniquement" severity="danger"></p-tag>
+      <h1>Dashboard Super Admin</h1>
+      <p>
+        Vue globale de la plateforme: entreprises, stations, cuves , alertes critiques et positions des
+        stations.
+      </p>
+    </div>
+  </div>
+
+  <div class="card filters-card mb-1">
+    <div class="filters-grid">
+      <div class="field">
+        <label for="filter-region">Region</label>
+        <p-dropdown
+          inputId="filter-region"
+          [options]="regions"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedRegionId"
+          (ngModelChange)="onRegionChange($event)"
+          [showClear]="true"
+          placeholder="Toutes les regions">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-town">Ville</label>
+        <p-dropdown
+          inputId="filter-town"
+          [options]="filteredTowns"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedTownId"
+          (ngModelChange)="onTownChange($event)"
+          [showClear]="true"
+          placeholder="Toutes les villes">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-company">Entreprise</label>
+        <p-dropdown
+          inputId="filter-company"
+          [options]="companies"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedCompanyId"
+          (ngModelChange)="onCompanyChange($event)"
+          [showClear]="true"
+          placeholder="Toutes les entreprises">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-status">Statut (actif/inactif)</label>
+        <p-dropdown
+          inputId="filter-status"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="selectedStatus"
+          (ngModelChange)="onStatusChange($event)"
+          placeholder="Tout">
+        </p-dropdown>
+      </div>
+
+      <div class="field action-field">
+        <label class="action-spacer" for="filter-reset">Action</label>
+        <p-button
+          id="filter-reset"
+          label="Reinitialiser"
+          icon="pi pi-refresh"
+          severity="secondary"
+          [text]="true"
+          (onClick)="clearFilters()">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid mb-0">
+    <div class="card kpi-card mb-1">
+      <span class="kpi-label">Stations</span>
+      <strong>{{ summary.stationsCount | number:'1.0-0':'fr' }}</strong>
+    </div>
+    <div class="card kpi-card">
+      <span class="kpi-label">Cuves connectees</span>
+      <strong>{{ summary.connectedTanksCount | number:'1.0-0':'fr' }}</strong>
+    </div>
+    <div class="card kpi-card online">
+      <span class="kpi-label">Stations online</span>
+      <strong>{{ summary.onlineStationsCount | number:'1.0-0':'fr' }}</strong>
+    </div>
+    <div class="card kpi-card offline">
+      <span class="kpi-label">Stations offline</span>
+      <strong>{{ summary.offlineStationsCount | number:'1.0-0':'fr' }}</strong>
+    </div>
+    <div class="card kpi-card kpi-alert">
+      <span class="kpi-label">Alertes </span>
+      <strong>{{ summary.activeAlertsCount | number:'1.0-0':'fr' }}</strong>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+    <div class="card info-table-card">
+      <div class="table-head">
+        <h2>Entreprises et stations</h2>
+        <small>{{ companyStationsRows.length }} entreprise(s)</small>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>Entreprise</th>
+              <th>Stations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pagedCompanyStationsRows">
+              <td class="company-cell">
+                <strong>{{ row.companyName }}</strong>
+                <small>{{ row.stationCount }} station(s)</small>
+              </td>
+              <td>
+                <div class="station-badges">
+                  <span class="station-badge" *ngFor="let station of row.stations">
+                    {{ station.name }} ({{ station.townName }})
+                  </span>
+                  <span class="text-muted" *ngIf="!row.stations.length">-</span>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!companyStationsRows.length">
+              <td colspan="2" class="empty-cell">Aucune entreprise/station pour les filtres actifs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-pagination">
+        <p-paginator
+          [rows]="companyStationsRowsPerPage"
+          [first]="companyStationsFirst"
+          [totalRecords]="companyStationsRows.length"
+          [rowsPerPageOptions]="tableRowsPerPageOptions"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first} - {last} / {totalRecords}"
+          (onPageChange)="onCompanyStationsPageChange($event)">
+        </p-paginator>
+      </div>
+    </div>
+
+    <div class="card info-table-card">
+      <div class="table-head">
+        <h2>Liste d'utilisateurs</h2>
+        <small>{{ filteredUsersRows.length }} utilisateur(s)</small>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Entreprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of pagedUsersRows">
+              <td>{{ user.fullName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.roleType }}</td>
+              <td>{{ user.companyName }}</td>
+            </tr>
+            <tr *ngIf="!filteredUsersRows.length">
+              <td colspan="4" class="empty-cell">Aucun utilisateur pour les filtres actifs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-pagination">
+        <p-paginator
+          [rows]="usersRowsPerPage"
+          [first]="usersFirst"
+          [totalRecords]="filteredUsersRows.length"
+          [rowsPerPageOptions]="tableRowsPerPageOptions"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first} - {last} / {totalRecords}"
+          (onPageChange)="onUsersPageChange($event)">
+        </p-paginator>
+      </div>
+    </div>
+  </div>
+
+  <div class="card map-section">
+    <div class="map-head">
+      <div>
+        <h2>Carte des stations</h2>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><i class="dot dot-online"></i>Online</span>
+        <span class="legend-item"><i class="dot dot-offline"></i>Offline</span>
+        <span class="legend-item"><i class="dot dot-alert"></i>Alert</span>
+      </div>
+    </div>
+
+    <div class="map-viewport" #mapViewport>
+      <div class="map-toolbar">
+        <p-button
+          [text]="true"
+          [rounded]="true"
+          [severity]="isFullScreen ? 'danger' : 'secondary'"
+          [icon]="isFullScreen ? 'pi pi-times' : 'pi pi-window-maximize'"
+          [pTooltip]="isFullScreen ? 'Quitter le plein ecran' : 'Plein ecran'"
+          tooltipPosition="left"
+          (onClick)="toggleFullScreen()">
+        </p-button>
+      </div>
+
+      <div class="map-loading" *ngIf="loadingContext || loadingDashboard">
+        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+      </div>
+
+      <div class="map-empty" *ngIf="!loadingContext && !loadingDashboard && !filteredStations.length">
+        <p>Aucune station ne correspond aux filtres actifs.</p>
+      </div>
+
+      <div
+        #mapCanvas
+        class="map-canvas"
+        leaflet
+        [leafletOptions]="mapOptions"
+        [leafletLayers]="mapLayers"
+        (leafletMapReady)="onMapReady($event)">
+      </div>
+    </div>
+
+    <div class="map-foot">
+      <small>{{ filteredStations.length }} station(s) affichee(s), dont {{ emittingStations.length }} emettrice(s).</small>
+    </div>
+  </div>
+</div>

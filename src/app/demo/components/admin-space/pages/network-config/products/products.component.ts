@@ -88,51 +88,63 @@ export class ProductsComponent implements OnInit {
   loadData() {
     this.loading_icon = true;
 
-    if (this.company_id !== null && this.company_id !== undefined) {
-      this.companiesService.getAllProductsOfEachPointOfSaleOfCompany(this.company_id).subscribe(
-        (response) => {
-          if (response.success == true) {
-            this.points_of_sale = response.data.map(point_of_sale => {
-              return {
-                id: point_of_sale.id,
-                name: point_of_sale.name,
-                town: point_of_sale.town
-              }
-            });
-            // ;
+    if (!this.hasCompanyContext(true)) {
+      this.loading_logo = false;
+      this.loading_icon = false;
+      return;
+    }
 
-            this.products_of_points_of_sale = response.data.map(point_of_sale => {
-              return point_of_sale.products.map(product => ({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                point_of_sale_id: point_of_sale.id,
-                point_of_sale_name: point_of_sale.name,
-                point_of_sale_town: point_of_sale.town,
-                point_of_sale_type: point_of_sale.type.name
-              }));
-            }).flat();
-            // ;
+    this.companiesService.getAllProductsOfEachPointOfSaleOfCompany(this.company_id).subscribe(
+      (response) => {
+        if (response.success == true) {
+          this.points_of_sale = response.data.map(point_of_sale => {
+            return {
+              id: point_of_sale.id,
+              name: point_of_sale.name,
+              town: point_of_sale.town
+            };
+          });
 
-            this.loading_logo = false;
-            this.loading_icon = false;
-            this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
-          }
-        },
-        (err) => {
+          this.products_of_points_of_sale = response.data.map(point_of_sale => {
+            return point_of_sale.products.map(product => ({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              point_of_sale_id: point_of_sale.id,
+              point_of_sale_name: point_of_sale.name,
+              point_of_sale_town: point_of_sale.town,
+              point_of_sale_type: point_of_sale.type.name
+            }));
+          }).flat();
 
           this.loading_logo = false;
           this.loading_icon = false;
-          this.messageService.add(
-            {
-              key: 'tst', severity: 'error', summary: 'Error Message',
-              detail: 'An error occure while loading all products of each point of sale of company. Please try again later.',
-              life: 10000
-            }
-          );
+          this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+          return;
         }
-      );
-    }
+
+        this.loading_logo = false;
+        this.loading_icon = false;
+        this.messageService.add({
+          key: 'tst',
+          severity: 'warn',
+          summary: 'Chargement incomplet',
+          detail: response?.message || 'Aucune donnee n a ete chargee pour cette entreprise.',
+          life: 7000
+        });
+      },
+      (err) => {
+        this.loading_logo = false;
+        this.loading_icon = false;
+        this.messageService.add(
+          {
+            key: 'tst', severity: 'error', summary: 'Error Message',
+            detail: 'An error occure while loading all products of each point of sale of company. Please try again later.',
+            life: 10000
+          }
+        );
+      }
+    );
   }
 
   isFirstOccurrence(point_of_sale_id: number, index: number): boolean {
@@ -266,5 +278,20 @@ export class ProductsComponent implements OnInit {
     } else {
       this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error Message', detail: 'Please fill price of product field.' });
     }
+  }
+
+  private hasCompanyContext(notify = false): boolean {
+    const hasContext = this.company_id !== undefined && this.company_id !== null;
+    if (!hasContext && notify) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Entreprise requise',
+        detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
+        life: 7000
+      });
+    }
+
+    return hasContext;
   }
 }
