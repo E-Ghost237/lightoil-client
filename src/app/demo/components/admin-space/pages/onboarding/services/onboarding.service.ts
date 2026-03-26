@@ -10,6 +10,32 @@ export class OnboardingService {
 
   constructor(private http: HttpClient) { }
 
+  private isFile(value: unknown): value is File {
+    return typeof File !== 'undefined' && value instanceof File;
+  }
+
+  private prepareCompanyPayload(payload: any): any {
+    if (!payload || !this.isFile(payload.logo)) {
+      return payload;
+    }
+
+    const formData = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value === null || value === undefined) {
+        return;
+      }
+
+      if (this.isFile(value)) {
+        formData.append(key, value);
+        return;
+      }
+
+      formData.append(key, String(value));
+    });
+
+    return formData;
+  }
+
   getCompanies(): Observable<any> {
     return this.http.get<any>(environment.apiUrl + 'company/list');
   }
@@ -27,11 +53,20 @@ export class OnboardingService {
   }
 
   createCompany(payload: any): Observable<any> {
-    return this.http.post<any>(environment.apiUrl + 'company/add', payload);
+    const preparedPayload = this.prepareCompanyPayload(payload);
+    return this.http.post<any>(environment.apiUrl + 'company/add', preparedPayload);
   }
 
   updateCompany(companyId: number, payload: any): Observable<any> {
-    return this.http.put<any>(environment.apiUrl + 'company/update/' + companyId, payload);
+    const preparedPayload = this.prepareCompanyPayload(payload);
+    const url = environment.apiUrl + 'company/update/' + companyId;
+
+    if (preparedPayload instanceof FormData) {
+      preparedPayload.append('_method', 'PUT');
+      return this.http.post<any>(url, preparedPayload);
+    }
+
+    return this.http.put<any>(url, preparedPayload);
   }
 
   getRegions(): Observable<any> {

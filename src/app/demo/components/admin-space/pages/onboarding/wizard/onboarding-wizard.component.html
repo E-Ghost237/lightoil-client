@@ -150,7 +150,19 @@
         </div>
         <div class="field">
           <label for="company-logo">Logo</label>
-          <input id="company-logo" pInputText formControlName="logo" />
+          <div class="logo-upload-control">
+            <input
+              id="company-logo"
+              class="logo-upload-input"
+              type="file"
+              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              (change)="onCompanyLogoChange($event)" />
+            <label class="logo-upload-button" for="company-logo">Choisir un fichier</label>
+            <span class="logo-upload-text">{{ selectedLogoFileName || 'Aucun fichier sélectionné' }}</span>
+          </div>
+          <small class="field-error" *ngIf="controlHasError(companyForm.get('logo'), 'invalidFileType')">
+            Formats autorises: JPG, JPEG, PNG.
+          </small>
         </div>
         <div class="field">
           <label for="company-start">Date de debut <span class="required-indicator">*</span></label>

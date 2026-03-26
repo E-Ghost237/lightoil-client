@@ -44,6 +44,7 @@ export class OnboardingWizardComponent implements OnInit {
   selectedStationId: number | null = null;
   companySelectionAttempted = false;
   stationSelectionAttempted = false;
+  selectedLogoFileName = '';
 
   companyForm: FormGroup;
   stationForm: FormGroup;
@@ -54,6 +55,8 @@ export class OnboardingWizardComponent implements OnInit {
     { label: 'Activé', value: 'enabled' },
     { label: 'Désactivé', value: 'disabled' }
   ];
+  private readonly allowedLogoMimeTypes = new Set(['image/jpeg', 'image/png']);
+  private readonly allowedLogoExtensions = new Set(['jpg', 'jpeg', 'png']);
 
   constructor(
     private fb: FormBuilder,
@@ -168,6 +171,7 @@ export class OnboardingWizardComponent implements OnInit {
     if (mode === 'create') {
       this.selectedCompanyId = null;
       this.createdCompany = null;
+      this.selectedLogoFileName = '';
       this.companyStations = [];
       this.companyForm.reset({
         name: '',
@@ -224,6 +228,7 @@ export class OnboardingWizardComponent implements OnInit {
       ?? [];
 
     this.createdCompany = company;
+    this.selectedLogoFileName = '';
     this.companyStations = Array.isArray(stations) ? stations : [];
     this.selectedCompanyId = company?.id ?? companyId;
     this.companyForm.patchValue({
@@ -415,8 +420,53 @@ export class OnboardingWizardComponent implements OnInit {
     return !!control && control.hasError(errorKey) && (control.touched || control.dirty);
   }
 
+  onCompanyLogoChange(event: Event): void {
+    const logoControl = this.companyForm.get('logo');
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    if (!logoControl) {
+      return;
+    }
+
+    if (!file) {
+      return;
+    }
+
+    if (!this.isAllowedLogoFile(file)) {
+      logoControl.setErrors({ ...(logoControl.errors ?? {}), invalidFileType: true });
+      logoControl.markAsTouched();
+      this.selectedLogoFileName = '';
+      if (input) {
+        input.value = '';
+      }
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Format non autorise',
+        detail: 'Le logo doit etre un fichier JPG, JPEG ou PNG.',
+        life: 5000
+      });
+      return;
+    }
+
+    const currentErrors = { ...(logoControl.errors ?? {}) };
+    delete currentErrors['invalidFileType'];
+    logoControl.setErrors(Object.keys(currentErrors).length ? currentErrors : null);
+    logoControl.setValue(file);
+    logoControl.markAsDirty();
+    logoControl.markAsTouched();
+    this.selectedLogoFileName = file.name;
+  }
+
   private normalizeValue(value: any): string {
     return String(value ?? '').trim().toLowerCase();
+  }
+
+  private isAllowedLogoFile(file: File): boolean {
+    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const mimeAllowed = this.allowedLogoMimeTypes.has((file.type || '').toLowerCase());
+    const extensionAllowed = this.allowedLogoExtensions.has(extension);
+    return mimeAllowed || extensionAllowed;
   }
 
   async submitCompany(): Promise<void> {
