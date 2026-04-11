@@ -13,6 +13,8 @@ import { CalendarModule } from 'primeng/calendar';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { AuthService } from './demo/components/auth/services/auth.service';
+import { ToastModule } from 'primeng/toast';
+import { GlobalNotificationInterceptor } from './demo/components/auth/interceptors/global-notification.interceptor';
 
 
 registerLocaleData(localeFr);
@@ -23,6 +25,7 @@ registerLocaleData(localeFr);
     ],
     imports: [
         CalendarModule,
+        ToastModule,
         BrowserModule,
         BrowserAnimationsModule,
         AppRoutingModule,
@@ -33,6 +36,11 @@ registerLocaleData(localeFr);
         {
             provide: HTTP_INTERCEPTORS,
             useClass: AuthInterceptor,
+            multi: true
+        },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: GlobalNotificationInterceptor,
             multi: true
         },
         MessageService, CookieService, ConfirmationService, AuthService

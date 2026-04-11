@@ -95,7 +95,8 @@
 
 :host ::ng-deep .p-dropdown,
 :host ::ng-deep .p-inputnumber {
-  display: block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .loading-card {

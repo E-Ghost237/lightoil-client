@@ -3,8 +3,7 @@
 <div class="onboarding-page">
   <div class="hero card">
     <div>
-      <p-tag value="Super Admin uniquement" severity="danger"></p-tag>
-      <h1>Onboarding reseau</h1>
+      <h1><strong>Onboarding reseau</strong></h1>
       <p>
         Creez une entreprise, son point de vente, rattachez les produits puis ajoutez les cuves avec leur jauge.
       </p>
@@ -60,8 +59,10 @@
   </div>
 
   <div *ngIf="loadingContext" class="loading-state card">
-    <p-progressSpinner strokeWidth="4"></p-progressSpinner>
-    <p>Chargement des references regions, villes, produits et jauges...</p>
+    <div class="lightgroup-loader">
+      <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+      <p class="lightgroup-loader__text">Chargement des references regions, villes, produits et jauges...</p>
+    </div>
   </div>
 
   <ng-container *ngIf="!loadingContext">

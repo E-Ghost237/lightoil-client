@@ -31,6 +31,7 @@ import { nonSuperAdminRouteMatchGuard } from 'src/app/demo/guards/non-super-admi
             loadChildren: () => import('./network-config/network-config.module').then((m) => m.NetworkConfigModule)
           },
           { path: 'onboarding', canActivate: [superAdminGuard], loadChildren: () => import('./onboarding/onboarding.module').then((m) => m.OnboardingModule) },
+          { path: 'subscriptions', canActivate: [superAdminGuard], loadChildren: () => import('./subscriptions/subscriptions.module').then((m) => m.SubscriptionsModule) },
           {
             path: 'reports',
             loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule)

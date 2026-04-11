@@ -10,6 +10,7 @@ export class AdminMenuComponent implements OnInit {
 
     model: any[] = [];
     roleType = '';
+    isPlatformSuperAdmin = false;
 
     constructor(
         public layoutService: AdminLayoutService,
@@ -18,6 +19,8 @@ export class AdminMenuComponent implements OnInit {
 
     ngOnInit() {
         this.roleType = this.localStorageService.getRoleType();
+        const userDetails = this.localStorageService.getUserDetails();
+        this.isPlatformSuperAdmin = this.resolveSuperAdminAccess(userDetails);
         this.model = [
             {
                 label: 'Accueil',
@@ -43,10 +46,15 @@ export class AdminMenuComponent implements OnInit {
                         icon: 'pi pi-fw pi-circle-on',
                         routerLink: ['/admin/network-config/products']
                     },
-                    ...(this.roleType === 'Super Admin' ? [{
+                    ...(this.isPlatformSuperAdmin ? [{
                         label: 'Onboarding reseau',
                         icon: 'pi pi-fw pi-directions-alt',
                         routerLink: ['/admin/onboarding']
+                    },
+                    {
+                        label: 'Souscriptions stations',
+                        icon: 'pi pi-fw pi-credit-card',
+                        routerLink: ['/admin/subscriptions']
                     }] : []),
                     {
                         label: 'Rapports',
@@ -131,6 +139,27 @@ export class AdminMenuComponent implements OnInit {
                 ]
             }
         ];
+    }
+
+    private resolveSuperAdminAccess(userDetails: any): boolean {
+        const roleType = String(userDetails?.role_type ?? '').trim().toLowerCase();
+        const userFlag = userDetails?.user?.is_platform_super_admin;
+        const detailFlag = userDetails?.is_platform_super_admin;
+        const isPlatformSuperAdmin =
+            userFlag === true
+            || detailFlag === true
+            || userFlag === 1
+            || detailFlag === 1
+            || String(userFlag ?? '').trim() === '1'
+            || String(detailFlag ?? '').trim() === '1'
+            || String(userFlag ?? '').trim().toLowerCase() === 'true'
+            || String(detailFlag ?? '').trim().toLowerCase() === 'true';
+
+        if (isPlatformSuperAdmin) {
+            return true;
+        }
+
+        return roleType === 'super admin' || roleType === 'super administrateur';
     }
 
     /**

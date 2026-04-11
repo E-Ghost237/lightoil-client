@@ -3,8 +3,7 @@
 <div class="super-dashboard">
   <div class="card hero mb-1">
     <div>
-      <p-tag value="Super Admin uniquement" severity="danger"></p-tag>
-      <h1>Dashboard Super Admin</h1>
+      <h1><strong>Tableau de Bord</strong></h1>
       <p>
         Vue globale de la plateforme: entreprises, stations, cuves , alertes critiques et positions des
         stations.
@@ -83,8 +82,8 @@
     </div>
   </div>
 
-  <div class="kpi-grid mb-0">
-    <div class="card kpi-card mb-1">
+  <div class="kpi-grid">
+    <div class="card kpi-card">
       <span class="kpi-label">Stations</span>
       <strong>{{ summary.stationsCount | number:'1.0-0':'fr' }}</strong>
     </div>
@@ -222,7 +221,9 @@
       </div>
 
       <div class="map-loading" *ngIf="loadingContext || loadingDashboard">
-        <p-progressSpinner strokeWidth="4"></p-progressSpinner>
+        <div class="lightgroup-loader">
+          <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+        </div>
       </div>
 
       <div class="map-empty" *ngIf="!loadingContext && !loadingDashboard && !filteredStations.length">

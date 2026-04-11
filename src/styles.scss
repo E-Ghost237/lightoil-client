@@ -56,3 +56,24 @@ $gutter: 1rem; //for primeflex grid system
     transform: scale(1.01);
 }
 
+.lightgroup-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.lightgroup-loader__image {
+    width: 150px;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.lightgroup-loader__text {
+    margin: 0;
+    color: #334155;
+    font-size: 0.98rem;
+}

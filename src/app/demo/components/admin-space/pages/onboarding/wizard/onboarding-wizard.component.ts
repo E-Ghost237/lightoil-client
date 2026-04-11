@@ -57,6 +57,7 @@ export class OnboardingWizardComponent implements OnInit {
   ];
   private readonly allowedLogoMimeTypes = new Set(['image/jpeg', 'image/png']);
   private readonly allowedLogoExtensions = new Set(['jpg', 'jpeg', 'png']);
+  private stationHydrationRequestId = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -119,6 +120,232 @@ export class OnboardingWizardComponent implements OnInit {
 
   tankRows(groupIndex: number): FormArray {
     return this.tankGroups.at(groupIndex).get('tanks') as FormArray;
+  }
+
+  private getStationFormDefaults(): any {
+    return {
+      name: '',
+      latitude: null,
+      longitude: null,
+      description: '',
+      status: 'enabled',
+      back_image_link: '',
+      address: '',
+      region_id: null,
+      town_id: null,
+      sale_point_type_id: null,
+      time_zone: 1
+    };
+  }
+
+  private toNumberOrNull(value: any, allowZero = false): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const normalized = typeof value === 'string' ? value.replace(',', '.').trim() : value;
+    if (normalized === '') {
+      return null;
+    }
+
+    const parsed = Number(normalized);
+    if (!Number.isFinite(parsed)) {
+      return null;
+    }
+
+    if (!allowZero && parsed <= 0) {
+      return null;
+    }
+
+    return parsed;
+  }
+
+  private resolveStationTypeId(station: any): number | null {
+    const directTypeId = this.toNumberOrNull(
+      station?.sale_point_type?.id
+      ?? station?.sale_point_type_id
+      ?? station?.point_of_sale_type?.id
+      ?? station?.point_of_sale_type_id
+      ?? station?.type?.id
+      ?? station?.type_id
+      ?? (typeof station?.sale_point_type === 'number' ? station.sale_point_type : null)
+      ?? (typeof station?.point_of_sale_type === 'number' ? station.point_of_sale_type : null)
+      ?? (typeof station?.type === 'number' ? station.type : null)
+    );
+
+    if (directTypeId) {
+      return directTypeId;
+    }
+
+    const stationTypeToken = String(
+      station?.sale_point_type?.code
+      ?? station?.sale_point_type?.name
+      ?? station?.point_of_sale_type?.code
+      ?? station?.point_of_sale_type?.name
+      ?? station?.type?.code
+      ?? station?.type?.name
+      ?? station?.sale_point_type
+      ?? station?.point_of_sale_type
+      ?? station?.type
+      ?? ''
+    ).trim().toLowerCase();
+
+    if (!stationTypeToken) {
+      return null;
+    }
+
+    const matchedType = this.salePointTypes.find((type: any) => {
+      const typeName = String(type?.name ?? '').trim().toLowerCase();
+      const typeCode = String(type?.code ?? '').trim().toLowerCase();
+      return stationTypeToken === typeName || stationTypeToken === typeCode;
+    });
+
+    return this.toNumberOrNull(matchedType?.id);
+  }
+
+  private resolveStationRegionId(station: any, townId: number | null): number | null {
+    const regionId = this.toNumberOrNull(
+      station?.town?.region_id
+      ?? station?.town?.region?.id
+      ?? station?.region?.id
+      ?? station?.region_id
+    );
+
+    if (regionId) {
+      return regionId;
+    }
+
+    if (!townId) {
+      return null;
+    }
+
+    const matchedTown = this.towns.find((town: any) => Number(town?.id) === Number(townId));
+    return this.toNumberOrNull(matchedTown?.region_id ?? matchedTown?.region?.id);
+  }
+
+  private resolveStationCoordinate(station: any, axis: 'latitude' | 'longitude'): number | null {
+    if (axis === 'latitude') {
+      return this.toNumberOrNull(
+        station?.latitude
+        ?? station?.lat
+        ?? station?.coord?.lat
+        ?? station?.coords?.lat
+        ?? station?.coordinates?.lat
+        ?? station?.geolocation?.lat
+        ?? station?.geo_location?.lat
+        ?? station?.location?.latitude
+        ?? station?.location?.lat,
+        true
+      );
+    }
+
+    return this.toNumberOrNull(
+      station?.longitude
+      ?? station?.lng
+      ?? station?.lon
+      ?? station?.long
+      ?? station?.coord?.lng
+      ?? station?.coord?.lon
+      ?? station?.coords?.lng
+      ?? station?.coords?.lon
+      ?? station?.coordinates?.lng
+      ?? station?.coordinates?.lon
+      ?? station?.geolocation?.lng
+      ?? station?.geolocation?.lon
+      ?? station?.geo_location?.lng
+      ?? station?.geo_location?.lon
+      ?? station?.location?.longitude
+      ?? station?.location?.lng
+      ?? station?.location?.lon
+      ?? station?.location?.long,
+      true
+    );
+  }
+
+  private extractStationPayload(response: any): any | null {
+    const payload = response?.data ?? response ?? {};
+    const station = payload?.station
+      ?? payload?.sale_point
+      ?? payload?.service_station
+      ?? payload?.point_of_sale
+      ?? payload?.data
+      ?? payload;
+
+    if (Array.isArray(station)) {
+      return station[0] ?? null;
+    }
+
+    return station && typeof station === 'object' ? station : null;
+  }
+
+  private async hydrateStationDetail(stationId: number, fallbackStation: any): Promise<any> {
+    let detailedStation: any = null;
+
+    try {
+      const stationRes = await firstValueFrom(this.onboardingService.getSalePointById(stationId));
+      detailedStation = this.extractStationPayload(stationRes);
+    } catch {
+      detailedStation = null;
+    }
+
+    if (!detailedStation && this.createdCompany?.id) {
+      try {
+        const contextRes = await firstValueFrom(
+          this.onboardingService.getCompanyStationContext(this.createdCompany.id, stationId)
+        );
+        detailedStation = this.extractStationPayload(contextRes);
+      } catch {
+        detailedStation = null;
+      }
+    }
+
+    if (!detailedStation) {
+      return fallbackStation;
+    }
+
+    return {
+      ...fallbackStation,
+      ...detailedStation,
+      town: detailedStation?.town ?? fallbackStation?.town,
+      sale_point_type:
+        detailedStation?.sale_point_type
+        ?? detailedStation?.point_of_sale_type
+        ?? detailedStation?.type
+        ?? fallbackStation?.sale_point_type
+        ?? fallbackStation?.point_of_sale_type
+        ?? fallbackStation?.type
+    };
+  }
+
+  private buildStationFormValue(station: any): any {
+    const townId = this.toNumberOrNull(
+      station?.town?.id
+      ?? station?.town_id
+      ?? station?.city?.id
+      ?? station?.city_id
+    );
+    const regionId = this.resolveStationRegionId(station, townId);
+
+    return {
+      ...this.getStationFormDefaults(),
+      name: station?.name ?? '',
+      latitude: this.resolveStationCoordinate(station, 'latitude'),
+      longitude: this.resolveStationCoordinate(station, 'longitude'),
+      description: station?.description ?? '',
+      status: station?.status ?? 'enabled',
+      back_image_link: station?.back_image_link ?? '',
+      address: station?.address ?? '',
+      region_id: regionId,
+      town_id: townId,
+      sale_point_type_id: this.resolveStationTypeId(station),
+      time_zone: this.toNumberOrNull(
+        station?.gmt
+        ?? station?.time_zone
+        ?? station?.timezone
+        ?? station?.timeZone,
+        true
+      ) ?? 1
+    };
   }
 
   async loadContext(): Promise<void> {
@@ -247,31 +474,21 @@ export class OnboardingWizardComponent implements OnInit {
   setStationMode(mode: 'create' | 'existing'): void {
     this.stationMode = mode;
     this.stationSelectionAttempted = false;
+    this.stationHydrationRequestId += 1;
 
     if (mode === 'create') {
       this.selectedStationId = null;
       this.createdStation = null;
-      this.stationForm.reset({
-        name: '',
-        latitude: null,
-        longitude: null,
-        description: '',
-        status: 'enabled',
-        back_image_link: '',
-        address: '',
-        region_id: null,
-        town_id: null,
-        sale_point_type_id: null,
-        time_zone: 1
-      });
+      this.stationForm.reset(this.getStationFormDefaults());
       this.filterTowns(null);
       this.resetProductAndBelow();
     }
   }
 
-  onExistingStationChange(stationId: number | null): void {
+  async onExistingStationChange(stationId: number | null): Promise<void> {
     this.selectedStationId = stationId;
     this.stationSelectionAttempted = false;
+    const requestId = ++this.stationHydrationRequestId;
     const station = this.companyStations.find((item) => Number(item.id) === Number(stationId));
 
     if (!station) {
@@ -280,22 +497,20 @@ export class OnboardingWizardComponent implements OnInit {
       return;
     }
 
-    this.createdStation = station;
-    const regionId = station?.town?.region_id ?? null;
-    this.stationForm.patchValue({
-      name: station.name ?? '',
-      latitude: station.latitude ?? null,
-      longitude: station.longitude ?? null,
-      description: station.description ?? '',
-      status: station.status ?? 'enabled',
-      back_image_link: station.back_image_link ?? '',
-      address: station.address ?? '',
-      region_id: regionId,
-      town_id: station?.town?.id ?? station.town_id ?? null,
-      sale_point_type_id: station?.sale_point_type?.id ?? station.sale_point_type_id ?? null,
-      time_zone: station.gmt ?? station.time_zone ?? 1
-    });
-    this.filterTowns(regionId);
+    let stationPayload = station;
+    const stationIdAsNumber = this.toNumberOrNull(stationId);
+
+    if (stationIdAsNumber) {
+      stationPayload = await this.hydrateStationDetail(stationIdAsNumber, station);
+      if (requestId !== this.stationHydrationRequestId) {
+        return;
+      }
+    }
+
+    this.createdStation = stationPayload;
+    const stationFormValue = this.buildStationFormValue(stationPayload);
+    this.stationForm.reset(stationFormValue, { emitEvent: false });
+    this.filterTowns(stationFormValue.region_id);
     this.resetProductAndBelow(false);
   }
 
@@ -304,19 +519,7 @@ export class OnboardingWizardComponent implements OnInit {
       this.createdStation = null;
       this.selectedStationId = null;
       this.stationMode = 'create';
-      this.stationForm.reset({
-        name: '',
-        latitude: null,
-        longitude: null,
-        description: '',
-        status: 'enabled',
-        back_image_link: '',
-        address: '',
-        region_id: null,
-        town_id: null,
-        sale_point_type_id: null,
-        time_zone: 1
-      });
+      this.stationForm.reset(this.getStationFormDefaults());
       this.filterTowns(null);
     }
 
@@ -634,7 +837,7 @@ export class OnboardingWizardComponent implements OnInit {
       await this.loadCompanyDetail(this.createdCompany.id);
       const latest = this.companyStations.find((item) => Number(item.id) === Number(this.createdStation.id));
       this.createdStation = latest ?? this.createdStation;
-      this.onExistingStationChange(this.createdStation.id);
+      await this.onExistingStationChange(this.createdStation.id);
       this.messageService.add({
         key: 'tst',
         severity: 'success',

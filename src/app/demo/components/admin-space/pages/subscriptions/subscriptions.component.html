@@ -1,0 +1,453 @@
+<p-toast key="tst"></p-toast>
+
+<div class="subscriptions-page">
+  <div class="card hero-card">
+    <div>
+      <h1><strong>Abonnements Stations</strong></h1>
+      <p>
+        Configuration des nouvelles souscriptions, suivi des cycles et actions critiques
+        (paiement, relances, automatisation) au niveau station.
+      </p>
+    </div>
+
+    <div class="hero-actions">
+      <p-button
+        label="Lancer l'automatisation"
+        icon="pi pi-play"
+        [loading]="runningAutomation"
+        severity="secondary"
+        [outlined]="true"
+        (onClick)="runAutomationNow()">
+      </p-button>
+    </div>
+  </div>
+
+  <div class="new-subscription-grid">
+    <div class="card setup-card">
+      <div class="section-head">
+        <h2>Nouvelles Souscriptions</h2>
+        <small>Configurez et démarrez la souscription d’une station.</small>
+      </div>
+
+      <form [formGroup]="configureForm" class="setup-form">
+        <div class="field">
+          <label for="setup-company">Entreprise <span class="required">*</span></label>
+          <p-dropdown
+            inputId="setup-company"
+            [options]="companies"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            formControlName="company_id"
+            placeholder="Sélectionner une entreprise">
+          </p-dropdown>
+          <small class="field-error" *ngIf="getSetupError('company_id', 'L’entreprise est obligatoire.')">
+            {{ getSetupError('company_id', 'L’entreprise est obligatoire.') }}
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="setup-station">Station <span class="required">*</span></label>
+          <p-dropdown
+            inputId="setup-station"
+            [options]="setupStations"
+            optionLabel="name"
+            optionValue="id"
+            [showClear]="true"
+            formControlName="station_id"
+            placeholder="Sélectionner une station">
+          </p-dropdown>
+          <small class="field-error" *ngIf="getSetupError('station_id', 'La station est obligatoire.')">
+            {{ getSetupError('station_id', 'La station est obligatoire.') }}
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="setup-signed">Document signé confirmé le <span class="required">*</span></label>
+          <input id="setup-signed" type="date" pInputText formControlName="signed_document_confirmed_at" />
+          <small class="field-error" *ngIf="getSetupError('signed_document_confirmed_at', 'La date signée est obligatoire.')">
+            {{ getSetupError('signed_document_confirmed_at', 'La date signée est obligatoire.') }}
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="setup-billing-start">Début de facturation</label>
+          <input id="setup-billing-start" type="date" pInputText formControlName="billing_start_date" />
+          <small class="field-error" *ngIf="billingStartDateGroupError">{{ billingStartDateGroupError }}</small>
+        </div>
+
+        <div class="field">
+          <label for="setup-gauge">Type de jauge</label>
+          <p-dropdown
+            inputId="setup-gauge"
+            [options]="gauges"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            formControlName="gauge_type_id"
+            placeholder="Optionnel">
+          </p-dropdown>
+        </div>
+
+        <div class="field">
+          <label for="setup-kit-quantity">Quantité kits <span class="required">*</span></label>
+          <p-inputNumber
+            inputId="setup-kit-quantity"
+            formControlName="kit_quantity"
+            [min]="1"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="0"
+            [useGrouping]="false">
+          </p-inputNumber>
+          <small class="field-error" *ngIf="getSetupError('kit_quantity', 'La quantité de kits doit être >= 1.')">
+            {{ getSetupError('kit_quantity', 'La quantité de kits doit être >= 1.') }}
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="setup-pricing-mode">Mode tarifaire <span class="required">*</span></label>
+          <p-dropdown
+            inputId="setup-pricing-mode"
+            [options]="pricingModeOptions"
+            optionLabel="label"
+            optionValue="value"
+            formControlName="pricing_mode">
+          </p-dropdown>
+        </div>
+
+        <div class="field">
+          <label for="setup-monthly-kit-price">
+            Prix mensuel kit
+            <span class="hint">(défaut: 195000)</span>
+          </label>
+          <p-inputNumber
+            inputId="setup-monthly-kit-price"
+            formControlName="monthly_kit_price"
+            [min]="0"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="0"
+            [useGrouping]="true">
+          </p-inputNumber>
+        </div>
+
+        <div class="field">
+          <label for="setup-custom-total">
+            Total mensuel négocié
+            <span class="required" *ngIf="isNegotiatedMode">*</span>
+          </label>
+          <p-inputNumber
+            inputId="setup-custom-total"
+            formControlName="custom_monthly_total"
+            [min]="0"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="0"
+            [useGrouping]="true">
+          </p-inputNumber>
+          <small class="field-error" *ngIf="getSetupError('custom_monthly_total', 'Le total négocié est requis.')">
+            {{ getSetupError('custom_monthly_total', 'Le total négocié est requis.') }}
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="setup-currency">Devise</label>
+          <input id="setup-currency" pInputText formControlName="currency" maxlength="3" placeholder="XAF" />
+          <small class="field-error" *ngIf="getSetupError('currency', 'La devise doit contenir 3 lettres.')">
+            {{ getSetupError('currency', 'La devise doit contenir 3 lettres.') }}
+          </small>
+        </div>
+      </form>
+
+      <div class="setup-actions">
+        <p-button
+          label="Configurer la souscription"
+          icon="pi pi-save"
+          [loading]="savingConfiguration"
+          [disabled]="!canSubmitConfiguration"
+          (onClick)="submitConfiguration()">
+        </p-button>
+      </div>
+    </div>
+
+    <div class="card new-stations-card">
+      <div class="section-head">
+        <h3>Stations sans cycle visible</h3>
+        <small>Pré-sélection utile pour nouvelles souscriptions</small>
+      </div>
+
+      <div class="stations-scroll">
+        <div class="empty-hint" *ngIf="!unconfiguredStationsPreview.length">
+          Toutes les stations connues ont déjà des cycles visibles.
+        </div>
+
+        <div class="station-preview" *ngFor="let station of unconfiguredStationsPreview">
+          <strong>{{ station.name }}</strong>
+          <small>{{ station.companyName || '-' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card monitor-filters">
+    <div class="section-head">
+      <h2>Suivi des cycles</h2>
+      <small>Filtres entreprise / station / statut / plage d'échéance</small>
+    </div>
+
+    <div class="filters-grid">
+      <div class="field">
+        <label for="filter-company">Entreprise</label>
+        <p-dropdown
+          inputId="filter-company"
+          [options]="companies"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          [ngModel]="cycleFilters.company_id"
+          (ngModelChange)="onCycleFilterCompanyChange($event)">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-station">Station</label>
+        <p-dropdown
+          inputId="filter-station"
+          [options]="filterStations"
+          optionLabel="name"
+          optionValue="id"
+          [showClear]="true"
+          [ngModel]="cycleFilters.service_station_id"
+          (ngModelChange)="cycleFilters.service_station_id = $event">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-status">Statut cycle</label>
+        <p-dropdown
+          inputId="filter-status"
+          [options]="cycleStatusOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="cycleFilters.status || ''"
+          (ngModelChange)="cycleFilters.status = $event ? $event : null">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-due-from">Échéance du</label>
+        <input id="filter-due-from" type="date" pInputText [ngModel]="cycleFilters.due_from" (ngModelChange)="cycleFilters.due_from = $event" />
+      </div>
+
+      <div class="field">
+        <label for="filter-due-to">Échéance au</label>
+        <input id="filter-due-to" type="date" pInputText [ngModel]="cycleFilters.due_to" (ngModelChange)="cycleFilters.due_to = $event" />
+      </div>
+
+      <div class="field">
+        <label for="filter-limit">Limite</label>
+        <p-dropdown
+          inputId="filter-limit"
+          [options]="limitOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="cycleFilters.limit"
+          (ngModelChange)="cycleFilters.limit = $event">
+        </p-dropdown>
+      </div>
+
+      <div class="field action-field">
+        <label class="action-spacer">Action</label>
+        <div class="filters-actions">
+          <p-button
+            label="Appliquer"
+            icon="pi pi-filter"
+            [loading]="loadingCycles"
+            (onClick)="loadCycles()">
+          </p-button>
+          <p-button
+            label="Réinitialiser"
+            icon="pi pi-times"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="resetCycleFilters()">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="monitor-grid">
+    <div class="card cycles-card">
+      <div class="section-head">
+        <h3>Cycles</h3>
+        <small>{{ cycleRows.length }} ligne(s)</small>
+      </div>
+
+      <div class="lightgroup-loader" *ngIf="loadingCycles">
+        <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+      </div>
+
+      <div class="table-wrap" *ngIf="!loadingCycles">
+        <table class="cycles-table">
+          <thead>
+            <tr>
+              <th>Entreprise</th>
+              <th>Station</th>
+              <th>Période</th>
+              <th>Date d'échéance</th>
+              <th>Montant</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let row of cycleRows"
+              [class.selected]="selectedCycle?.id === row.id"
+              (click)="selectCycle(row)">
+              <td>{{ row.companyName }}</td>
+              <td>{{ row.stationName }}</td>
+              <td>
+                {{ row.periodStart ? (row.periodStart | date:'dd/MM/yyyy':'':'fr') : '-' }}
+                →
+                {{ row.periodEnd ? (row.periodEnd | date:'dd/MM/yyyy':'':'fr') : '-' }}
+              </td>
+              <td>{{ row.dueDate ? (row.dueDate | date:'dd/MM/yyyy':'':'fr') : '-' }}</td>
+              <td>{{ formatCurrency(row.amountDue, row.currency) }}</td>
+              <td>
+                <p-tag [severity]="resolveCycleStatusSeverity(row.status)" [value]="resolveCycleStatusLabel(row.status)"></p-tag>
+              </td>
+            </tr>
+
+            <tr *ngIf="!cycleRows.length">
+              <td colspan="6" class="empty-cell">Aucun cycle trouvé pour les filtres actifs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card detail-card">
+      <div class="section-head">
+        <h3>Détail Souscription Station</h3>
+        <small>Cycle ouvert + journal des rappels</small>
+      </div>
+
+      <div class="lightgroup-loader" *ngIf="loadingDetail">
+        <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+      </div>
+
+      <div *ngIf="!loadingDetail && stationNotConfigured" class="empty-hint">
+        {{ detailFallbackMessage || 'Souscription non configurée.' }}
+      </div>
+
+      <div *ngIf="!loadingDetail && !stationNotConfigured && selectedSubscription as subscription" class="detail-content">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span>Entreprise</span>
+            <strong>{{ subscription.companyName }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Station</span>
+            <strong>{{ subscription.stationName }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Mode tarifaire</span>
+            <strong>{{ resolvePricingModeLabel(subscription.pricingMode) }}</strong>
+          </div>
+          <div class="summary-item">
+            <span>Kits</span>
+            <strong>{{ subscription.kitQuantity }}</strong>
+          </div>
+        </div>
+
+        <div class="cycle-actions" *ngIf="selectedCycle as cycle">
+          <div class="cycle-head">
+            <p-tag [severity]="resolveCycleStatusSeverity(cycle.status)" [value]="resolveCycleStatusLabel(cycle.status)"></p-tag>
+            <small>Cycle #{{ cycle.id }} · échéance {{ cycle.dueDate ? (cycle.dueDate | date:'dd/MM/yyyy':'':'fr') : '-' }}</small>
+          </div>
+
+          <div class="field">
+            <label for="action-payment-ref">Référence de paiement</label>
+            <input id="action-payment-ref" pInputText [(ngModel)]="paymentReference" placeholder="Optionnel" />
+            <small class="field-error" *ngIf="actionFieldErrors['payment_reference']">{{ actionFieldErrors['payment_reference'] }}</small>
+          </div>
+
+          <div class="field">
+            <label for="action-payment-notes">Notes de paiement</label>
+            <textarea id="action-payment-notes" pInputTextarea rows="2" [(ngModel)]="paymentNotes" placeholder="Optionnel"></textarea>
+            <small class="field-error" *ngIf="actionFieldErrors['payment_notes']">{{ actionFieldErrors['payment_notes'] }}</small>
+          </div>
+
+          <div class="field reminder-field">
+            <label for="action-reminder-type">Type de rappel</label>
+            <p-dropdown
+              inputId="action-reminder-type"
+              [options]="reminderTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              [(ngModel)]="reminderType">
+            </p-dropdown>
+          </div>
+
+          <div class="field checkbox-field">
+            <p-checkbox
+              inputId="action-allow-repeat"
+              [binary]="true"
+              [(ngModel)]="allowRepeat">
+            </p-checkbox>
+            <label for="action-allow-repeat">Autoriser la répétition</label>
+          </div>
+
+          <div class="actions-row">
+            <p-button
+              label="Confirmer le paiement"
+              icon="pi pi-check"
+              severity="success"
+              [loading]="actionInProgress"
+              [disabled]="actionInProgress || cycle.status === 'paid'"
+              (onClick)="confirmSelectedCyclePayment()">
+            </p-button>
+            <p-button
+              label="Envoyer le rappel"
+              icon="pi pi-send"
+              severity="secondary"
+              [outlined]="true"
+              [loading]="actionInProgress"
+              [disabled]="actionInProgress || cycle.status === 'paid'"
+              (onClick)="sendReminderForSelectedCycle()">
+            </p-button>
+          </div>
+        </div>
+
+        <div class="logs-block" *ngIf="selectedCycle?.reminderLogs?.length">
+          <h4>Journal d'envoi des rappels</h4>
+          <div class="log-row" *ngFor="let log of selectedCycle?.reminderLogs">
+            <div class="log-main">
+              <strong>{{ log.reminderType }}</strong>
+              <small>{{ log.recipient || '-' }}</small>
+            </div>
+            <div class="log-dates">
+              <small>tenté le: {{ log.attemptedAt ? (log.attemptedAt | date:'dd/MM/yyyy HH:mm':'':'fr') : '-' }}</small>
+              <small>envoyé le: {{ log.sentAt ? (log.sentAt | date:'dd/MM/yyyy HH:mm':'':'fr') : '-' }}</small>
+              <small>échec le: {{ log.failedAt ? (log.failedAt | date:'dd/MM/yyyy HH:mm':'':'fr') : '-' }}</small>
+            </div>
+            <p-tag [severity]="resolveReminderStatusSeverity(log.status)" [value]="resolveReminderStatusLabel(log.status)"></p-tag>
+          </div>
+
+          <div class="log-error" *ngIf="hasReminderErrors(selectedCycle?.reminderLogs)">
+            <strong>Dernier message d’erreur:</strong>
+            {{ getLatestReminderErrorMessage(selectedCycle?.reminderLogs) }}
+          </div>
+        </div>
+
+        <div class="logs-block" *ngIf="!selectedCycle?.reminderLogs?.length">
+          <h4>Journal d'envoi des rappels</h4>
+          <p>Aucun log de relance pour ce cycle.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingDetail && !stationNotConfigured && !selectedSubscription" class="empty-hint">
+        Sélectionnez un cycle pour afficher le détail d’abonnement station.
+      </div>
+    </div>
+  </div>
+</div>
