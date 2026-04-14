@@ -76,6 +76,10 @@ export class TankImageComponent {
         return this.parseMetric(record?.fuel_volume ?? record?.volume);
     }
 
+    private formatFuelVolume(value: number): string {
+        return value.toFixed(5);
+    }
+
     private getWaterHeight(record: any): number | null {
         return this.parseMetric(record?.water_height);
     }
@@ -97,7 +101,7 @@ export class TankImageComponent {
         const latestRecord = this.getLatestRecord();
         const fuelVolume = this.getFuelVolume(latestRecord);
         if(latestRecord && fuelVolume !== null){
-            return ''+ Math.round(fuelVolume*100)/100 +' / '+latestRecord.total_volume;
+            return this.formatFuelVolume(fuelVolume) + ' / ' + latestRecord.total_volume;
         }else{
             return '---';
         }

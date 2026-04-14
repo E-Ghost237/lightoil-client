@@ -1637,7 +1637,7 @@ export class PdfService {
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(fuelVolume),
+          text: this.getFuelVolumeDisplay(fuelVolume),
           style: "tableLine"
         },
         {
@@ -2698,7 +2698,7 @@ export class PdfService {
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(fuelVolume),
+          text: this.getFuelVolumeDisplay(fuelVolume),
           style: "tableLine"
         },
         {
@@ -2972,6 +2972,20 @@ export class PdfService {
 
   getToLocalTime(date1:string){
       return Utility.toLocalTime(date1)??"";
+  }
+
+  private parseMetric(value: any): number | null {
+      if (value === null || value === undefined || value === '') {
+          return null;
+      }
+
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  private getFuelVolumeDisplay(value: any): string {
+      const parsed = this.parseMetric(value);
+      return parsed === null ? '---' : parsed.toFixed(5);
   }
 
   getRoundValue(num:number){

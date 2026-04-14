@@ -129,6 +129,15 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         return this.parseMetric(record?.fuel_volume ?? record?.volume);
     }
 
+    private formatFuelVolume(value: number): string {
+        return value.toFixed(5);
+    }
+
+    getFuelVolumeDisplay(record: any): string {
+        const fuelVolume = this.getFuelVolume(record);
+        return fuelVolume === null ? '---' : this.formatFuelVolume(fuelVolume);
+    }
+
     private getWaterHeight(record: any): number | null {
         return this.parseMetric(record?.water_height);
     }
@@ -164,7 +173,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 time.push(this.getToLocalDateTime(record?.updated_at))
                 d.push(this.getRoundValue(record?.density));
                 l.push(this.getRoundValue(record?.liquid_height));
-                v.push(this.getRoundedMetricOrNull(this.getFuelVolume(record)));
+                v.push(this.getFuelVolume(record));
                 v15.push(this.getRoundValue(record?.volume_at_fift));
                 t.push(this.getRoundValue(record?.liquid_temperature));
                 wv.push(this.getRoundedMetricOrNull(this.getWaterVolumeMetric(record)));
@@ -301,7 +310,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         const latestRecord = this.getLatestRecord();
         const fuelVolume = this.getFuelVolume(latestRecord);
         if(latestRecord && fuelVolume !== null){
-            return ''+ (Math.round(fuelVolume*100)/100) +' / '+latestRecord.total_volume;
+            return this.formatFuelVolume(fuelVolume) + ' / ' + latestRecord.total_volume;
         }
         return '---';
     }

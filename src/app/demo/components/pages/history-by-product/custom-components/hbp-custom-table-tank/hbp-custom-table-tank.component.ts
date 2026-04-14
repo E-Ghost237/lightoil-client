@@ -44,7 +44,12 @@ export class HbpCustomTableTankComponent {
 
   getVolumeAtT(){
       if(this.tankDetailsData?.listLastRecord?.length > 0){
-          return ''+ Math.round(this.tankDetailsData.listLastRecord[0].volume*100)/100 +' / '+this.tankDetailsData.listLastRecord[0].total_volume;
+          const record = this.tankDetailsData.listLastRecord[0];
+          const fuelVolume = this.parseMetric(record?.fuel_volume ?? record?.volume);
+          if (fuelVolume === null) {
+              return '---';
+          }
+          return this.formatFuelVolume(fuelVolume) + ' / ' + record.total_volume;
       }
       return '0';
   }
@@ -165,6 +170,10 @@ export class HbpCustomTableTankComponent {
       return Math.round(num*100)/100;
   }
 
+  private formatFuelVolume(value: number): string {
+      return value.toFixed(5);
+  }
+
   private parseMetric(value: any): number | null {
       if (value === null || value === undefined || value === '') {
           return null;
@@ -181,6 +190,6 @@ export class HbpCustomTableTankComponent {
           return '---';
       }
 
-      return '' + this.getRoundValue(fuelVolume);
+      return this.formatFuelVolume(fuelVolume);
   }
 }
