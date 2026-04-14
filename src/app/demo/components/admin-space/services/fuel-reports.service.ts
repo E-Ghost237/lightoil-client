@@ -8,6 +8,7 @@ export interface FuelReportPayload {
   date_start: string; // YYYY-MM-DD
   date_end: string;   // YYYY-MM-DD
   station_id?: number | null; // optional (Admin can filter)
+  granularity?: 'hourly'; // opt-in mode for non-breaking backend rollout
 }
 
 @Injectable({

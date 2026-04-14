@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { PusherService } from '../../services/pusher.service';
@@ -12,13 +12,15 @@ import { AuthService } from '../../../auth/services/auth.service';
   templateUrl: './tank-image.component.html',
   styleUrls: ['./tank-image.component.scss']
 })
-export class TankImageComponent {
+export class TankImageComponent implements OnChanges {
     @Input() dataFromTankList:any;
     @Input() type:any="vanne de surveillance";
     stationId: number;
     flowSensorId: number;
     user_details: any;
     volume: any = "indéterminée";
+    dayOutputTotal = 0;
+    notificationTimezone = 'Africa/Douala';
 
 
     constructor(
@@ -34,13 +36,33 @@ export class TankImageComponent {
 
 
     ngOnInit(): void {
-        //;
-        //("date: ", this.getLastIncomeDateRecord());
-        this.user_details = this.authService.getUserData();
-        this.stationId = this.user_details?.service_station_id;
-        this.flowSensorId = this.dataFromTankList.tank.id;
-        this.getLastHourVolume();
+        if (!this.dataFromTankList) {
+            this.refreshContextAndMetrics();
+        }
+    }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['dataFromTankList'] || changes['type']) {
+            this.refreshContextAndMetrics();
+        }
+    }
+
+    private isFlowMeterType(): boolean {
+        return this.type == 'Debimetre' || this.type == 'Débimètre';
+    }
+
+    private refreshContextAndMetrics(): void {
+        this.user_details = this.user_details ?? this.authService.getUserData();
+        this.stationId = this.user_details?.service_station_id;
+        this.notificationTimezone = this.resolveStationTimezone();
+        this.flowSensorId = Number(this.dataFromTankList?.tank?.id ?? 0);
+
+        if (this.isFlowMeterType()) {
+            this.getLastHourVolume();
+            return;
+        }
+
+        this.refreshDayOutputTotal();
     }
 
     private getRecordMoment(record: any): number {
@@ -49,8 +71,8 @@ export class TankImageComponent {
         return Math.max(createdAt, updatedAt);
     }
 
-    private getSortedRecords() {
-        return [...(this.dataFromTankList?.listLastRecord ?? [])].sort(
+    private getSortedRecords(records: any[] = this.dataFromTankList?.listLastRecord ?? []) {
+        return [...records].sort(
             (a, b) => this.getRecordMoment(b) - this.getRecordMoment(a)
         );
     }
@@ -116,17 +138,126 @@ export class TankImageComponent {
         }
     }
 
-    getOutputVolume() {
-        const latestRecord = this.getLatestRecord();
-        const previousRecord = this.getPreviousRecord();
-        const latestFuelVolume = this.getFuelVolume(latestRecord);
-        const previousFuelVolume = this.getFuelVolume(previousRecord);
+    private resolveStationTimezone(): string {
+        const fallback = 'Africa/Douala';
+        const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
+        const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.stationId)) ?? null;
 
-        if (latestFuelVolume !== null && previousFuelVolume !== null && latestFuelVolume <= previousFuelVolume) {
-            return Math.round((previousFuelVolume - latestFuelVolume) * 100) / 100;
+        const candidates = [
+            this.user_details?.timezone,
+            this.user_details?.time_zone,
+            currentStation?.timezone,
+            currentStation?.time_zone
+        ].filter((value: any) => typeof value === 'string' && value.trim().length > 0);
+
+        for (const candidate of candidates) {
+            const timezone = String(candidate).trim();
+            try {
+                Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+                return timezone;
+            } catch {
+                // Ignore invalid timezone identifiers and continue.
+            }
         }
 
-        return '---';
+        return fallback;
+    }
+
+    private getLocalDateKey(date: Date = new Date(), timezone: string = this.notificationTimezone): string {
+        try {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+
+            const year = parts.find((part) => part.type === 'year')?.value;
+            const month = parts.find((part) => part.type === 'month')?.value;
+            const day = parts.find((part) => part.type === 'day')?.value;
+            if (year && month && day) {
+                return `${year}-${month}-${day}`;
+            }
+        } catch {
+            // Fallback to local timezone if Intl timezone formatting fails.
+        }
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
+        const candidate = record?.updated_at ?? record?.created_at ?? null;
+        if (!candidate) {
+            return null;
+        }
+
+        const timestamp = new Date(candidate);
+        if (Number.isNaN(timestamp.getTime())) {
+            return null;
+        }
+
+        return this.getLocalDateKey(timestamp, timezone);
+    }
+
+    private getRoundValue(num: number): number {
+        return Math.round(num * 100) / 100;
+    }
+
+    private computeOutputSumFromRecords(records: any[]): number {
+        if (!Array.isArray(records) || records.length < 2) {
+            return 0;
+        }
+
+        const sorted = this.getSortedRecords(records);
+        let total = 0;
+
+        for (let i = 0; i < sorted.length - 1; i++) {
+            const latestVolume = this.getFuelVolume(sorted[i]);
+            const previousVolume = this.getFuelVolume(sorted[i + 1]);
+
+            if (latestVolume !== null && previousVolume !== null && latestVolume <= previousVolume) {
+                total += (previousVolume - latestVolume);
+            }
+        }
+
+        return this.getRoundValue(total);
+    }
+
+    private computeDayOutputFromCurrentRecords(dayKey: string): number {
+        const sourceRecords = Array.isArray(this.dataFromTankList?.listLastRecord) ? this.dataFromTankList.listLastRecord : [];
+        const sameDayRecords = sourceRecords.filter((record: any) => this.getRecordDateKey(record) === dayKey);
+        return this.computeOutputSumFromRecords(sameDayRecords);
+    }
+
+    private refreshDayOutputTotal(): void {
+        const tankId = Number(this.dataFromTankList?.tank?.id ?? 0);
+        if (!tankId) {
+            this.dayOutputTotal = 0;
+            return;
+        }
+
+        const dayKey = this.getLocalDateKey();
+        this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
+
+        this.recordService.getListRecordsForOneDay({
+            tankId,
+            dateStart: dayKey
+        }).subscribe({
+            next: (response: any) => {
+                const dayRecords = Array.isArray(response) ? response : [];
+                this.dayOutputTotal = this.computeOutputSumFromRecords(dayRecords);
+            },
+            error: () => {
+                this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
+            }
+        });
+    }
+
+    getOutputVolume() {
+        return this.getRoundValue(this.dayOutputTotal);
     }
 
     getLiquidTemp(){

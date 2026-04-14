@@ -221,12 +221,14 @@ export class TankOutletReportsComponent implements OnInit {
 
     const type = this.getPeriodType();
     const range = this.computeRange(type);
+    const granularity = (type === 'day' || type === 'week') ? 'hourly' : undefined;
 
     return {
       product_id: this.selectedProductId,
       date_start: this.formatDate(range.start),
       date_end: this.formatDate(range.end),
-      station_id: this.selectedStationId
+      station_id: this.selectedStationId,
+      ...(granularity ? { granularity } : {})
     };
   }
 
@@ -299,6 +301,31 @@ export class TankOutletReportsComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
+  private hasTimePart(value: any): boolean {
+    if (value instanceof Date) return true;
+    if (typeof value !== 'string') return false;
+    return value.includes('T') || value.includes(':') || value.includes(' ');
+  }
+
+  private adjustIncomingDateTime(date: Date, shouldShift: boolean): Date {
+    if (!shouldShift) return date;
+    return new Date(date.getTime() - (60 * 60 * 1000));
+  }
+
+  private shiftHourMinute(value: string): string {
+    const match = /^(\d{2}):(\d{2})$/.exec(value);
+    if (!match) return value;
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return value;
+
+    const date = new Date(2000, 0, 1, hours, minutes, 0, 0);
+    date.setHours(date.getHours() - 1);
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+
   private parseEventDate(value: any): Date | null {
     if (!value) return null;
     if (typeof value === 'string' && value.length <= 10 && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -307,7 +334,8 @@ export class TankOutletReportsComponent implements OnInit {
     }
     const normalized = typeof value === 'string' ? value.replace(' ', 'T') : value;
     const date = value instanceof Date ? value : new Date(normalized);
-    return Number.isNaN(date.getTime()) ? null : date;
+    if (Number.isNaN(date.getTime())) return null;
+    return this.adjustIncomingDateTime(date, this.hasTimePart(value));
   }
 
   formatEventDate(value: any): string {
@@ -320,7 +348,7 @@ export class TankOutletReportsComponent implements OnInit {
 
   formatEventTime(value: any): string {
     if (typeof value === 'string' && value.length <= 5 && /^\d{2}:\d{2}$/.test(value)) {
-      return value;
+      return this.shiftHourMinute(value);
     }
     const date = this.parseEventDate(value);
     if (date) {
