@@ -1,53 +1,80 @@
-<div class="justify-content-center ml-3 mr-3">
-    <table class="table table-striped table-hover table-bordered caption-top">
-        <caption class="font-bold text-lg text-dark">Rapport de ventes du mois de ...</caption>      
-        <thead class="table-dark">
-            <tr class="font-bold text-lg text-uppercase">
-                <th scope="col" class="text-center">#</th>
-                <th scope="col">Stations-service</th>
-                <th scope="col">Produits</th>
-                <th scope="col">Total</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider" *ngFor="let gas_station of gas_stations; index as i">
-            <tr>
-                <th scope="row" rowspan="2" class="align-middle">{{ i }}</th>
-                <td>
-                    <b>{{ gas_station.name }}</b> <br> {{ gas_station.town }}
-                </td>
-                <td>
-                    <table class="table mb-0" *ngFor="let product of products">
-                        <tr>
-                            <td *ngIf="product.name == 'Super'" style="color: #ba0505;">
-                                <strong>{{ product.name }} : </strong>
-                            </td>
-                            <td *ngIf="product.name == 'Gasoil'" style="color: #1f2422;">
-                                <strong>{{ product.name }} : </strong>
-                            </td>
-                            <td *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" style="color: #06bd74;">
-                                <strong>{{ product.name }} : </strong>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-                <td>
-                    <table class="table mb-0">
-                      <tr>
-                        <td>xxx</td>
-                      </tr>
-                    </table>
-                </td>
-            </tr>
-            <tr class="text-end font-bold text-md">
-                <th scope="row" colspan="2" class="pr-4">Total des ventes de la station-service ...</th>
-                <td class="pr-4">... FCFA</td>
-            </tr>
-        </tbody>
-        <tfoot class="table-group-divider">
-            <tr class="align-middle text-end font-bold text-lg text-uppercase">
-                <th scope="row" colspan="3" class="pt-5 pr-4 pb-2">Total des ventes du mois de ...</th>
-                <td class="table-info pt-5 pr-4 pb-2">... FCFA</td>
-            </tr>
-        </tfoot>      
-    </table>
+<div class="justify-content-center">
+    <ng-container *ngIf="loading == false; else elseTemplate">
+        <ng-container *ngIf="sales_by_product_of_sale_points?.length > 0; else noDataTemplate">
+            <table class="table table-striped table-hover table-bordered caption-top">
+                <caption class="font-bold text-lg text-dark">Rapport de ventes du mois de {{ month_label ?? '...' }}</caption>
+                <thead class="table-dark">
+                    <tr class="font-bold text-lg text-uppercase">
+                        <th scope="col" class="text-center">#</th>
+                        <th scope="col">{{ sale_point_type?.name ?? 'Points de vente' }}</th>
+                        <th scope="col">Produits</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="table-group-divider align-middle" *ngFor="let sale_point of sales_by_product_of_sale_points; index as i">
+                    <tr>
+                        <th scope="row" rowspan="2" class="text-center">{{ i + 1 }}</th>
+                        <td>
+                            <b>{{ sale_point.name }}</b> <br> {{ sale_point.town }}
+                        </td>
+                        <td>
+                            <table class="table mb-0" *ngFor="let product of sale_point.sales_by_product">
+                                <tr class="font-semibold">
+                                    <td *ngIf="product.name == 'Super'" style="color: #014da4;">
+                                        {{ product.name }}
+                                    </td>
+                                    <td *ngIf="product.name == 'Gasoil'" style="color: #fdc401;">
+                                        {{ product.name }}
+                                    </td>
+                                    <td *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" style="color: #007138;">
+                                        {{ product.name }}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td>
+                            <table class="table mb-0" *ngFor="let product of sale_point.sales_by_product">
+                                <tr class="font-semibold">
+                                    <td *ngIf="product.name == 'Super'" style="color: #014da4;">
+                                        {{ product.total_sales | number:'1.0-0':'fr' }} FCFA
+                                    </td>
+                                    <td *ngIf="product.name == 'Gasoil'" style="color: #fdc401;">
+                                        {{ product.total_sales | number:'1.0-0':'fr' }} FCFA
+                                    </td>
+                                    <td *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" style="color: #007138;">
+                                        {{ product.total_sales | number:'1.0-0':'fr' }} FCFA
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr class="text-end font-bold text-md">
+                        <th *ngIf=" sale_point_type?.code == 'SS'" scope="row" colspan="2" class="pt-3 pr-3">Total des ventes de la station-service {{ sale_point.name ?? '...' }}</th>
+                        <th *ngIf=" sale_point_type?.code == 'PCC'" scope="row" colspan="2" class="pt-3 pr-3">Total des ventes du point client conso {{ sale_point.name ?? '...' }}</th>
+                        <td class="pt-3 pr-3">{{ (sale_point.total_sales | number:'1.0-0':'fr') ?? '...' }} FCFA</td>
+                    </tr>
+                </tbody>
+                <tfoot class="table-group-divider">
+                    <tr class="align-middle text-end font-bold text-lg text-uppercase">
+                        <th scope="row" colspan="3" class="pt-5 pr-3 pb-2">Total des ventes du mois de {{ month_label ?? '...' }}</th>
+                        <td class="table-info pt-5 pr-3 pb-2">{{ (total_network_sales | number:'1.0-0':'fr') ?? '...' }} FCFA</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </ng-container>
+    </ng-container>
+
+    <ng-template #noDataTemplate>
+        <div class="p-4 text-center font-medium">
+            Aucune donnee de ventes mensuelles pour les filtres selectionnes.
+        </div>
+    </ng-template>
+
+    <ng-template #elseTemplate>
+        <div class="relative flex flex-column align-items-center justify-content-center mt-5">
+            <div class="absolute top-100 flex align-items-center justify-content-center mt-5">
+                <img src="../../../../../../../../assets/img/logos/loading-oil-logo.gif" width="150rem" alt="Loading...">
+            </div>
+        </div>
+    </ng-template>
 </div>

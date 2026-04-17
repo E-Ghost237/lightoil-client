@@ -1619,13 +1619,25 @@ export class PdfService {
 
   // OK
   lineTableTankRecord(listRecords :any[]){
-    let lines:any[]=[];
-    for (let i = (listRecords.length-1); i >= 0; i--) {
-      let record = listRecords[i];
+    const lines:any[] = [];
+    const orderedRecords = [...listRecords].reverse();
+
+    for (let i = 0; i < orderedRecords.length; i++) {
+      const record = orderedRecords[i];
+      const previousRecord = orderedRecords[i - 1];
       const fuelVolume = record?.fuel_volume ?? record?.volume;
+      const storedOutputVolume = this.parseMetric(record?.output_volume);
+      const previousFuelVolume = this.parseMetric(previousRecord?.fuel_volume ?? previousRecord?.volume);
+      const currentFuelVolume = this.parseMetric(record?.fuel_volume ?? record?.volume);
+
+      let outputVolume = storedOutputVolume;
+      if (outputVolume === null && previousFuelVolume !== null && currentFuelVolume !== null) {
+        outputVolume = Math.max(previousFuelVolume - currentFuelVolume, 0);
+      }
+
       lines.push([
         {
-          text: (listRecords.length-i)+"",
+          text: (i + 1) + "",
           style: "tableLine"
         },
         {
@@ -1646,7 +1658,7 @@ export class PdfService {
           fillColor: '#87CEFA'
         },
         {
-          text: this.getRoundValue(record.output_volume),
+          text: this.getRoundValue(outputVolume ?? 0),
           style: "tableLine",
           fillColor: '#A7CEFB'
         },

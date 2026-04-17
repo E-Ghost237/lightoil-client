@@ -198,12 +198,14 @@
 
             <!-- Monthly report -->
             <div class="tab-pane fade" id="monthly-tab-pane" role="tabpanel" aria-labelledby="monthly-tab" tabindex="0">
-                <app-monthly-sales></app-monthly-sales>
+                <app-monthly-sales [sale_point_type]="selected_sale_point_type"
+                    [monthly_sales_report]="monthly_sales_report" [loading]="lightoil_loading"></app-monthly-sales>
             </div>
 
             <!-- Annual report -->
             <div class="tab-pane fade" id="annual-tab-pane" role="tabpanel" aria-labelledby="annual-tab" tabindex="0">
-                <app-annual-sales></app-annual-sales>
+                <app-annual-sales [sale_point_type]="selected_sale_point_type"
+                    [annual_sales_report]="annual_sales_report" [loading]="lightoil_loading"></app-annual-sales>
             </div>
         </div>
     </div>

@@ -1,6 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
-import { ReportsService } from '../../../services/reports.service';
+import {
+  ReportsService,
+  SalesReportDateInput,
+  SalesReportPeriod
+} from '../../../services/reports.service';
 import { CompaniesService } from '../../../services/companies.service';
 import { PointsOfSaleService } from '../../../services/sale-points.service';
 import { ProductsService } from '../../../services/products.service';
@@ -22,10 +26,10 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
   can_generate_report: boolean = false;
   can_export_report: boolean = false;
 
-  daily_sales_report!: Array<any>;
-  weekly_sales_report!: Array<any>;
-  monthly_sales_report!: Array<any>;
-  annual_sales_report!: Array<any>;
+  daily_sales_report!: any;
+  weekly_sales_report!: any;
+  monthly_sales_report!: any;
+  annual_sales_report!: any;
 
   sale_points!: Array<any>;
   sale_points_matching_type!: Array<any>;
@@ -68,22 +72,11 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
 
     this.export_formats = [
       { name: 'PDF', value: 'pdf' },
-      { name: 'Excel', value: 'xlsx' },
-      // { name: 'CSV', value: 'csv' },
+      { name: 'Excel', value: 'xlsx' }
     ];
 
     this.canGenerateIntervalId = setInterval(() => {
-      if (this.selected_sale_points !== undefined && this.selected_products !== undefined) {
-        if (this.is_daily_report && this.daily_date !== undefined) {
-          this.can_generate_report = true;
-        } else if (this.is_weekly_report && (this.weekly_date !== undefined && this.weekly_date.length > 0)) {
-          this.can_generate_report = true;
-        } else if (this.is_monthly_report && this.monthly_date !== undefined) {
-          this.can_generate_report = true;
-        } else if (this.is_annual_report && this.annual_date !== undefined) {
-          this.can_generate_report = true;
-        }
-      }
+      this.can_generate_report = this.canGenerateCurrentReport();
     }, 2000);
   }
 
@@ -105,11 +98,9 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
             this.selected_sale_point_type = this.sale_point_types.find(
               (sale_point_type) => sale_point_type.code == 'SS'
             );
-            // this.stopLoadingLogo();
           }
         },
         (err) => {
-          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -119,11 +110,9 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
           if (response.success == true) {
             this.sale_points = response.data;
             this.getPointsOfSaleMatchingType(this.sale_points);
-            // this.stopLoadingLogo();
           }
         },
         (err) => {
-          // ;
           this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
         }
       );
@@ -136,7 +125,6 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
         }
       },
       (err) => {
-        // ;
         this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message, life: 3000 });
       }
     );
@@ -145,95 +133,81 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
   onSalePointTypeChange(event: any) {
     this.selected_sale_point_type = event.value;
     this.getPointsOfSaleMatchingType(this.sale_points);
+    this.can_export_report = false;
   }
 
   onSalePointsChange(event: any) {
-    // this.resetData();
     this.selected_sale_points = event.value;
 
     if (this.selected_sale_points.length === 0 || this.selected_sale_points.length === null || this.selected_sale_points.length === undefined) {
       this.sale_point_ids = undefined;
       this.select_all_sale_points = false;
-      // ('No sale points selected.', this.selected_sale_points);
     } else if (this.selected_sale_points.length === this.sale_points_matching_type.length) {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = true;
-      // ('All sale points selected selected.', this.selected_sale_points);
-      // ('Sale points IDs.', this.sale_point_ids);
     } else {
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = false;
-      // ('Some sale points selected.', this.selected_sale_points);
-      // ('Sale points IDs.', this.sale_point_ids);
     }
+
+    this.can_export_report = false;
   }
 
   onSelectAllSalePointsChange(event: any) {
-    // this.resetData();
-
     if (event.checked) {
       this.selected_sale_points = this.sale_points_matching_type;
       this.sale_point_ids = this.getIdsOfSelectedPointsOfSale(this.selected_sale_points);
       this.select_all_sale_points = event.checked;
-      // ('All sale points selected selected.', this.selected_sale_points);
-      // ('Sale points IDs.', this.sale_point_ids);
     } else {
       this.selected_sale_points = undefined;
       this.sale_point_ids = undefined;
       this.select_all_sale_points = event.checked;
-      // ('No sale points selected.', this.selected_sale_points);
     }
+
+    this.can_export_report = false;
   }
 
   onProductsChange(event: any) {
-    // this.resetData();
     this.selected_products = event.value;
 
     if (this.selected_products.length === 0 || this.selected_products.length === null || this.selected_products.length === undefined) {
       this.product_ids = undefined;
       this.select_all_products = false;
-      // ('No products selected.', this.selected_products);
     } else if (this.selected_products.length === this.products.length) {
       this.product_ids = this.getIdsOfSelectedProducts(this.selected_products);
       this.select_all_products = true;
-      // ('All products selected selected.', this.selected_products);
-      // ('Products IDs.', this.product_ids);
     } else {
       this.product_ids = this.getIdsOfSelectedProducts(this.selected_products);
       this.select_all_products = false;
-      // ('Some products selected.', this.selected_products);
-      // ('Products IDs.', this.product_ids);
     }
+
+    this.can_export_report = false;
   }
 
   onSelectAllProductsChange(event: any) {
-    // this.resetData();
-
     if (event.checked) {
       this.selected_products = this.products;
       this.product_ids = this.getIdsOfSelectedProducts(this.selected_products);
       this.select_all_products = event.checked;
-      // ('All products selected selected.', this.selected_products);
-      // ('Products IDs.', this.product_ids);
     } else {
       this.selected_products = undefined;
       this.product_ids = undefined;
       this.select_all_products = event.checked;
-      // ('No products selected.', this.selected_products);
     }
+
+    this.can_export_report = false;
   }
 
   onDateSelect(event: Date) {
-    // this.resetData();
     if (this.is_daily_report) {
       this.daily_date = event;
-    } else if (this.is_weekly_report) {
-
     } else if (this.is_monthly_report) {
-
+      this.monthly_date = event;
     } else if (this.is_annual_report) {
-
+      this.annual_date = event;
     }
+
+    this.can_export_report = false;
   }
 
   getPointsOfSaleMatchingType(sale_points: Array<any> | undefined) {
@@ -284,159 +258,84 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
     } else if (this.is_weekly_report) {
       this.getWeeklySalesReport();
     } else if (this.is_monthly_report) {
-      this.messageService.add(
-        { key: 'tst', severity: 'info', summary: 'Info. Message',
-          detail: 'Generate monthly sales report feature is under developement. It will be available soon.', life: 5000
-        }
-      );
+      this.getMonthlySalesReport();
     } else if (this.is_annual_report) {
-      this.messageService.add(
-        { key: 'tst', severity: 'info', summary: 'Info. Message',
-          detail: 'Generate annual sales report feature is under developement. It will be available soon.', life: 5000
-        }
-      );
+      this.getYearlySalesReport();
     }
   }
 
   getDailySalesReport() {
-    this.loading_icon = true;
-    this.lightoil_loading = true;
-
-    if (this.company_id !== undefined && this.company_id !== null && this.selected_sale_point_type !== undefined) {
-      if ((this.sale_point_ids !== undefined && this.sale_point_ids.length > 0) && (this.product_ids !== undefined && this.product_ids.length > 0) && this.daily_date !== undefined) {
-        this.reportsService.getDailySalesOfPointsOfSaleOfCompany(this.company_id, this.selected_sale_point_type.id, this.sale_point_ids, this.product_ids, this.daily_date).subscribe(
-          (response) => {
-            if (response.success == true) {
-              this.daily_sales_report = response.data;
-              this.loading_icon = false;
-              this.lightoil_loading = false;
-              this.can_export_report = true;
-              this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
-              return;
-            }
-
-            this.loading_icon = false;
-            this.lightoil_loading = false;
-            this.messageService.add({
-              key: 'tst',
-              severity: 'warn',
-              summary: 'Chargement incomplet',
-              detail: response?.message || 'Le rapport journalier n a pas pu etre charge.',
-              life: 7000
-            });
-          },
-          (err) => {
-            this.loading_icon = false;
-            this.lightoil_loading = false;
-            this.messageService.add(
-              {
-                key: 'tst', severity: 'error', summary: 'Error Message',
-                detail: 'An error occure while generatting daily sales report. Please try again later.', life: 10000
-              }
-            );
-          }
-        );
-      } else {
-        this.loading_icon = false;
-        this.lightoil_loading = false;
-        this.messageService.add(
-          {
-            key: 'tst', severity: 'error', summary: 'Error Message',
-            detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.',
-            life: 10000
-          }
-        );
-      }
-      return;
-    }
-
-    this.loading_icon = false;
-    this.lightoil_loading = false;
-    this.messageService.add({
-      key: 'tst',
-      severity: 'warn',
-      summary: 'Entreprise requise',
-      detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
-      life: 7000
-    });
+    this.requestSalesReport('daily');
   }
 
   getWeeklySalesReport() {
-    this.loading_icon = true;
-    this.lightoil_loading = true;
+    this.requestSalesReport('weekly');
+  }
 
-    if (this.company_id !== undefined && this.company_id !== null && this.selected_sale_point_type !== undefined) {
-      if ((this.sale_point_ids !== undefined && this.sale_point_ids.length > 0) && (this.product_ids !== undefined && this.product_ids.length > 0) && (this.weekly_date !== undefined && this.weekly_date.length > 0)) {
-        this.reportsService.getWeeklySalesOfPointsOfSaleOfCompany(this.company_id, this.selected_sale_point_type.id, this.sale_point_ids, this.product_ids, this.weekly_date).subscribe(
-          (response) => {
-            if (response.success == true) {
-              this.weekly_sales_report = response.data;
-              this.loading_icon = false;
-              this.lightoil_loading = false;
-              this.can_export_report = true;
-              this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
-              return;
-            }
+  getMonthlySalesReport() {
+    this.requestSalesReport('monthly');
+  }
 
-            this.loading_icon = false;
-            this.lightoil_loading = false;
-            this.messageService.add({
-              key: 'tst',
-              severity: 'warn',
-              summary: 'Chargement incomplet',
-              detail: response?.message || 'Le rapport hebdomadaire n a pas pu etre charge.',
-              life: 7000
-            });
-          },
-          (err) => {
-            this.loading_icon = false;
-            this.lightoil_loading = false;
-            this.messageService.add(
-              {
-                key: 'tst', severity: 'error', summary: 'Error Message',
-                detail: 'An error occure while generatting weekly sales report. Please try again later.',
-                life: 10000
-              }
-            );
-          }
-        );
-      } else {
-        this.loading_icon = false;
-        this.lightoil_loading = false;
-        this.messageService.add(
-          {
-            key: 'tst', severity: 'error', summary: 'Error Message',
-            detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.',
-            life: 10000
-          }
-        );
-      }
-      return;
-    }
-
-    this.loading_icon = false;
-    this.lightoil_loading = false;
-    this.messageService.add({
-      key: 'tst',
-      severity: 'warn',
-      summary: 'Entreprise requise',
-      detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
-      life: 7000
-    });
+  getYearlySalesReport() {
+    this.requestSalesReport('yearly');
   }
 
   exportReportToPDFFormat() {
-    this.messageService.add(
-      { key: 'tst', severity: 'info', summary: 'Info. Message',
-        detail: 'Export to PDF feature is under developement. It will be available soon.', life: 5000
+    const payload = this.buildPayloadByPeriod(this.getActivePeriod());
+    if (!payload) {
+      return;
+    }
+
+    this.reportsService.exportSalesReportPdf(
+      payload.company_id,
+      payload.sale_point_type_id,
+      payload.sale_point_ids,
+      payload.product_ids,
+      payload.date,
+      payload.period
+    ).subscribe(
+      (blob) => {
+        this.downloadBlob(blob, `${this.getFileNamePrefix(payload.period, payload.date)}.pdf`);
+        this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: 'Le rapport PDF a ete exporte avec succes.', life: 5000 });
+      },
+      (err) => {
+        this.messageService.add({
+          key: 'tst',
+          severity: 'error',
+          summary: 'Export failed',
+          detail: err?.error?.message || 'Impossible d exporter le rapport PDF.',
+          life: 10000
+        });
       }
     );
   }
 
   exportReportToExcelFormat() {
-    this.messageService.add(
-      { key: 'tst', severity: 'info', summary: 'Info. Message',
-        detail: 'Export to Excel feature is under developement. It will be available soon.', life: 5000
+    const payload = this.buildPayloadByPeriod(this.getActivePeriod());
+    if (!payload) {
+      return;
+    }
+
+    this.reportsService.exportSalesReportExcel(
+      payload.company_id,
+      payload.sale_point_type_id,
+      payload.sale_point_ids,
+      payload.product_ids,
+      payload.date,
+      payload.period
+    ).subscribe(
+      (blob) => {
+        this.downloadBlob(blob, `${this.getFileNamePrefix(payload.period, payload.date)}.xlsx`);
+        this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: 'Le rapport Excel a ete exporte avec succes.', life: 5000 });
+      },
+      (err) => {
+        this.messageService.add({
+          key: 'tst',
+          severity: 'error',
+          summary: 'Export failed',
+          detail: err?.error?.message || 'Impossible d exporter le rapport Excel.',
+          life: 10000
+        });
       }
     );
   }
@@ -470,5 +369,194 @@ export class SalesReportsComponent implements OnInit, OnDestroy {
       this.is_weekly_report = false;
       this.is_monthly_report = false;
     }
+
+    this.can_export_report = false;
+  }
+
+  private requestSalesReport(period: SalesReportPeriod): void {
+    this.loading_icon = true;
+    this.lightoil_loading = true;
+
+    const payload = this.buildPayloadByPeriod(period);
+    if (!payload) {
+      this.loading_icon = false;
+      this.lightoil_loading = false;
+      return;
+    }
+
+    const request$ = period === 'daily'
+      ? this.reportsService.getDailySalesOfPointsOfSaleOfCompany(payload.company_id, payload.sale_point_type_id, payload.sale_point_ids, payload.product_ids, payload.date)
+      : period === 'weekly'
+        ? this.reportsService.getWeeklySalesOfPointsOfSaleOfCompany(payload.company_id, payload.sale_point_type_id, payload.sale_point_ids, payload.product_ids, payload.date)
+        : period === 'monthly'
+          ? this.reportsService.getMonthlySalesOfPointsOfSaleOfCompany(payload.company_id, payload.sale_point_type_id, payload.sale_point_ids, payload.product_ids, payload.date)
+          : this.reportsService.getYearlySalesOfPointsOfSaleOfCompany(payload.company_id, payload.sale_point_type_id, payload.sale_point_ids, payload.product_ids, payload.date);
+
+    request$.subscribe(
+      (response) => {
+        if (response.success == true) {
+          if (period === 'daily') {
+            this.daily_sales_report = response.data;
+          } else if (period === 'weekly') {
+            this.weekly_sales_report = response.data;
+          } else if (period === 'monthly') {
+            this.monthly_sales_report = response.data;
+          } else {
+            this.annual_sales_report = response.data;
+          }
+
+          this.loading_icon = false;
+          this.lightoil_loading = false;
+          this.can_export_report = true;
+          this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+          return;
+        }
+
+        this.loading_icon = false;
+        this.lightoil_loading = false;
+        this.messageService.add({
+          key: 'tst',
+          severity: 'warn',
+          summary: 'Chargement incomplet',
+          detail: response?.message || `Le rapport ${period} n a pas pu etre charge.`,
+          life: 7000
+        });
+      },
+      (err) => {
+        this.loading_icon = false;
+        this.lightoil_loading = false;
+        this.messageService.add({
+          key: 'tst',
+          severity: 'error',
+          summary: 'Error Message',
+          detail: err?.error?.message || `An error occured while generating ${period} sales report. Please try again later.`,
+          life: 10000
+        });
+      }
+    );
+  }
+
+  private buildPayloadByPeriod(period: SalesReportPeriod): {
+    company_id: number;
+    sale_point_type_id: number;
+    sale_point_ids: number[];
+    product_ids: number[];
+    date: SalesReportDateInput;
+    period: SalesReportPeriod;
+  } | null {
+    if (this.company_id === undefined || this.company_id === null || this.selected_sale_point_type === undefined) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Entreprise requise',
+        detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
+        life: 7000
+      });
+      return null;
+    }
+
+    if (!(this.sale_point_ids !== undefined && this.sale_point_ids.length > 0) || !(this.product_ids !== undefined && this.product_ids.length > 0)) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'error',
+        summary: 'Error Message',
+        detail: 'Some fields are missing. Make sure you have selected points of sale, products and date.',
+        life: 10000
+      });
+      return null;
+    }
+
+    const date = this.getDateByPeriod(period);
+    if (!date) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'error',
+        summary: 'Date requise',
+        detail: 'Veuillez selectionner une date valide pour cette periode.',
+        life: 10000
+      });
+      return null;
+    }
+
+    return {
+      company_id: this.company_id,
+      sale_point_type_id: this.selected_sale_point_type.id,
+      sale_point_ids: this.sale_point_ids,
+      product_ids: this.product_ids,
+      date,
+      period
+    };
+  }
+
+  private getDateByPeriod(period: SalesReportPeriod): SalesReportDateInput | null {
+    if (period === 'daily') {
+      return this.daily_date ? this.toIsoDate(this.daily_date) : null;
+    }
+
+    if (period === 'weekly') {
+      if (!this.weekly_date || this.weekly_date.length < 2 || !this.weekly_date[0] || !this.weekly_date[1]) {
+        return null;
+      }
+
+      return [this.toIsoDate(this.weekly_date[0]), this.toIsoDate(this.weekly_date[1])];
+    }
+
+    if (period === 'monthly') {
+      return this.monthly_date ? this.toIsoDate(this.monthly_date) : null;
+    }
+
+    return this.annual_date ? this.toIsoDate(this.annual_date) : null;
+  }
+
+  private toIsoDate(date: Date): string {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private getActivePeriod(): SalesReportPeriod {
+    if (this.is_daily_report) {
+      return 'daily';
+    }
+
+    if (this.is_weekly_report) {
+      return 'weekly';
+    }
+
+    if (this.is_monthly_report) {
+      return 'monthly';
+    }
+
+    return 'yearly';
+  }
+
+  private canGenerateCurrentReport(): boolean {
+    if (!this.selected_sale_points || !this.selected_products) {
+      return false;
+    }
+
+    if (!(this.sale_point_ids && this.sale_point_ids.length > 0) || !(this.product_ids && this.product_ids.length > 0)) {
+      return false;
+    }
+
+    return this.getDateByPeriod(this.getActivePeriod()) !== null;
+  }
+
+  private getFileNamePrefix(period: SalesReportPeriod, date: SalesReportDateInput): string {
+    if (Array.isArray(date)) {
+      return `sales-report-${period}-${date[0]}-to-${date[1]}`;
+    }
+
+    return `sales-report-${period}-${date}`;
+  }
+
+  private downloadBlob(blob: Blob, fileName: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    window.URL.revokeObjectURL(url);
   }
 }
