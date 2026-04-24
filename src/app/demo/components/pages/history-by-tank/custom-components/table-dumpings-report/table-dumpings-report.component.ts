@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import * as Utility from '../../../../../utilities/utility';
 
 @Component({
     selector: 'app-table-dumpings-report',
@@ -7,7 +6,6 @@ import * as Utility from '../../../../../utilities/utility';
     styleUrls: ['./table-dumpings-report.component.scss'],
 })
 export class TableDumpingsReportComponent {
-    cumulVente = 0;
 
     @Input()
     listReport!: any;
@@ -27,20 +25,69 @@ export class TableDumpingsReportComponent {
         }
     }
 
-    getToLocalDateTime(date1: string) {
-        return Utility.toLocalDateTime(date1) ?? '';
+    private formatLabelValue(value: any, fallback = '-'): string {
+        if (value === null || value === undefined) {
+            return fallback;
+        }
+
+        const text = String(value).trim();
+        return text !== '' ? text : fallback;
     }
 
-    getToLocalDate(date1: string) {
-        return Utility.toLocalDate(date1) ?? '';
+    getPeriodLabel(): string {
+        const explicit = this.formatLabelValue(this.listReport?.periodLabel, '');
+        if (explicit !== '') {
+            return explicit;
+        }
+
+        const startDate = this.formatLabelValue(this.listReport?.dateStartLabel);
+        const endDate = this.formatLabelValue(this.listReport?.dateEndLabel);
+        const startTime = this.formatLabelValue(this.listReport?.timeStartLabel);
+        const endTime = this.formatLabelValue(this.listReport?.timeCloseLabel);
+
+        return `Du ${startDate} au ${endDate} entre ${startTime} et ${endTime}`;
     }
 
-    getToLocalTime(date1: string) {
-        return Utility.toLocalTime(date1) ?? '';
+    getRowDateLabel(report: any): string {
+        return this.formatLabelValue(report?.dateLabel ?? report?.startDateLabel ?? report?.start);
+    }
+
+    getRowTimeRangeLabel(report: any): string {
+        const explicit = this.formatLabelValue(report?.timeRangeLabel, '');
+        if (explicit !== '') {
+            return explicit;
+        }
+
+        const startTime = this.formatLabelValue(report?.startTimeLabel);
+        const endTime = this.formatLabelValue(report?.endTimeLabel);
+
+        if (startTime === '-' || endTime === '-') {
+            return '-';
+        }
+
+        return `de ${startTime} à ${endTime}`;
     }
 
     getRoundValue(num: number) {
         return Math.round(num * 100) / 100;
+    }
+
+    formatTwoDecimals(value: any): string {
+        const parsed = this.parseMetric(value);
+        if (parsed === null) {
+            return '-';
+        }
+
+        return this.getRoundValue(parsed).toFixed(2);
+    }
+
+    private parseMetric(value: any): number | null {
+        if (value === null || value === undefined || value === '') {
+            return null;
+        }
+
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
     }
 
     getstockTherorique(report: any) {
@@ -54,33 +101,36 @@ export class TableDumpingsReportComponent {
     }
 
     getstockPhysique(report: any) {
-        const volume = 0
-        return this.getRoundValue(volume);
+        const fuelVolume = this.parseMetric(report?.lastPeriodRecord?.fuel_volume);
+        if (fuelVolume !== null) {
+            return this.getRoundValue(fuelVolume);
+        }
+
+        const fallbackVolume = this.parseMetric(report?.lastPeriodRecord?.volume);
+        if (fallbackVolume !== null) {
+            return this.getRoundValue(fallbackVolume);
+        }
+
+        return 0;
     }
 
     getEcart(report: any): number {
         const stockTheorique = this.getstockTherorique(report) ?? 0;
-        const stockPhysique = this.getstockPhysique(report) ?? 0; // ou autre champ
+        const stockPhysique = this.getstockPhysique(report) ?? 0;
         return stockPhysique - stockTheorique;
     }
 
     prepareListDayRecord(): void {
         if (!this.listReport?.listDayRecord) return;
-
-        let cumulVentes = 0;
         let cumulEcarts = 0;
 
-        const newList = this.listReport.listDayRecord.map((record) => {
-            const output = Number(record.output ?? 0);
-
-            cumulVentes += output;
+        const newList = this.listReport.listDayRecord.map((record: any) => {
             const ecart = this.getEcart(record);
 
             cumulEcarts += ecart;
 
             return {
                 ...record,
-                cumulVentes: Number(cumulVentes),
                 ecart: Number(ecart),
                 cumulEcarts: Number(cumulEcarts),
             };

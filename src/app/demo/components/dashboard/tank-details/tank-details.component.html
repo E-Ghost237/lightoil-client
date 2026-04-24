@@ -252,7 +252,7 @@
                             <td>{{getToLocalDateTime(record.updated_at)}}</td>
                             <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
                             <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
-                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume_at_fift)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeAtFiftValue(record)}}</td>
                             <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
                             <td>{{getWaterLevelValue(record)}}</td>
                             <td>{{getWaterVolumeValue(record)}}</td>

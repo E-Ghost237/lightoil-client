@@ -81,7 +81,7 @@ export class HbpCustomTableTankComponent {
 
   getVolumeAtT15(){
       if(this.tankDetailsData?.listLastRecord?.length > 0){
-          return ''+Math.round(this.tankDetailsData.listLastRecord[0].volume_at_fift*100)/100;
+          return ''+Math.round(this.getFuelVolumeAtFift(this.tankDetailsData.listLastRecord[0])*100)/100;
       }
       return '0';
   }
@@ -171,7 +171,7 @@ export class HbpCustomTableTankComponent {
   }
 
   private formatFuelVolume(value: number): string {
-      return value.toFixed(5);
+      return value.toFixed(2);
   }
 
   private parseMetric(value: any): number | null {
@@ -191,5 +191,19 @@ export class HbpCustomTableTankComponent {
       }
 
       return this.formatFuelVolume(fuelVolume);
+  }
+
+  getFuelVolumeAtFiftValue(record: any) {
+      return this.getRoundValue(this.getFuelVolumeAtFift(record));
+  }
+
+  private getFuelVolumeAtFift(record: any): number {
+      const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+      if (normalizedVolumeAtFift !== null) {
+          return normalizedVolumeAtFift;
+      }
+
+      const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+      return legacyVolumeAtFift ?? 0;
   }
 }

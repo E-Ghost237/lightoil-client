@@ -98,8 +98,18 @@ export class TankImageComponent implements OnChanges {
         return this.parseMetric(record?.fuel_volume ?? record?.volume);
     }
 
+    private getFuelVolumeAtFift(record: any): number {
+        const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+        if (normalizedVolumeAtFift !== null) {
+            return normalizedVolumeAtFift;
+        }
+
+        const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+        return legacyVolumeAtFift ?? 0;
+    }
+
     private formatFuelVolume(value: number): string {
-        return value.toFixed(5);
+        return value.toFixed(2);
     }
 
     private getWaterHeight(record: any): number | null {
@@ -132,7 +142,7 @@ export class TankImageComponent implements OnChanges {
     getVolumeAtT15(){
         const latestRecord = this.getLatestRecord();
         if(latestRecord){
-            return ''+Math.round(latestRecord.volume_at_fift*100)/100;
+            return ''+Math.round(this.getFuelVolumeAtFift(latestRecord)*100)/100;
         }else{
             return '---';
         }

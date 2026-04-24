@@ -129,13 +129,27 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         return this.parseMetric(record?.fuel_volume ?? record?.volume);
     }
 
+    private getFuelVolumeAtFift(record: any): number {
+        const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+        if (normalizedVolumeAtFift !== null) {
+            return normalizedVolumeAtFift;
+        }
+
+        const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+        return legacyVolumeAtFift ?? 0;
+    }
+
     private formatFuelVolume(value: number): string {
-        return value.toFixed(5);
+        return value.toFixed(2);
     }
 
     getFuelVolumeDisplay(record: any): string {
         const fuelVolume = this.getFuelVolume(record);
         return fuelVolume === null ? '---' : this.formatFuelVolume(fuelVolume);
+    }
+
+    getFuelVolumeAtFiftValue(record: any): number {
+        return this.getRoundValue(this.getFuelVolumeAtFift(record));
     }
 
     private getWaterHeight(record: any): number | null {
@@ -174,7 +188,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 d.push(this.getRoundValue(record?.density));
                 l.push(this.getRoundValue(record?.liquid_height));
                 v.push(this.getFuelVolume(record));
-                v15.push(this.getRoundValue(record?.volume_at_fift));
+                v15.push(this.getRoundValue(this.getFuelVolumeAtFift(record)));
                 t.push(this.getRoundValue(record?.liquid_temperature));
                 wv.push(this.getRoundedMetricOrNull(this.getWaterVolumeMetric(record)));
             }
@@ -349,7 +363,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     getVolumeAtT15(){
         const latestRecord = this.getLatestRecord();
         if(latestRecord){
-            return ''+Math.round(latestRecord.volume_at_fift*100)/100;
+            return ''+Math.round(this.getFuelVolumeAtFift(latestRecord)*100)/100;
         }
         return '---';
     }
@@ -906,7 +920,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 raw_volume: record.volume,
                 volume: this.getFuelVolume(record),
                 fuel_volume: this.getFuelVolume(record),
-                volume_at_fift: record.volume_at_fift,
+                volume_at_fift: this.getFuelVolumeAtFift(record),
                 output_volume: output_volume ? output_volume.volume : null,  // Get volume from output_volumes
                 created_at: record.created_at,
                 updated_at: record.updated_at,
