@@ -49,7 +49,7 @@ export class GlobalNotificationInterceptor implements HttpInterceptor {
     const body = response.body ?? {};
     const responseMessage = this.toastLocalizationService.localizeText(String(body?.message ?? '').trim());
     const isBusinessFailure = body?.success === false;
-    const signature = `${method}|${req.urlWithParams}|${isBusinessFailure ? 'warn' : 'ok'}`;
+    const signature = `${method}|${this.router.url}|${req.urlWithParams}|${isBusinessFailure ? 'warn' : 'ok'}`;
 
     if (!this.toastLocalizationService.canEmit(signature)) {
       return;
@@ -65,20 +65,7 @@ export class GlobalNotificationInterceptor implements HttpInterceptor {
       return;
     }
 
-    const isRead = method === 'GET';
-    if (isRead) {
-      // Réduit le bruit: un seul toast de chargement par écran/route sur une courte fenêtre.
-      const routeSignature = `GET_OK_ROUTE|${this.router.url}`;
-      if (!this.toastLocalizationService.canEmit(routeSignature, 7000)) {
-        return;
-      }
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Chargement réussi',
-        detail: 'Les données ont été chargées avec succès.',
-        life: 2800
-      });
+    if (!this.shouldEmitSuccessToast(req, method, responseMessage)) {
       return;
     }
 
@@ -96,8 +83,8 @@ export class GlobalNotificationInterceptor implements HttpInterceptor {
     const backendMessage = this.toastLocalizationService.localizeText(
       String(httpError?.error?.message ?? httpError?.message ?? '').trim()
     );
-    const signature = `ERR|${status}|${req.urlWithParams}`;
-    if (!this.toastLocalizationService.canEmit(signature, 1500)) {
+    const signature = `ERR|${status}|${this.router.url}|${backendMessage || req.urlWithParams}`;
+    if (!this.toastLocalizationService.canEmit(signature, 2500)) {
       return;
     }
 
@@ -182,5 +169,26 @@ export class GlobalNotificationInterceptor implements HttpInterceptor {
     } catch {
       return null;
     }
+  }
+
+  private shouldEmitSuccessToast(req: HttpRequest<any>, method: string, responseMessage: string): boolean {
+    if (req.headers.get('X-Silent-Toast') === 'true') {
+      return false;
+    }
+
+    if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+      return false;
+    }
+
+    const normalizedMessage = responseMessage.toLowerCase();
+    const isReadLikeSuccess = normalizedMessage.includes('loaded successfully')
+      || normalizedMessage.includes('chargement réussi')
+      || normalizedMessage.includes('données ont été chargées')
+      || normalizedMessage.includes('chargé avec succès')
+      || normalizedMessage.includes('chargés avec succès')
+      || normalizedMessage.includes('chargée avec succès')
+      || normalizedMessage.includes('chargées avec succès');
+
+    return !isReadLikeSuccess;
   }
 }

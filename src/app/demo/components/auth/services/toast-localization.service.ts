@@ -5,6 +5,7 @@ import { Message, MessageService } from 'primeng/api';
   providedIn: 'root'
 })
 export class ToastLocalizationService {
+  readonly globalToastKey = 'app-global-toast';
   private installed = false;
   private readonly throttleMap = new Map<string, number>();
 
@@ -47,10 +48,10 @@ export class ToastLocalizationService {
     const summary = this.localizeText(String(message?.summary || '').trim()) || this.defaultSummary(severity);
     const detail = this.localizeText(String(message?.detail || '').trim()) || this.defaultDetail(severity);
 
-    // Unifier l’affichage via le toast global (évite les variations de clés selon les pages).
+    // Force un seul canal d'affichage pour éviter les doublons de conteneurs toast.
     return {
       ...message,
-      key: undefined,
+      key: this.globalToastKey,
       severity,
       summary,
       detail
@@ -180,9 +181,19 @@ export class ToastLocalizationService {
   }
 
   private buildMessageSignature(message: Message): string {
+    const key = String(message?.key || '').trim();
     const severity = String(message?.severity || 'info').trim().toLowerCase();
-    const summary = String(message?.summary || '').trim();
-    const detail = String(message?.detail || '').trim();
-    return `${severity}|${summary}|${detail}`;
+    const summary = this.normalizeSignatureText(String(message?.summary || '').trim());
+    const detail = this.normalizeSignatureText(String(message?.detail || '').trim());
+    const primaryText = detail || summary;
+    return `${key}|${severity}|${primaryText}`;
+  }
+
+  private normalizeSignatureText(value: string): string {
+    return value
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/[.!?]+$/g, '')
+      .trim();
   }
 }
