@@ -341,7 +341,11 @@ export class TankOutletReportsComponent implements OnInit {
   formatEventDate(value: any): string {
     const date = this.parseEventDate(value);
     if (date) {
-      return new Intl.DateTimeFormat('fr-FR').format(date);
+      return new Intl.DateTimeFormat('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(date);
     }
     return value ? String(value) : '--';
   }

@@ -23,7 +23,7 @@ export class FlowMeterDetailsComponent implements OnInit, OnDestroy {
   volume: any = "indéterminée";
 
   records: any[]=[];
-  d:string = new Date().toLocaleString();
+  d:string = Utility.toLocalDateTime(new Date());
   t1:Subscription;
   stationId:any;
   flowMeterId:any;
@@ -143,7 +143,7 @@ export class FlowMeterDetailsComponent implements OnInit, OnDestroy {
   }
 
   getStringDate(){
-    this.d = new Date().toLocaleString();
+    this.d = Utility.toLocalDateTime(new Date());
   }
 
   backToDashboard(){

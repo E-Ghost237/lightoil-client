@@ -76,7 +76,7 @@
 
     <ng-template pTemplate="body" let-row>
       <tr>
-        <td style="white-space:nowrap">{{ (row.date || '') | date:'dd-MM' }}</td>
+        <td style="white-space:nowrap">{{ (row.date || '') | date:'dd/MM/yyyy':'':'fr' }}</td>
 
         <td class="text-center">{{ row.height_cm | number:'1.2-2':'fr' }}</td>
 

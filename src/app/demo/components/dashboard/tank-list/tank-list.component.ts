@@ -8,6 +8,7 @@ import { RecordService } from '../services/record.service';
 import { MessageService } from 'primeng/api';
 import { LocalStorageService } from '../../auth/services/local-storage.service';
 import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
+import * as Utility from '../../../utilities/utility';
 
 @Component({
   selector: 'app-tank-list',
@@ -18,7 +19,7 @@ import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.servi
 export class TankListComponent implements OnInit, OnDestroy {
 
     t:Subscription;
-    d:string = new Date().toLocaleString();
+    d:string = Utility.toLocalDateTime(new Date());
     stationId:any;
     user:any;
     dashboardData:any[]=[];
@@ -118,7 +119,7 @@ export class TankListComponent implements OnInit, OnDestroy {
     }
 
     getStringDate(){
-        this.d = new Date().toLocaleString();
+        this.d = Utility.toLocalDateTime(new Date());
         //;
 
     }
@@ -156,7 +157,5 @@ export class TankListComponent implements OnInit, OnDestroy {
 
 
 }
-
-
 
 

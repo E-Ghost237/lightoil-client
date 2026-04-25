@@ -26,7 +26,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     records: any[]=[];
     t1:Subscription;
-    d:string = new Date().toLocaleString();
+    d:string = Utility.toLocalDateTime(new Date());
     stationId:any;
     tankId:any;
     user_details:any;
@@ -851,7 +851,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getStringDate(){
-        this.d = new Date().toLocaleString();
+        this.d = Utility.toLocalDateTime(new Date());
         const currentDayKey = this.getLocalDateKey();
         if (currentDayKey !== this.notificationDateKey) {
             this.refreshDayNotifications();

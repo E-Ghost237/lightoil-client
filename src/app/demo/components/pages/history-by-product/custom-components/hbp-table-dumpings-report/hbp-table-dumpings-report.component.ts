@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import * as Utility from 'src/app/demo/utilities/utility';
 
 @Component({
     selector: 'app-hbp-table-dumpings-report',
@@ -33,32 +34,69 @@ export class HbpTableDumpingsReportComponent {
         return text !== '' ? text : fallback;
     }
 
-    getPeriodLabel(): string {
-        const explicit = this.formatLabelValue(this.listReport?.periodLabel, '');
-        if (explicit !== '') {
-            return explicit;
+    private normalizeLabel(value: any, fallback = '-'): string {
+        const text = this.formatLabelValue(value, fallback);
+        if (text === fallback) {
+            return fallback;
         }
 
-        const startDate = this.formatLabelValue(this.listReport?.dateStartLabel);
-        const endDate = this.formatLabelValue(this.listReport?.dateEndLabel);
-        const startTime = this.formatLabelValue(this.listReport?.timeStartLabel);
-        const endTime = this.formatLabelValue(this.listReport?.timeCloseLabel);
+        return Utility.normalizeDateTokens(text);
+    }
 
-        return `Du ${startDate} au ${endDate} entre ${startTime} et ${endTime}`;
+    private formatDateValue(value: any, fallback = '-'): string {
+        if (value === null || value === undefined || value === '') {
+            return fallback;
+        }
+
+        const formatted = Utility.toLocalDate(String(value));
+        if (formatted) {
+            return formatted;
+        }
+
+        return this.normalizeLabel(value, fallback);
+    }
+
+    private formatTimeValue(value: any, fallback = '-'): string {
+        if (value === null || value === undefined || value === '') {
+            return fallback;
+        }
+
+        const formatted = Utility.toLocalTime(String(value));
+        if (formatted) {
+            return formatted;
+        }
+
+        return this.normalizeLabel(value, fallback);
+    }
+
+    getPeriodLabel(): string {
+        const startDate = this.formatDateValue(this.listReport?.dateStart ?? this.listReport?.dateStartLabel);
+        const endDate = this.formatDateValue(this.listReport?.dateEnd ?? this.listReport?.dateEndLabel);
+        const startTime = this.formatTimeValue(this.listReport?.timeStart ?? this.listReport?.timeStartLabel);
+        const endTime = this.formatTimeValue(this.listReport?.timeClose ?? this.listReport?.timeCloseLabel);
+
+        if (startDate !== '-' && endDate !== '-') {
+            return `Du ${startDate} au ${endDate} entre ${startTime} et ${endTime}`;
+        }
+
+        const explicit = this.normalizeLabel(this.listReport?.periodLabel, '');
+        return explicit !== '' ? explicit : '-';
     }
 
     getRowDateLabel(report: any): string {
-        return this.formatLabelValue(report?.dateLabel ?? report?.startDateLabel ?? report?.start);
+        return this.formatDateValue(
+            report?.start ?? report?.date ?? report?.dateLabel ?? report?.startDateLabel
+        );
     }
 
     getRowTimeRangeLabel(report: any): string {
-        const explicit = this.formatLabelValue(report?.timeRangeLabel, '');
+        const explicit = this.normalizeLabel(report?.timeRangeLabel, '');
         if (explicit !== '') {
             return explicit;
         }
 
-        const startTime = this.formatLabelValue(report?.startTimeLabel);
-        const endTime = this.formatLabelValue(report?.endTimeLabel);
+        const startTime = this.formatTimeValue(report?.start ?? report?.startTimeLabel);
+        const endTime = this.formatTimeValue(report?.end ?? report?.endTimeLabel);
 
         if (startTime === '-' || endTime === '-') {
             return '-';

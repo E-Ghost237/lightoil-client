@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import * as Utility from 'src/app/demo/utilities/utility';
 
 @Component({
   selector: 'app-hbp-table-dumpings-output',
@@ -44,6 +45,41 @@ export class HbpTableDumpingsOutputComponent {
       return text !== '' ? text : fallback;
   }
 
+  private normalizeLabel(value: any, fallback = '-'): string {
+      const text = this.formatLabelValue(value, fallback);
+      if (text === fallback) {
+          return fallback;
+      }
+
+      return Utility.normalizeDateTokens(text);
+  }
+
+  private formatDateValue(value: any, fallback = '-'): string {
+      if (value === null || value === undefined || value === '') {
+          return fallback;
+      }
+
+      const formatted = Utility.toLocalDate(String(value));
+      if (formatted) {
+          return formatted;
+      }
+
+      return this.normalizeLabel(value, fallback);
+  }
+
+  private formatTimeValue(value: any, fallback = '-'): string {
+      if (value === null || value === undefined || value === '') {
+          return fallback;
+      }
+
+      const formatted = Utility.toLocalTime(String(value));
+      if (formatted) {
+          return formatted;
+      }
+
+      return this.normalizeLabel(value, fallback);
+  }
+
   private formatNumericValue(value: any): string {
       const parsed = this.parseNumericValue(value);
       if (parsed === null) {
@@ -67,17 +103,17 @@ export class HbpTableDumpingsOutputComponent {
   }
 
   getPeriodLabel(): string {
-      const explicit = this.formatLabelValue(this.listOutputs?.periodLabel, '');
-      if (explicit !== '') {
-          return explicit;
+      const startDate = this.formatDateValue(this.listOutputs?.dateStart ?? this.listOutputs?.dateStartLabel);
+      const endDate = this.formatDateValue(this.listOutputs?.dateEnd ?? this.listOutputs?.dateEndLabel);
+      const startTime = this.formatTimeValue(this.listOutputs?.timeStart ?? this.listOutputs?.timeStartLabel);
+      const endTime = this.formatTimeValue(this.listOutputs?.timeClose ?? this.listOutputs?.timeCloseLabel);
+
+      if (startDate !== '-' && endDate !== '-') {
+          return `Du ${startDate} au ${endDate} entre ${startTime} et ${endTime}`;
       }
 
-      const startDate = this.formatLabelValue(this.listOutputs?.dateStartLabel);
-      const endDate = this.formatLabelValue(this.listOutputs?.dateEndLabel);
-      const startTime = this.formatLabelValue(this.listOutputs?.timeStartLabel);
-      const endTime = this.formatLabelValue(this.listOutputs?.timeCloseLabel);
-
-      return `Du ${startDate} au ${endDate} entre ${startTime} et ${endTime}`;
+      const explicit = this.normalizeLabel(this.listOutputs?.periodLabel, '');
+      return explicit !== '' ? explicit : '-';
   }
 
   getOutputRows(periodRecord: any): any[] {
@@ -120,17 +156,19 @@ export class HbpTableDumpingsOutputComponent {
   }
 
   getRowDateLabel(output: any): string {
-      return this.formatLabelValue(output?.dateLabel ?? output?.startDateLabel ?? output?.start);
+      return this.formatDateValue(
+          output?.start ?? output?.date ?? output?.dateLabel ?? output?.startDateLabel
+      );
   }
 
   getRowTimeRangeLabel(output: any): string {
-      const explicit = this.formatLabelValue(output?.timeRangeLabel, '');
+      const explicit = this.normalizeLabel(output?.timeRangeLabel, '');
       if (explicit !== '') {
           return explicit;
       }
 
-      const startTime = this.formatLabelValue(output?.startTimeLabel);
-      const endTime = this.formatLabelValue(output?.endTimeLabel);
+      const startTime = this.formatTimeValue(output?.start ?? output?.startTimeLabel);
+      const endTime = this.formatTimeValue(output?.end ?? output?.endTimeLabel);
 
       if (startTime === '-' || endTime === '-') {
           return '-';

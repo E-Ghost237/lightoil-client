@@ -71,7 +71,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -129,8 +129,8 @@ export class PdfService {
                   colSpan: 8,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+usefullData.dateStart+
-                        " au "+usefullData.dateEnd+
+                  text: "Du "+Utility.toLocalDate(usefullData.dateStart)+
+                        " au "+Utility.toLocalDate(usefullData.dateEnd)+
                         " quart "+usefullData.quartWorking.time_start+
                         " -- "+usefullData.quartWorking.time_close,
                   alignment: 'left',
@@ -347,7 +347,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -405,8 +405,8 @@ export class PdfService {
                   colSpan: 9,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+usefullData.dateStart+
-                        " au "+usefullData.dateEnd,
+                  text: "Du "+Utility.toLocalDate(usefullData.dateStart)+
+                        " au "+Utility.toLocalDate(usefullData.dateEnd),
                   alignment: 'left',
                 },
                 "",
@@ -608,7 +608,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -884,7 +884,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1156,7 +1156,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1445,7 +1445,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1715,7 +1715,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1941,7 +1941,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -2224,7 +2224,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -2511,7 +2511,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -2763,7 +2763,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -3032,7 +3032,7 @@ export class PdfService {
   private getPeriodHeaderLabel(periodData: any, timezone: string = 'Africa/Douala'): string {
       const explicit = typeof periodData?.periodLabel === 'string' ? periodData.periodLabel.trim() : '';
       if (explicit) {
-          return explicit;
+          return Utility.normalizeDateTokens(explicit);
       }
 
       const startDate = this.formatDateWithTimezone(periodData?.dateStart, timezone);
@@ -3046,7 +3046,7 @@ export class PdfService {
   private getRowDateLabel(row: any, fallbackDateValue: any, timezone: string = 'Africa/Douala'): string {
       const explicit = typeof row?.dateLabel === 'string' ? row.dateLabel.trim() : '';
       if (explicit) {
-          return explicit;
+          return this.formatDateWithTimezone(explicit, timezone);
       }
 
       return this.formatDateWithTimezone(fallbackDateValue, timezone);
@@ -3055,7 +3055,7 @@ export class PdfService {
   private getRowTimeRangeLabel(row: any, fallbackStart: any, fallbackEnd: any, timezone: string = 'Africa/Douala'): string {
       const explicit = typeof row?.timeRangeLabel === 'string' ? row.timeRangeLabel.trim() : '';
       if (explicit) {
-          return explicit;
+          return Utility.normalizeDateTokens(explicit);
       }
 
       return this.formatOutputPeriodRange(fallbackStart, fallbackEnd, timezone);

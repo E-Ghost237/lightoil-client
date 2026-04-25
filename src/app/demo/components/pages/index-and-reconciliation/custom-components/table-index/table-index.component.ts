@@ -244,7 +244,7 @@ export class TableIndexComponent {
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Index modifié', life: 3000 });
       } else {
         // TODO save in database
-        this.indexForDialog.dateSave = (new Date()).toLocaleString();
+        this.indexForDialog.dateSave = Utility.toLocalDateTime(new Date());
         this.indexForDialog.userId = this.user_details.user.id;
         this.indexForDialog.stationId = this.user_details.service_station_id;
         this.indexService.saveIndex(this.indexForDialog).subscribe((res)=>{
