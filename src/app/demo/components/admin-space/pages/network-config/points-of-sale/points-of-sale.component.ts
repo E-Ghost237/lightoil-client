@@ -12,6 +12,8 @@ import { LocalStorageService } from 'src/app/demo/components/auth/services/local
 })
 export class PointsOfSaleComponent implements OnInit {
   company_id!: number;
+  isPlatformSuperAdmin: boolean = false;
+  pageTitle: string = "Liste des points de vente de l'entreprise";
   loading_icon: boolean = false;
   loading_logo: boolean = true;
 
@@ -39,12 +41,16 @@ export class PointsOfSaleComponent implements OnInit {
 
   ngOnInit(): void {
     this.company_id = this.localStorageService.getCompanyId();
+    this.isPlatformSuperAdmin = this.resolveSuperAdminAccess(this.localStorageService.getUserDetails());
+    this.pageTitle = this.isPlatformSuperAdmin
+      ? 'Liste des points de vente de toutes les entreprises'
+      : "Liste des points de vente de l'entreprise";
     this.initFilters();
     this.loadData();
   }
 
   initFilters() {
-    if (!this.hasCompanyContext()) {
+    if (!this.isPlatformSuperAdmin && !this.hasCompanyContext()) {
       return;
     }
 
@@ -72,13 +78,17 @@ export class PointsOfSaleComponent implements OnInit {
   loadData() {
     this.loading_icon = true;
 
-    if (!this.hasCompanyContext(true)) {
+    if (!this.isPlatformSuperAdmin && !this.hasCompanyContext(true)) {
       this.loading_logo = false;
       this.loading_icon = false;
       return;
     }
 
-    this.companiesService.getAllPointsOfSaleOfCompany(this.company_id).subscribe(
+    const request$ = this.isPlatformSuperAdmin
+      ? this.pointsOfSaleService.getAllPointsOfSale()
+      : this.companiesService.getAllPointsOfSaleOfCompany(this.company_id);
+
+    request$.subscribe(
       (response) => {
         if (response.success == true) {
           this.points_of_sale = response.data;
@@ -104,7 +114,9 @@ export class PointsOfSaleComponent implements OnInit {
         this.messageService.add(
           {
             key: 'tst', severity: 'error', summary: 'Error Message',
-            detail: 'An error occure while loading all points of sale of company. Please try again later.',
+            detail: this.isPlatformSuperAdmin
+              ? 'An error occure while loading all points of sale. Please try again later.'
+              : 'An error occure while loading all points of sale of company. Please try again later.',
             life: 10000
           }
         );
@@ -195,5 +207,26 @@ export class PointsOfSaleComponent implements OnInit {
     }
 
     return hasContext;
+  }
+
+  private resolveSuperAdminAccess(userDetails: any): boolean {
+    const roleType = String(userDetails?.role_type ?? '').trim().toLowerCase();
+    const userFlag = userDetails?.user?.is_platform_super_admin;
+    const detailFlag = userDetails?.is_platform_super_admin;
+    const isPlatformSuperAdmin =
+      userFlag === true
+      || detailFlag === true
+      || userFlag === 1
+      || detailFlag === 1
+      || String(userFlag ?? '').trim() === '1'
+      || String(detailFlag ?? '').trim() === '1'
+      || String(userFlag ?? '').trim().toLowerCase() === 'true'
+      || String(detailFlag ?? '').trim().toLowerCase() === 'true';
+
+    if (isPlatformSuperAdmin) {
+      return true;
+    }
+
+    return roleType === 'super admin' || roleType === 'super administrateur';
   }
 }

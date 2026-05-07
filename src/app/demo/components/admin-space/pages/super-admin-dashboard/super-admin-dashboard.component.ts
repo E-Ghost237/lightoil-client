@@ -445,19 +445,22 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
         ?? 0
       ) || 0,
       connectedTanksCount: Number(
-        totals?.connected_tanks_total
+        totals?.connected_tanks
+        ?? totals?.connected_tanks_total
         ?? totals?.connected_tanks_count
         ?? totals?.number_of_connected_tanks
         ?? 0
       ) || 0,
       onlineStationsCount: Number(
-        totals?.stations_enabled
+        totals?.stations_online
+        ?? totals?.stations_enabled
         ?? totals?.online_stations_count
         ?? totals?.stations_online_count
         ?? 0
       ) || 0,
       offlineStationsCount: Number(
-        totals?.stations_disabled
+        totals?.stations_offline
+        ?? totals?.stations_disabled
         ?? totals?.offline_stations_count
         ?? totals?.stations_offline_count
         ?? 0

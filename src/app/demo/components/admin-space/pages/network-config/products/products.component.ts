@@ -6,6 +6,7 @@ import { PointsOfSaleService } from '../../../services/sale-points.service';
 import { CompaniesService } from '../../../services/companies.service';
 import { LocalStorageService } from 'src/app/demo/components/auth/services/local-storage.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-products',
@@ -14,6 +15,8 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 })
 export class ProductsComponent implements OnInit {
   company_id!: number;
+  isPlatformSuperAdmin: boolean = false;
+  pageTitle: string = 'Liste de produits par point de vente';
   loading_icon: boolean = false;
   loading_logo: boolean = true;
 
@@ -53,70 +56,143 @@ export class ProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.company_id = this.localStorageService.getCompanyId();
+    this.isPlatformSuperAdmin = this.resolveSuperAdminAccess(this.localStorageService.getUserDetails());
+    this.pageTitle = this.isPlatformSuperAdmin
+      ? 'Liste de produits par point de vente - toutes les entreprises'
+      : 'Liste de produits par point de vente';
     this.initFilters();
     this.loadData();
   }
 
   initFilters() {
-    if (this.company_id !== undefined && this.company_id !== null) {
-      this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
-        (response) => {
-          if (response.success == true) {
-            this.point_of_sale_types = response.data;
-          }
-        },
-        (err) => {
-          // ;
-          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
-        }
-      );
-
-      this.productsService.getAllProducts().subscribe(
-        (response) => {
-          if (response.success == true) {
-            this.products = response.data;
-          }
-        },
-        (err) => {
-          // ;
-          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message, life: 3000 });
-        }
-      );
+    if (!this.isPlatformSuperAdmin && (this.company_id === undefined || this.company_id === null)) {
+      return;
     }
+
+    this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
+      (response) => {
+        if (response.success == true) {
+          this.point_of_sale_types = response.data;
+        }
+      },
+      (err) => {
+        this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message });
+      }
+    );
+
+    this.productsService.getAllProducts().subscribe(
+      (response) => {
+        if (response.success == true) {
+          this.products = response.data;
+        }
+      },
+      (err) => {
+        this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error', detail: err.error.message, life: 3000 });
+      }
+    );
   }
 
   loadData() {
     this.loading_icon = true;
 
-    if (!this.hasCompanyContext(true)) {
+    if (!this.isPlatformSuperAdmin && !this.hasCompanyContext(true)) {
       this.loading_logo = false;
       this.loading_icon = false;
+      return;
+    }
+
+    if (this.isPlatformSuperAdmin) {
+      this.pointsOfSaleService.getAllPointsOfSale().subscribe(
+        (salePointsRes) => {
+          if (salePointsRes?.success !== true) {
+            this.loading_logo = false;
+            this.loading_icon = false;
+            this.messageService.add({
+              key: 'tst',
+              severity: 'warn',
+              summary: 'Chargement incomplet',
+              detail: salePointsRes?.message || 'Aucune donnee de points de vente n a ete chargee.',
+              life: 7000
+            });
+            return;
+          }
+
+          const salePoints = Array.isArray(salePointsRes?.data) ? salePointsRes.data : [];
+          if (!salePoints.length) {
+            this.points_of_sale = [];
+            this.products_of_points_of_sale = [];
+            this.loading_logo = false;
+            this.loading_icon = false;
+            this.messageService.add({
+              key: 'tst',
+              severity: 'success',
+              summary: 'Success',
+              detail: salePointsRes?.message || 'Aucun point de vente trouve.',
+              life: 5000
+            });
+            return;
+          }
+
+          forkJoin(
+            salePoints.map((salePoint: any) => this.productsService.getAllProductsOfPointOfSale(Number(salePoint?.id)))
+          ).subscribe(
+            (productsResBySalePoint) => {
+              const normalizedRows = salePoints.map((salePoint: any, index: number) => {
+                const productsRes = productsResBySalePoint[index];
+                const products = (productsRes?.success === true && Array.isArray(productsRes?.data)) ? productsRes.data : [];
+
+                return {
+                  id: salePoint?.id,
+                  name: salePoint?.name,
+                  town: salePoint?.town?.name ?? '-',
+                  type: salePoint?.sale_point_type ?? { name: '-' },
+                  products
+                };
+              });
+
+              this.hydrateProductsTable(normalizedRows);
+              this.loading_logo = false;
+              this.loading_icon = false;
+              this.messageService.add({
+                key: 'tst',
+                severity: 'success',
+                summary: 'Success',
+                detail: 'All products of each point of sale loaded successfully.',
+                life: 5000
+              });
+            },
+            () => {
+              this.loading_logo = false;
+              this.loading_icon = false;
+              this.messageService.add({
+                key: 'tst',
+                severity: 'error',
+                summary: 'Error Message',
+                detail: 'An error occure while loading all products of each point of sale. Please try again later.',
+                life: 10000
+              });
+            }
+          );
+        },
+        () => {
+          this.loading_logo = false;
+          this.loading_icon = false;
+          this.messageService.add({
+            key: 'tst',
+            severity: 'error',
+            summary: 'Error Message',
+            detail: 'An error occure while loading all points of sale. Please try again later.',
+            life: 10000
+          });
+        }
+      );
       return;
     }
 
     this.companiesService.getAllProductsOfEachPointOfSaleOfCompany(this.company_id).subscribe(
       (response) => {
         if (response.success == true) {
-          this.points_of_sale = response.data.map(point_of_sale => {
-            return {
-              id: point_of_sale.id,
-              name: point_of_sale.name,
-              town: point_of_sale.town
-            };
-          });
-
-          this.products_of_points_of_sale = response.data.map(point_of_sale => {
-            return point_of_sale.products.map(product => ({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              point_of_sale_id: point_of_sale.id,
-              point_of_sale_name: point_of_sale.name,
-              point_of_sale_town: point_of_sale.town,
-              point_of_sale_type: point_of_sale.type.name
-            }));
-          }).flat();
-
+          this.hydrateProductsTable(response.data);
           this.loading_logo = false;
           this.loading_icon = false;
           this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
@@ -133,7 +209,7 @@ export class ProductsComponent implements OnInit {
           life: 7000
         });
       },
-      (err) => {
+      () => {
         this.loading_logo = false;
         this.loading_icon = false;
         this.messageService.add(
@@ -293,5 +369,49 @@ export class ProductsComponent implements OnInit {
     }
 
     return hasContext;
+  }
+
+  private hydrateProductsTable(rows: any[]): void {
+    const safeRows = Array.isArray(rows) ? rows : [];
+    this.points_of_sale = safeRows.map((point_of_sale: any) => ({
+      id: point_of_sale?.id,
+      name: point_of_sale?.name,
+      town: point_of_sale?.town
+    }));
+
+    this.products_of_points_of_sale = safeRows.map((point_of_sale: any) => {
+      const products = Array.isArray(point_of_sale?.products) ? point_of_sale.products : [];
+
+      return products.map((product: any) => ({
+        id: product?.id,
+        name: product?.name,
+        price: product?.price,
+        point_of_sale_id: point_of_sale?.id,
+        point_of_sale_name: point_of_sale?.name,
+        point_of_sale_town: point_of_sale?.town,
+        point_of_sale_type: point_of_sale?.type?.name ?? '-'
+      }));
+    }).flat();
+  }
+
+  private resolveSuperAdminAccess(userDetails: any): boolean {
+    const roleType = String(userDetails?.role_type ?? '').trim().toLowerCase();
+    const userFlag = userDetails?.user?.is_platform_super_admin;
+    const detailFlag = userDetails?.is_platform_super_admin;
+    const isPlatformSuperAdmin =
+      userFlag === true
+      || detailFlag === true
+      || userFlag === 1
+      || detailFlag === 1
+      || String(userFlag ?? '').trim() === '1'
+      || String(detailFlag ?? '').trim() === '1'
+      || String(userFlag ?? '').trim().toLowerCase() === 'true'
+      || String(detailFlag ?? '').trim().toLowerCase() === 'true';
+
+    if (isPlatformSuperAdmin) {
+      return true;
+    }
+
+    return roleType === 'super admin' || roleType === 'super administrateur';
   }
 }
