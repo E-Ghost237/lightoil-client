@@ -48,6 +48,8 @@ interface CompanyStationsRow {
   companyId: number | null;
   companyName: string;
   stationCount: number;
+  connectedTanks: number;
+  overallStatus: StationActivityStatus;
   stations: Array<{
     id: number;
     name: string;
@@ -81,6 +83,7 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
   loadingContext = true;
   loadingDashboard = false;
   isFullScreen = false;
+  lastUpdatedAt: Date | null = null;
 
   readonly statusOptions = [
     { label: 'Tout', value: null },
@@ -116,9 +119,9 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
   companyStationsRows: CompanyStationsRow[] = [];
   usersRows: DashboardUserRow[] = [];
   filteredUsersRows: DashboardUserRow[] = [];
-  readonly tableRowsPerPageOptions = [10, 20, 50];
-  companyStationsRowsPerPage = 10;
-  usersRowsPerPage = 10;
+  readonly tableRowsPerPageOptions = [5, 10, 20, 50];
+  companyStationsRowsPerPage = 5;
+  usersRowsPerPage = 5;
   companyStationsFirst = 0;
   usersFirst = 0;
   private map?: L.Map;
@@ -246,6 +249,7 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
       this.stations = this.normalizeStationList(stationsRes);
       this.bindRealtimeStationUpdates(this.stations.map((station) => station.id));
       this.applyStationFiltersAndMap();
+      this.lastUpdatedAt = new Date();
     } catch {
       if (!this.isRefreshCurrent(refreshToken)) {
         return;
@@ -350,6 +354,22 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
     const rows = this.resolveRowsPerPage(event?.rows, this.usersRowsPerPage);
     this.usersRowsPerPage = rows;
     this.usersFirst = this.clampPaginatorFirst(first, this.filteredUsersRows.length, rows);
+  }
+
+  getActivityStatusLabel(status: StationActivityStatus): string {
+    return status === 'active' ? 'Actif' : 'Inactif';
+  }
+
+  getActivityStatusClass(status: StationActivityStatus): string {
+    return status === 'active' ? 'is-active' : 'is-inactive';
+  }
+
+  getUserStatusLabel(status: string): string {
+    return this.isActiveStatus(status) ? 'Actif' : 'Inactif';
+  }
+
+  getUserStatusClass(status: string): string {
+    return this.isActiveStatus(status) ? 'is-active' : 'is-inactive';
   }
 
   private async loadFilterOptions(): Promise<void> {
@@ -804,6 +824,7 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
       this.usersRows = this.normalizeUsers(usersRes);
       this.usersCount = this.usersRows.length;
       this.applyUsersFilter();
+      this.lastUpdatedAt = new Date();
       const filteredStations = this.filteredStations;
 
       const stationIds = new Set<number>();
@@ -975,6 +996,8 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
           companyId: station.companyId,
           companyName: station.companyName || '-',
           stationCount: 0,
+          connectedTanks: 0,
+          overallStatus: 'inactive',
           stations: []
         });
       }
@@ -989,6 +1012,10 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
         isEmitting: station.isEmitting
       });
       row.stationCount += 1;
+      row.connectedTanks += station.connectedTanks;
+      if (station.activityStatus === 'active') {
+        row.overallStatus = 'active';
+      }
     });
 
     return [...companyMap.values()]
@@ -1085,6 +1112,11 @@ export class SuperAdminDashboardComponent implements OnInit, OnDestroy {
 
   private isRefreshCurrent(refreshToken: number): boolean {
     return !this.destroyed && refreshToken === this.refreshSequence;
+  }
+
+  private isActiveStatus(status: string): boolean {
+    const value = String(status ?? '').trim().toLowerCase();
+    return value === 'active' || value === 'enabled' || value === '1' || value === 'true';
   }
 
   private resolveRowsPerPage(rows: any, fallback: number): number {
