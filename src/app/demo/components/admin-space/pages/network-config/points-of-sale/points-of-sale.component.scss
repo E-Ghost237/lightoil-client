@@ -1,0 +1,78 @@
+:host {
+  display: block;
+}
+
+.admin-table-page {
+  color: #0b1220;
+}
+
+.table-page-header {
+  border: 1px solid #d6e1f3;
+  background: linear-gradient(155deg, #ffffff, #f7fbff);
+}
+
+.table-page-header h1 {
+  color: #0f3d92;
+  letter-spacing: 0.03em;
+}
+
+.table-page-card {
+  border: 1px solid #d8e3f2;
+  overflow: visible;
+}
+
+:host ::ng-deep .table-page-card .p-datatable-header {
+  background: linear-gradient(160deg, #f8fbff, #f0f6ff);
+  border-bottom: 1px solid #d9e3f3;
+}
+
+:host ::ng-deep .table-page-card .p-datatable .p-datatable-thead > tr > th {
+  background: #0f3d92;
+  color: #fff;
+  border-color: #0f3d92;
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+}
+
+:host ::ng-deep .table-page-card .p-column-filter-row th {
+  background: #eff5ff;
+  border-color: #d8e3f2;
+}
+
+:host ::ng-deep .table-page-card .p-inputtext,
+:host ::ng-deep .table-page-card .p-multiselect {
+  border-radius: 9px;
+}
+
+:host ::ng-deep .table-page-card .p-datatable-wrapper {
+  overflow: auto;
+}
+
+:host ::ng-deep .table-page-card .p-column-filter,
+:host ::ng-deep .table-page-card .p-multiselect,
+:host ::ng-deep .table-page-card .p-inputtext {
+  width: 100%;
+}
+
+:host ::ng-deep .table-page-card .p-datatable .p-datatable-tbody > tr > td {
+  border-color: #e2e9f5;
+}
+
+:host ::ng-deep .table-page-card .p-paginator {
+  border-top: 1px solid #dce5f4;
+}
+
+@media (max-width: 991px) {
+  :host ::ng-deep .table-page-card .p-datatable-header > div {
+    gap: 0.55rem;
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+}
+
+@media (max-width: 767px) {
+  :host ::ng-deep .table-page-card .p-datatable-thead > tr > th {
+    font-size: .7rem;
+    padding: .55rem .45rem;
+  }
+}

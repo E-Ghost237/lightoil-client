@@ -3,10 +3,33 @@
     flex-direction: column;
     min-height: 100vh;
     justify-content: space-between;
-    padding: 5.6rem 1rem 1rem 1rem;
+    padding: 6.2rem 1.25rem 1.25rem 1.25rem;
     transition: margin-left $transitionDuration;
 }
 
 .layout-main {
     flex: 1 1 auto;
+}
+
+.fuel-layout-main {
+    position: relative;
+    background: radial-gradient(circle at top right, rgba(22, 72, 170, 0.22), transparent 40%), #f3f7ff;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    border-left: 1px solid rgba(15, 61, 146, 0.08);
+}
+
+.fuel-layout-main::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.22));
+}
+
+.fuel-layout-main > .layout-main,
+.fuel-layout-main > .layout-footer {
+    position: relative;
+    z-index: 1;
 }

@@ -1,8 +1,10 @@
 <!-- Show message -->
 <p-toast key="tst"></p-toast>
 
+<div class="admin-table-page">
+
 <!-- Page header -->
-<div class="card pb-0 mb-5">
+<div class="card pb-0 mb-4 table-page-header">
     <div class="card-body align-content-center justify-content-between pt-0">
         <div class="text-center align-content-center text-xl text-uppercase">
             <h1 class="font-bold">{{ pageTitle }}</h1>
@@ -12,7 +14,7 @@
 
 <ng-container *ngIf="loading_logo == false; else elseTemplate">
     <!-- Table -->
-    <div class="card p-2 pb-3">
+    <div class="card p-2 pb-3 table-page-card">
         <p-table #dt [value]="points_of_sale" [(selection)]="selected_point_of_sale" [rowHover]="true" dataKey="id"
             styleClass="p-datatable-striped mt-5" [scrollable]="true" scrollHeight="30rem" [paginator]="true"
             [rows]="10" [first]="first_page" [showCurrentPageReport]="true" (onPage)="onPageChange($event)"
@@ -47,6 +49,7 @@
                         <p-columnFilter field="sale_point_type.name" matchMode="in" [showMenu]="false">
                             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                                 <p-multiSelect [ngModel]="selected_point_of_sale_types" [options]="point_of_sale_types"
+                                    [appendTo]="'body'"
                                     [maxselectedLabels]="1" placeholder="Sélectionner"
                                     [selectAll]="select_all_point_of_sale_types"
                                     (onChange)="filter(onPointsOfSaleTypesChange($event.value))"
@@ -67,6 +70,7 @@
                         <p-columnFilter field="name" matchMode="in" [showMenu]="false">
                             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                                 <p-multiSelect [ngModel]="selected_points_of_sale" [options]="points_of_sale"
+                                    [appendTo]="'body'"
                                     [maxselectedLabels]="1" placeholder="Sélectionner" [selectAll]="select_all_points_of_sale"
                                     (onChange)="filter(onPointsOfSaleChange($event.value))"
                                     (onSelectAllChange)="filter(onSelectAllPointsOfSaleChange($event.checked))"
@@ -152,6 +156,7 @@
     <!-- Chatbot -->
     <app-chatbot></app-chatbot>
 </ng-container>
+</div>
 <ng-template #elseTemplate>
     <div class="relative flex flex-column align-items-center justify-content-center mt-5">
         <div class="absolute top-100 flex align-items-center justify-content-center mt-5">

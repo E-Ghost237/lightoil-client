@@ -1,6 +1,8 @@
 <!-- Show message -->
 <p-toast key="tst"></p-toast>
 
+<div class="admin-table-page">
+
 <!-- Update price of product form -->
 <p-dialog header="Mise à jour du mot de passe" [(visible)]="show_modal" [modal]="true" [position]="position"
     styleClass="w-24rem xl:w-30rem lg:w-30rem md:w-30rem" [dismissableMask]="false">
@@ -98,7 +100,7 @@
 </p-dialog>
 
 <!-- Page header -->
-<div class="card pb-0 mb-5">
+<div class="card pb-0 mb-4 table-page-header">
     <div class="card-body align-content-center justify-content-between pt-0">
         <div class="text-center align-content-center text-xl text-uppercase">
             <h1 class="font-bold">{{ pageTitle }}</h1>
@@ -108,7 +110,7 @@
 
 <ng-container *ngIf="loading_logo == false; else elseTemplate">
     <!-- Table -->
-    <div class="card p-2 pb-3">
+    <div class="card p-2 pb-3 table-page-card">
         <p-table #dt [value]="products_of_points_of_sale" [(selection)]="selected_product" [rowHover]="true"
             dataKey="id" styleClass="p-datatable-striped mt-5" [scrollable]="true" scrollHeight="30rem"
             [paginator]="true" [rows]="10" [first]="first_page" [showCurrentPageReport]="true"
@@ -144,6 +146,7 @@
                         <p-columnFilter field="point_of_sale_name" matchMode="in" [showMenu]="false">
                             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                                 <p-multiSelect [ngModel]="selected_points_of_sale" [options]="points_of_sale"
+                                    [appendTo]="'body'"
                                     [maxselectedLabels]="1" placeholder="Sélectionner"
                                     [selectAll]="select_all_points_of_sale"
                                     (onChange)="filter(onPointsOfSaleChange($event.value))"
@@ -164,6 +167,7 @@
                         <p-columnFilter field="point_of_sale_type" matchMode="in" [showMenu]="false">
                             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                                 <p-multiSelect [ngModel]="selected_point_of_sale_types" [options]="point_of_sale_types"
+                                    [appendTo]="'body'"
                                     [maxselectedLabels]="1" placeholder="Sélectionner"
                                     [selectAll]="select_all_point_of_sale_types"
                                     (onChange)="filter(onPointsOfSaleTypesChange($event.value))"
@@ -184,6 +188,7 @@
                         <p-columnFilter field="name" matchMode="in" [showMenu]="false">
                             <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                                 <p-multiSelect [ngModel]="selected_products" [options]="products"
+                                    [appendTo]="'body'"
                                     [maxSelectedLabels]="2" placeholder="Sélectionner" [selectAll]="select_all_products"
                                     (onChange)="filter(onProductsChange($event.value))"
                                     (onSelectAllChange)="filter(onSelectAllProductsChange($event.checked))"
@@ -260,6 +265,7 @@
     <!-- Chatbot -->
     <app-chatbot></app-chatbot>
 </ng-container>
+</div>
 <ng-template #elseTemplate>
     <div class="relative flex flex-column align-items-center justify-content-center mt-5">
         <div class="absolute top-100 flex align-items-center justify-content-center mt-5">

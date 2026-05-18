@@ -1,211 +1,214 @@
 <!-- Show message -->
 <p-toast key="tst"></p-toast>
 
-<div class="card pb-0 mb-5">
-    <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
-        <div
-            class="col-12 xl:col-7 lg:col-7 md:col-7 text-center align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
-            <h1 class="font-bold">Rapports de ventes</h1>
-        </div>
-        <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
-            <label for="sale-point-types" class="block font-bold text-lg">Réseau :</label>
-            <p-dropdown (onChange)="onSalePointTypeChange($event)"
-                styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase" inputId="sale-point-types"
-                [options]="sale_point_types" [(ngModel)]="selected_sale_point_type" optionLabel="name"
-                [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un réseau" />
+<div class="sales-reports-page">
+    <div class="card pb-0 mb-4 sales-header-card">
+        <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
+            <div
+                class="col-12 xl:col-7 lg:col-7 md:col-7 text-center xl:text-left align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
+                <h1 class="font-bold sales-page-title">Rapports de ventes</h1>
+                <p class="sales-page-subtitle">Analyse multi-periode du reseau et export professionnel des performances.</p>
+            </div>
+            <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
+                <label for="sale-point-types" class="block font-bold text-lg section-label">Reseau</label>
+                <p-dropdown (onChange)="onSalePointTypeChange($event)"
+                    styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase filter-control" inputId="sale-point-types"
+                    [options]="sale_point_types" [(ngModel)]="selected_sale_point_type" optionLabel="name"
+                    [appendTo]="'body'"
+                    [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un reseau" />
+            </div>
         </div>
     </div>
-</div>
 
-<div class="card p-2 pb-3">
-    <div class="card-header font-bold text-xl pt-0">
-        <!-- Nav tabs -->
-        <ul class="nav nav-tabs nav-justified card-header-tabs" role="tablist" id="report-tab">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active text-uppercase" id="daily-tab" data-bs-toggle="tab"
-                    data-bs-target="#daily-tab-pane" type="button" role="tab" aria-controls="daily-tab-pane"
-                    aria-selected="true" (click)="showCalendar('daily')">
-                    Journalières
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link text-uppercase" id="weekly-tab" data-bs-toggle="tab"
-                    data-bs-target="#weekly-tab-pane" type="button" role="tab" aria-controls="weekly-tab-pane"
-                    aria-selected="false" (click)="showCalendar('weekly')">
-                    Hebdomadaires
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link text-uppercase" id="monthly-tab" data-bs-toggle="tab"
-                    data-bs-target="#monthly-tab-pane" type="button" role="tab" aria-controls="monthly-tab-pane"
-                    aria-selected="false" (click)="showCalendar('monthly')">
-                    Mensuelles
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link text-uppercase" id="annual-tab" data-bs-toggle="tab"
-                    data-bs-target="#annual-tab-pane" type="button" role="tab" aria-controls="annual-tab-pane"
-                    aria-selected="false" (click)="showCalendar('annual')">
-                    Annuelles
-                </button>
-            </li>
-        </ul>
-    </div>
-    <div class="card-body justify-content-center">
-        <div class="grid mt-1 mb-5">
-            <!-- Filters section -->
-            <div class="col-12 xl:col-8">
-                <div class="grid">
-                    <!-- Points of sale -->
-                    <div class="col-12 xl:col-4 lg:col-4 md:col-12">
-                        <label for="sale-points" class="block font-bold mb-1">Points de vente : </label>
-                        <p-multiSelect (onChange)="onSalePointsChange($event)"
-                            (onSelectAllChange)="onSelectAllSalePointsChange($event)" styleClass="w-full"
-                            inputId="sale-points" [options]="sale_points_matching_type" [showToggleAll]="true"
-                            [selectAll]="select_all_sale_points" [(ngModel)]="selected_sale_points" display="chip"
-                            optionLabel="name" [virtualScroll]="true" [virtualScrollItemSize]="30"
-                            class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="3"
-                            placeholder="Sélectionner un ou plusieurs">
-                            <ng-template let-sale_point pTemplate="footer">
-                                <div class="py-2 px-3">
-                                    <b>{{ selected_sale_points ? selected_sale_points.length : 0 }}</b>
-                                    point{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' : '' }}
-                                    de vente
-                                    selectionné{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' :
-                                    '' }}.
-                                </div>
-                            </ng-template>
-                        </p-multiSelect>
+    <div class="card p-2 pb-3 sales-workspace-card">
+        <div class="card-header font-bold text-xl pt-0">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs nav-justified card-header-tabs sales-period-tabs" role="tablist" id="report-tab">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active text-uppercase" id="daily-tab" data-bs-toggle="tab"
+                        data-bs-target="#daily-tab-pane" type="button" role="tab" aria-controls="daily-tab-pane"
+                        aria-selected="true" (click)="showCalendar('daily')">
+                        Journalieres
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-uppercase" id="weekly-tab" data-bs-toggle="tab"
+                        data-bs-target="#weekly-tab-pane" type="button" role="tab" aria-controls="weekly-tab-pane"
+                        aria-selected="false" (click)="showCalendar('weekly')">
+                        Hebdomadaires
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-uppercase" id="monthly-tab" data-bs-toggle="tab"
+                        data-bs-target="#monthly-tab-pane" type="button" role="tab" aria-controls="monthly-tab-pane"
+                        aria-selected="false" (click)="showCalendar('monthly')">
+                        Mensuelles
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-uppercase" id="annual-tab" data-bs-toggle="tab"
+                        data-bs-target="#annual-tab-pane" type="button" role="tab" aria-controls="annual-tab-pane"
+                        aria-selected="false" (click)="showCalendar('annual')">
+                        Annuelles
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body justify-content-center">
+            <div class="grid mt-1 mb-4 reports-toolbar">
+                <!-- Filters section -->
+                <div class="col-12 xl:col-8 filters-zone">
+                    <div class="grid">
+                        <!-- Points of sale -->
+                        <div class="col-12 xl:col-4 lg:col-4 md:col-12">
+                            <label for="sale-points" class="block font-bold mb-1 section-label">Points de vente</label>
+                            <p-multiSelect (onChange)="onSalePointsChange($event)"
+                                (onSelectAllChange)="onSelectAllSalePointsChange($event)" styleClass="w-full filter-control"
+                                inputId="sale-points" [options]="sale_points_matching_type" [showToggleAll]="true"
+                                [appendTo]="'body'"
+                                [selectAll]="select_all_sale_points" [(ngModel)]="selected_sale_points" display="chip"
+                                optionLabel="name" [virtualScroll]="true" [virtualScrollItemSize]="30"
+                                class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="3"
+                                placeholder="Selectionner un ou plusieurs">
+                                <ng-template let-sale_point pTemplate="footer">
+                                    <div class="py-2 px-3">
+                                        <b>{{ selected_sale_points ? selected_sale_points.length : 0 }}</b>
+                                        point{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' : '' }}
+                                        de vente
+                                        selectionne{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' : '' }}.
+                                    </div>
+                                </ng-template>
+                            </p-multiSelect>
+                        </div>
+
+                        <!-- Products -->
+                        <div class="col-12 xl:col-4 lg:col-4 md:col-6">
+                            <label for="products" class="block font-bold mb-1 section-label">Produits</label>
+                            <p-multiSelect (onChange)="onProductsChange($event)"
+                                (onSelectAllChange)="onSelectAllProductsChange($event)" styleClass="w-full filter-control"
+                                inputId="products" [options]="products" [showToggleAll]="true"
+                                [appendTo]="'body'"
+                                [selectAll]="select_all_products" [(ngModel)]="selected_products" display="chip"
+                                optionLabel="name" [virtualScroll]="true" [virtualScrollItemSize]="30"
+                                class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="3"
+                                placeholder="Selectionner le(s) produit(s)">
+                                <ng-template let-product pTemplate="footer">
+                                    <div class="py-2 px-3">
+                                        <b>{{ selected_products ? selected_products.length : 0 }}</b>
+                                        produit{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}
+                                        selectionne{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}.
+                                    </div>
+                                </ng-template>
+                            </p-multiSelect>
+                        </div>
+
+                        <!-- Calendar -->
+                        <div class="col-12 xl:col-4 lg:col-4 md:col-6">
+                            <!-- Daily calendar -->
+                            <div *ngIf="is_daily_report">
+                                <label for="daily_date" class="block font-bold mb-1 section-label">Journee du</label>
+                                <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="daily_date"
+                                    [appendTo]="'body'" dateFormat="dd/mm/yy" [(ngModel)]="daily_date" [readonlyInput]="true" [showClear]="true"
+                                    placeholder="Selectionner un jour" [maxDate]="max_date" />
+                            </div>
+
+                            <!-- Weekly calendar -->
+                            <div *ngIf="is_weekly_report">
+                                <label for="weekly_date" class="block font-bold mb-1 section-label">Semaine du</label>
+                                <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="weekly_date"
+                                    [appendTo]="'body'" dateFormat="dd/mm/yy" selectionMode="range" [(ngModel)]="weekly_date" [maxDate]="max_date"
+                                    [readonlyInput]="true" [showClear]="true" placeholder="Selectionner une periode" />
+                            </div>
+
+                            <!-- Monthly calendar -->
+                            <div *ngIf="is_monthly_report">
+                                <label for="monthly_date" class="block font-bold mb-1 section-label">Mois de</label>
+                                <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="monthly_date"
+                                    [appendTo]="'body'" dateFormat="mm-yy" view="month" [(ngModel)]="monthly_date" [readonlyInput]="true"
+                                    [showClear]="true" placeholder="Selectionner un mois" [maxDate]="max_date" />
+                            </div>
+
+                            <!-- Yearly calendar -->
+                            <div *ngIf="is_annual_report">
+                                <label for="annual_date" class="block font-bold mb-1 section-label">Annee</label>
+                                <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="annual_date"
+                                    [appendTo]="'body'" dateFormat="yy" view="year" [showClear]="true" [(ngModel)]="annual_date"
+                                    placeholder="Selectionner une annee" [maxDate]="max_date" />
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Products -->
-                    <div class="col-12 xl:col-4 lg:col-4 md:col-6">
-                        <label for="products" class="block font-bold mb-1">Produits : </label>
-                        <p-multiSelect (onChange)="onProductsChange($event)"
-                            (onSelectAllChange)="onSelectAllProductsChange($event)" styleClass="w-full"
-                            inputId="products" [options]="products" [showToggleAll]="true"
-                            [selectAll]="select_all_products" [(ngModel)]="selected_products" display="chip"
-                            optionLabel="name" [virtualScroll]="true" [virtualScrollItemSize]="30"
-                            class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="3"
-                            placeholder="Sélectionner le(s) produit(s)">
-                            <ng-template let-product pTemplate="footer">
-                                <div class="py-2 px-3">
-                                    <b>{{ selected_products ? selected_products.length : 0 }}</b>
-                                    produit{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}
-                                    selectionné{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}.
+                <!-- Buttons section -->
+                <div class="col-12 xl:col-4 lg:col-8 md:col-8 actions-zone">
+                    <div class="grid">
+                        <!-- Generate report button -->
+                        <div class="col-12 xl:col-4 lg:col-4 md:col-4">
+                            <span class="block font-bold mb-1 section-label">Generer</span>
+                            <div class="grid">
+                                <div class="col-12">
+                                    <p-button (onClick)="generateReport()" styleClass="w-full align-content-center text-lg action-button btn-generate"
+                                        label="Generer" [raised]="true" severity="primary" [loading]="loading_icon"
+                                        loadingIcon="pi pi-sync" icon="pi pi-sync" iconPos="left"
+                                        [disabled]="!can_generate_report">
+                                    </p-button>
                                 </div>
-                            </ng-template>
-                        </p-multiSelect>
-                    </div>
-
-                    <!-- Calendar -->
-                    <div class="col-12 xl:col-4 lg:col-4 md:col-6">
-                        <!-- Daily calendar -->
-                        <div *ngIf="is_daily_report">
-                            <label for="daily_date" class="block font-bold mb-1"> Journée du : </label>
-                            <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="daily_date"
-                                dateFormat="dd/mm/yy" [(ngModel)]="daily_date" [readonlyInput]="true" [showClear]="true"
-                                placeholder="Sélectionner un jour" [maxDate]="max_date" />
+                            </div>
                         </div>
 
-                        <!-- Weekly calendar -->
-                        <div *ngIf="is_weekly_report">
-                            <label for="weekly_date" class="block font-bold mb-1"> Semaine du : </label>
-                            <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="weekly_date"
-                                dateFormat="dd/mm/yy" selectionMode="range" [(ngModel)]="weekly_date" [maxDate]="max_date"
-                                [readonlyInput]="true" [showClear]="true" placeholder="Sélectionner une période" />
-                        </div>
+                        <!-- Export report buttons -->
+                        <div class="col-12 xl:col-8 lg:col-8 md:col-8">
+                            <span class="block font-bold mb-1 section-label">Exporter au format</span>
+                            <div class="grid">
+                                <!-- Export report to PDF format -->
+                                <div class="col-6">
+                                    <p-button (onClick)="exportReportToPDFFormat()"
+                                        styleClass="w-full align-content-center text-lg action-button btn-export-pdf" label="PDF" [raised]="true"
+                                        severity="danger" [disabled]="!can_export_report">
+                                        <img src="assets/img/pdf.png" class="mr-2" style="width: 1.25rem" alt="PDF" />
+                                    </p-button>
+                                </div>
 
-                        <!-- Monthly calendar -->
-                        <div *ngIf="is_monthly_report">
-                            <label for="monthly_date" class="block font-bold mb-1"> Mois de : </label>
-                            <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="monthly_date"
-                                dateFormat="mm-yy" view="month" [(ngModel)]="monthly_date" [readonlyInput]="true"
-                                [showClear]="true" placeholder="Sélectionner un mois" [maxDate]="max_date" />
-                        </div>
-
-                        <!-- Yearly calendar -->
-                        <div *ngIf="is_annual_report">
-                            <label for="annual_date" class="block font-bold mb-1"> Année : </label>
-                            <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full" inputId="annual_date"
-                                dateFormat="yy" view="year" [showClear]="true" [(ngModel)]="annual_date"
-                                placeholder="Sélectionner une année" [maxDate]="max_date" />
+                                <!-- Export report to Excel format -->
+                                <div class="col-6">
+                                    <p-button (onClick)="exportReportToExcelFormat()"
+                                        styleClass="w-full align-content-center text-lg action-button btn-export-excel" label="Excel" [raised]="true"
+                                        severity="success" [disabled]="!can_export_report">
+                                        <img src="assets/img/excel.png" class="mr-2" style="width: 1.25rem" alt="Excel" />
+                                    </p-button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Buttons section -->
-            <div class="col-12 xl:col-4 lg:col-8 md:col-8">
-                <div class="grid">
-                    <!-- Generate report button -->
-                    <div class="col-12 xl:col-4 lg:col-4 md:col-4">
-                        <span class="block font-bold mb-1">Générer : </span>
-                        <div class="grid">
-                            <div class="col-12">
-                                <p-button (onClick)="generateReport()" styleClass="w-full align-content-center text-lg"
-                                    label="Générer" [raised]="true" severity="primary" [loading]="loading_icon"
-                                    loadingIcon="pi pi-sync" icon="pi pi-sync" iconPos="left"
-                                    [disabled]="!can_generate_report">
-                                </p-button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Export report buttons -->
-                    <div class="col-12 xl:col-8 lg:col-8 md:col-8">
-                        <span class="block font-bold mb-1">Exporter au format : </span>
-                        <div class="grid">
-                            <!-- Export report to PDF format -->
-                            <div class="col-6">
-                                <p-button (onClick)="exportReportToPDFFormat()"
-                                    styleClass="w-full align-content-center text-lg" label="PDF" [raised]="true"
-                                    severity="danger" [disabled]="!can_export_report">
-                                    <img src="assets/img/pdf.png" class="mr-2" style="width: 1.5rem" />
-                                    <!-- <span class="ml-2 font-bold">PDF</span> -->
-                                </p-button>
-                            </div>
-
-                            <!-- Export report to Excel format -->
-                            <div class="col-6">
-                                <p-button (onClick)="exportReportToExcelFormat()"
-                                    styleClass="w-full align-content-center text-lg" label="Excel" [raised]="true"
-                                    severity="success" [disabled]="!can_export_report">
-                                    <img src="assets/img/excel.png" class="mr-2" style="width: 1.5rem" />
-                                    <!-- <span class="ml-2 font-bold">Excel</span> -->
-                                </p-button>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Tab panes -->
+            <div class="tab-content mt-4" id="report-tab-content">
+                <!-- Daily report -->
+                <div class="tab-pane fade show active" id="daily-tab-pane" role="tabpanel" aria-labelledby="daily-tab"
+                    tabindex="0">
+                    <app-daily-sales [sale_point_type]="selected_sale_point_type"
+                        [daily_sales_report]="daily_sales_report" [loading]="lightoil_loading"></app-daily-sales>
                 </div>
-            </div>
-        </div>
 
-        <!-- Tab panes -->
-        <div class="tab-content mt-4" id="report-tab-content">
-            <!-- Daily report -->
-            <div class="tab-pane fade show active" id="daily-tab-pane" role="tabpanel" aria-labelledby="daily-tab"
-                tabindex="0">
-                <app-daily-sales [sale_point_type]="selected_sale_point_type"
-                    [daily_sales_report]="daily_sales_report" [loading]="lightoil_loading"></app-daily-sales>
-            </div>
+                <!-- Weekly report -->
+                <div class="tab-pane fade" id="weekly-tab-pane" role="tabpanel" aria-labelledby="weekly-tab" tabindex="0">
+                    <app-weekly-sales [sale_point_type]="selected_sale_point_type"
+                        [weekly_sales_report]="weekly_sales_report" [loading]="lightoil_loading"></app-weekly-sales>
+                </div>
 
-            <!-- Weekly report -->
-            <div class="tab-pane fade" id="weekly-tab-pane" role="tabpanel" aria-labelledby="weekly-tab" tabindex="0">
-                <app-weekly-sales [sale_point_type]="selected_sale_point_type"
-                    [weekly_sales_report]="weekly_sales_report" [loading]="lightoil_loading"></app-weekly-sales>
-            </div>
+                <!-- Monthly report -->
+                <div class="tab-pane fade" id="monthly-tab-pane" role="tabpanel" aria-labelledby="monthly-tab" tabindex="0">
+                    <app-monthly-sales [sale_point_type]="selected_sale_point_type"
+                        [monthly_sales_report]="monthly_sales_report" [loading]="lightoil_loading"></app-monthly-sales>
+                </div>
 
-            <!-- Monthly report -->
-            <div class="tab-pane fade" id="monthly-tab-pane" role="tabpanel" aria-labelledby="monthly-tab" tabindex="0">
-                <app-monthly-sales [sale_point_type]="selected_sale_point_type"
-                    [monthly_sales_report]="monthly_sales_report" [loading]="lightoil_loading"></app-monthly-sales>
-            </div>
-
-            <!-- Annual report -->
-            <div class="tab-pane fade" id="annual-tab-pane" role="tabpanel" aria-labelledby="annual-tab" tabindex="0">
-                <app-annual-sales [sale_point_type]="selected_sale_point_type"
-                    [annual_sales_report]="annual_sales_report" [loading]="lightoil_loading"></app-annual-sales>
+                <!-- Annual report -->
+                <div class="tab-pane fade" id="annual-tab-pane" role="tabpanel" aria-labelledby="annual-tab" tabindex="0">
+                    <app-annual-sales [sale_point_type]="selected_sale_point_type"
+                        [annual_sales_report]="annual_sales_report" [loading]="lightoil_loading"></app-annual-sales>
+                </div>
             </div>
         </div>
     </div>

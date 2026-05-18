@@ -2,8 +2,10 @@
 <p-toast key="tst"></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
+<div class="users-list-page">
+
 <!-- Page header -->
-<div class="card pb-0 mb-5">
+<div class="card pb-0 mb-4 users-page-header">
   <div class="card-body align-content-center justify-content-between pt-0">
     <div class="text-center align-content-center text-xl text-uppercase">
       <h1 class="font-bold">Liste des utilisateurs</h1>
@@ -18,7 +20,7 @@
 </div>
 
 <!-- Table -->
-<div class="card p-2 pb-3">
+<div class="card p-2 pb-3 users-page-table">
   <p-table
     #dt
     [value]="users"

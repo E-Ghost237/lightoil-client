@@ -12,7 +12,8 @@ import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.servi
 
 @Component({
   selector: 'app-admin-dashboard',
-  templateUrl: './dashboard.component.html'
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   position: string = 'center';

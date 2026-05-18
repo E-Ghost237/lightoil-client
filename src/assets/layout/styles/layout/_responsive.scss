@@ -7,6 +7,12 @@
 
 }
 
+@media (min-width: 992px) and (max-width: 1399px) {
+    .layout-wrapper {
+        --sidebar-width: 272px;
+    }
+}
+
 @media (min-width: 992px) {
     .layout-wrapper {
         &.layout-overlay {
@@ -33,7 +39,7 @@
 
         &.layout-static {
             .layout-main-container {
-                margin-left: 300px;
+                margin-left: var(--sidebar-width);
             }
 
             &.layout-static-inactive {
@@ -61,9 +67,12 @@
     }
 
     .layout-wrapper {
+        --sidebar-width: min(88vw, 320px);
+
         .layout-main-container {
             margin-left: 0;
-            padding-left: 1rem;
+            padding-left: .9rem;
+            padding-right: .9rem;
         }
 
         .layout-sidebar {

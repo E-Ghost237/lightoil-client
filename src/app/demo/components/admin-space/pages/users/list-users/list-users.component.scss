@@ -2,10 +2,68 @@
   display: block;
 }
 
+.users-list-page {
+  color: #0b1220;
+}
+
+.users-page-header {
+  border: 1px solid #d6e1f3;
+  background: linear-gradient(155deg, #ffffff, #f7fbff);
+}
+
+.users-page-header h1 {
+  color: #0f3d92;
+}
+
+.users-page-table {
+  border: 1px solid #d8e3f2;
+}
+
+:host ::ng-deep .users-page-table .p-datatable-header {
+  background: linear-gradient(160deg, #f8fbff, #f0f6ff);
+  border-bottom: 1px solid #d9e3f3;
+}
+
+:host ::ng-deep .users-page-table .p-datatable .p-datatable-thead > tr > th {
+  white-space: nowrap;
+  background: #0f3d92;
+  color: #fff;
+  border-color: #0f3d92;
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+}
+
+:host ::ng-deep .users-page-table .p-datatable .p-datatable-tbody > tr > td {
+  border-color: #dde6f3;
+}
+
+:host ::ng-deep .users-page-table .p-paginator {
+  border-top: 1px solid #dce5f4;
+}
+
 :host ::ng-deep .p-tag {
   font-weight: 600;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
-  white-space: nowrap;
+:host ::ng-deep .p-dialog .p-dialog-title {
+  color: #24344f;
+  font-weight: 700;
+}
+
+:host ::ng-deep .p-dialog .grid {
+  margin-top: 0.1rem;
+}
+
+:host ::ng-deep .p-dialog .text-500.text-xs {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem !important;
+}
+
+@media (max-width: 991px) {
+  :host ::ng-deep .users-page-table .p-datatable-header > div {
+    gap: 0.55rem;
+    flex-direction: column;
+    align-items: stretch !important;
+  }
 }

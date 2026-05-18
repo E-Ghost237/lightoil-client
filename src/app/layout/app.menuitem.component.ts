@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Component, Host, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Component, HostBinding, Input, OnDestroy, OnInit } from '@angular/core';
+import { IsActiveMatchOptions, NavigationEnd, Router } from '@angular/router';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -65,7 +65,14 @@ export class AppMenuitemComponent implements OnInit, OnDestroy {
 
     key: string = "";
 
-    constructor(public layoutService: LayoutService, private cd: ChangeDetectorRef, public router: Router, private menuService: MenuService) {
+    private readonly routeMatchOptions: IsActiveMatchOptions = {
+        paths: 'exact',
+        queryParams: 'ignored',
+        matrixParams: 'ignored',
+        fragment: 'ignored'
+    };
+
+    constructor(public layoutService: LayoutService, public router: Router, private menuService: MenuService) {
         this.menuSourceSubscription = this.menuService.menuSource$.subscribe(value => {
             Promise.resolve(null).then(() => {
                 if (value.routeEvent) {
@@ -100,7 +107,13 @@ export class AppMenuitemComponent implements OnInit, OnDestroy {
     }
 
     updateActiveStateFromRoute() {
-        let activeRoute = this.router.isActive(this.item.routerLink[0], { paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' });
+        if (!this.item?.routerLink) {
+            return;
+        }
+
+        const linkCommands = Array.isArray(this.item.routerLink) ? this.item.routerLink : [this.item.routerLink];
+        const linkTree = this.router.createUrlTree(linkCommands);
+        const activeRoute = this.router.isActive(linkTree, this.routeMatchOptions);
 
         if (activeRoute) {
             this.menuService.onMenuStateChange({ key: this.key, routeEvent: true });
@@ -108,6 +121,8 @@ export class AppMenuitemComponent implements OnInit, OnDestroy {
     }
 
     itemClick(event: Event) {
+        const target = event.currentTarget as HTMLElement | null;
+
         // avoid processing disabled items
         if (this.item.disabled) {
             event.preventDefault();
@@ -119,12 +134,24 @@ export class AppMenuitemComponent implements OnInit, OnDestroy {
             this.item.command({ originalEvent: event, item: this.item });
         }
 
-        // toggle active state
+        // Submenus toggle immediately.
         if (this.item.items) {
             this.active = !this.active;
+            this.menuService.onMenuStateChange({ key: this.key });
+            return;
         }
 
-        this.menuService.onMenuStateChange({ key: this.key });
+        // Let routing drive visual active state and drop focus ring immediately.
+        if (this.item.routerLink) {
+            this.menuService.onMenuStateChange({ key: this.key, routeEvent: true });
+            setTimeout(() => target?.blur(), 0);
+            return;
+        }
+
+        // Non-routing entries can still notify menu state on click.
+        if (!this.item.routerLink) {
+            this.menuService.onMenuStateChange({ key: this.key });
+        }
     }
 
     get submenuAnimation() {

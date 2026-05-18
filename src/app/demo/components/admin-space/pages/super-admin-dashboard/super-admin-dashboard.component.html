@@ -23,6 +23,7 @@
         <label for="filter-region">Région</label>
         <p-dropdown
           inputId="filter-region"
+          [appendTo]="'body'"
           [options]="regions"
           optionLabel="name"
           optionValue="id"
@@ -37,6 +38,7 @@
         <label for="filter-town">Ville</label>
         <p-dropdown
           inputId="filter-town"
+          [appendTo]="'body'"
           [options]="filteredTowns"
           optionLabel="name"
           optionValue="id"
@@ -51,6 +53,7 @@
         <label for="filter-company">Entreprise</label>
         <p-dropdown
           inputId="filter-company"
+          [appendTo]="'body'"
           [options]="companies"
           optionLabel="name"
           optionValue="id"
@@ -65,6 +68,7 @@
         <label for="filter-status">Statut (actif/inactif)</label>
         <p-dropdown
           inputId="filter-status"
+          [appendTo]="'body'"
           [options]="statusOptions"
           optionLabel="label"
           optionValue="value"
@@ -78,6 +82,7 @@
         <label class="action-spacer" for="filter-reset">Action</label>
         <p-button
           id="filter-reset"
+          styleClass="reset-action"
           label="Réinitialiser"
           icon="pi pi-refresh"
           severity="secondary"
