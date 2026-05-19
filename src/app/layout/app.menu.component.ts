@@ -90,7 +90,7 @@ export class AppMenuComponent implements OnInit {
             if(this.listFeatures.includes('dashboard')){
                 itemDashboard.push(
                     {
-                        label: 'Dashboard',
+                        label: 'Tableau de bord',
                         icon: 'pi pi-fw pi-table',
                         routerLink: ['/pages/dashboard']
                     },
@@ -98,7 +98,7 @@ export class AppMenuComponent implements OnInit {
             }
             if(itemDashboard.length > 0){
                 tableDashboard = {
-                    label: 'Dashboard',
+                    label: 'Tableau de bord',
                     icon: 'pi pi-fw pi-th-large',
                     items:itemDashboard,
 
