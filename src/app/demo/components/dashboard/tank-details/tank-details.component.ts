@@ -533,6 +533,35 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         return this.getLocalDateKey(timestamp, timezone);
     }
 
+    private getValidatedOutingStep(record: any, currentVolume: number | null, nextVolume: number | null): number {
+        const selected = this.parseMetric(record?.qte_sortie);
+        if (selected !== null) {
+            return Math.max(0, this.getRoundValue(selected));
+        }
+
+        const mode = String(record?.outputs_mode ?? '').toLowerCase();
+        const validated = this.parseMetric(record?.qte_sortie_validated);
+        const legacy = this.parseMetric(record?.qte_sortie_legacy);
+
+        if (mode === 'new') {
+            if (validated !== null) {
+                return Math.max(0, this.getRoundValue(validated));
+            }
+        } else {
+            if (legacy !== null) {
+                return Math.max(0, this.getRoundValue(legacy));
+            }
+        }
+
+        if (currentVolume === null || nextVolume === null || currentVolume > nextVolume) {
+            return 0;
+        }
+
+        // Fallback aligns with validated outing floor to avoid micro-jitter (e.g. 0.01L).
+        const rawDrop = nextVolume - currentVolume;
+        return rawDrop >= 20 ? this.getRoundValue(rawDrop) : 0;
+    }
+
     private computeOutputSumFromRecords(records: any[]): number {
         if (!Array.isArray(records) || records.length < 2) {
             return 0;
@@ -544,10 +573,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         for (let i = 0; i < sorted.length - 1; i++) {
             const latestVolume = this.getFuelVolume(sorted[i]);
             const previousVolume = this.getFuelVolume(sorted[i + 1]);
-
-            if (latestVolume !== null && previousVolume !== null && latestVolume <= previousVolume) {
-                total += (previousVolume - latestVolume);
-            }
+            total += this.getValidatedOutingStep(sorted[i], latestVolume, previousVolume);
         }
 
         return this.getRoundValue(total);
@@ -888,18 +914,17 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         let i = 0;
         let last_volume: number | null;
         let new_volume: number | null;
-        const sourceRecords = Array.isArray(records) ? records : [];
+        records = this.records;
         this.output_volumes = [];
-        // ;
 
-        if (sourceRecords.length > 0) {
-            sourceRecords.forEach(record => {
-                if (i < (sourceRecords.length - 1)) {
+        if (records.length > 0) {
+            records.forEach(record => {
+                if (i < (records.length - 1)) {
                     i = i+1;
-                    // ("Record "+[i]+":", sourceRecords[i]);
+                    // ("Record "+[i]+":", records[i]);
                 }
                 new_volume = this.getFuelVolume(record);
-                last_volume = this.getFuelVolume(sourceRecords[i]);
+                last_volume = this.getFuelVolume(records[i]);
                 // this.output_volume = { id: record.id, volume: last_volume - new_volume };
                 // this.output_volumes.push(this.output_volume);
 

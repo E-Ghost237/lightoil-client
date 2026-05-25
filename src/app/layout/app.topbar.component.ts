@@ -11,10 +11,6 @@ import { AuthService } from '../demo/components/auth/services/auth.service';
 import { MessageService } from 'primeng/api';
 
 
-interface City {
-    name: string;
-    code: string;
-}
 @Component({
     selector: 'app-topbar',
     templateUrl: './app.topbar.component.html'
@@ -35,9 +31,6 @@ export class AppTopBarComponent {
     selectedTank:any;
 
     items!: MenuItem[];
-
-    languages: City[] | undefined;
-    selectedLanguage: City | undefined;
 
     itemUser: MenuItem[] | undefined;
 
@@ -74,15 +67,6 @@ export class AppTopBarComponent {
         this.stationId = this.localStorageService.getServiceStationId();
         this.role = this.localStorageService.getRole();
 
-
-        this.languages = [
-            { name: 'Francais', code: 'Fr' },
-            { name: 'English', code: 'En' },
-            { name: 'Deutsch', code: 'De' },
-            { name: 'Chinese', code: 'Cn' },
-            { name: 'Spanish', code: 'Es' }
-        ];
-        this.selectedLanguage = this.languages[0];
 
         this.itemUser = [
             {
