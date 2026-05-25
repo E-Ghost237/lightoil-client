@@ -76,6 +76,11 @@ export class AdminMenuComponent implements OnInit {
                                 icon: 'pi pi-fw pi-window-minimize',
                                 routerLink: ['/admin/reports/dumpings']
                             },
+                            {
+                                label: 'Analyse',
+                                icon: 'pi pi-fw pi-chart-line',
+                                routerLink: ['/admin/reports/analyse']
+                            },
                         ]
                     },
                     {

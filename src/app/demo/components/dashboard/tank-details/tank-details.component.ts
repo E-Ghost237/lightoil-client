@@ -165,7 +165,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         return parsed === null ? null : this.getRoundValue(parsed);
     }
 
-    initGraphData(){
+    initGraphData(dayRecords: any[] = []){
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
@@ -179,8 +179,8 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         let wv:any[]=[];
         let time:any[]=[];
 
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let listRecord = this.tankDetailsData?.listLastRecord;
+        if(dayRecords?.length > 0){
+            const listRecord = dayRecords;
 
             for (let i = (listRecord.length-1); i >=0; i--) {
                 const record = listRecord[i];
@@ -272,6 +272,11 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 }
             };
 
+        } else {
+            this.data = {
+                labels: [],
+                datasets: []
+            };
         }
         this.line?.refresh();
 
@@ -554,6 +559,13 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         return this.computeOutputSumFromRecords(sameDayRecords);
     }
 
+    private getStrictDayRecords(records: any[], dayKey: string): any[] {
+        const source = Array.isArray(records) ? records : [];
+        return source
+            .filter((record: any) => this.getRecordDateKey(record) === dayKey)
+            .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
+    }
+
     private refreshDayOutputTotal(): void {
         if (!this.tankId) {
             this.dayOutputTotal = 0;
@@ -568,8 +580,9 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
         this.recordService.getListRecordsForOneDay(payload).subscribe({
             next: (response: any) => {
-                const dayRecords = Array.isArray(response) ? response : [];
-                this.dayOutputTotal = this.computeOutputSumFromRecords(dayRecords);
+                const dayRecordsRaw = Array.isArray(response) ? response : [];
+                const strictDayRecords = this.getStrictDayRecords(dayRecordsRaw, dayKey);
+                this.dayOutputTotal = this.computeOutputSumFromRecords(strictDayRecords);
             },
             error: () => {
                 this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
@@ -875,18 +888,18 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         let i = 0;
         let last_volume: number | null;
         let new_volume: number | null;
-        records = this.records;
+        const sourceRecords = Array.isArray(records) ? records : [];
         this.output_volumes = [];
         // ;
 
-        if (records.length > 0) {
-            records.forEach(record => {
-                if (i < (records.length - 1)) {
+        if (sourceRecords.length > 0) {
+            sourceRecords.forEach(record => {
+                if (i < (sourceRecords.length - 1)) {
                     i = i+1;
-                    // ("Record "+[i]+":", records[i]);
+                    // ("Record "+[i]+":", sourceRecords[i]);
                 }
                 new_volume = this.getFuelVolume(record);
-                last_volume = this.getFuelVolume(records[i]);
+                last_volume = this.getFuelVolume(sourceRecords[i]);
                 // this.output_volume = { id: record.id, volume: last_volume - new_volume };
                 // this.output_volumes.push(this.output_volume);
 
@@ -899,8 +912,9 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     }
 
-    ajustedRecords() {
-        this.ajusted_records = this.records.map(record => {
+    ajustedRecords(records: Array<any> = []) {
+        const sourceRecords = Array.isArray(records) ? records : [];
+        this.ajusted_records = sourceRecords.map(record => {
             const output_volume = this.output_volumes.find(item => item.id === record.id);
             return {
                 id: record.id,
@@ -936,14 +950,16 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 this.tankDetailsData = res[0];
                 this.tankDetailsData.listLastRecord = this.getSortedRecords(this.tankDetailsData.listLastRecord);
                 this.records = this.tankDetailsData.listLastRecord;
+                const dayKey = this.getLocalDateKey();
+                const strictDayRecords = this.getStrictDayRecords(this.records, dayKey);
                 this.refreshDayNotifications();
                 this.refreshDayOutputTotal();
-                this.getOutputVolumes(this.records);
-                this.ajustedRecords();
+                this.getOutputVolumes(strictDayRecords);
+                this.ajustedRecords(strictDayRecords);
                 if (showNotification) {
                     this.showNotificationMessage();
                 }
-                this.initGraphData();
+                this.initGraphData(strictDayRecords);
                 //this.ref.detectChanges();
             } else {
                 this.dayOutputTotal = 0;

@@ -4,6 +4,7 @@ import { ReportsComponent } from './reports.component';
 import { SalesReportsComponent } from './sales-reports/sales-reports.component';
 import { DumpingReportsComponent } from './dumping-reports/dumping-reports.component';
 import { TankOutletReportsComponent } from './tank-outlet-reports/tank-outlet-reports.component';
+import { AnalyseReportsComponent } from './analyse-reports/analyse-reports.component';
 
 
 @NgModule({
@@ -16,6 +17,7 @@ import { TankOutletReportsComponent } from './tank-outlet-reports/tank-outlet-re
           { path: 'sales', component: SalesReportsComponent },
           { path: 'dumpings', component: DumpingReportsComponent },
           { path: 'tank-outlets', component: TankOutletReportsComponent },
+          { path: 'analyse', component: AnalyseReportsComponent },
           { path: '', redirectTo: 'sales', pathMatch: 'full' },
         ]
       }
