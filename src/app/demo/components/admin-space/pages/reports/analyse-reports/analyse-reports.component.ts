@@ -50,7 +50,7 @@ const indexRangeValidator = (openingKey: string, closingKey: string, errorKey: s
       return null;
     }
 
-    return opening >= closing ? null : { [errorKey]: true };
+    return closing >= opening ? null : { [errorKey]: true };
   };
 };
 
@@ -964,10 +964,10 @@ export class AnalyseReportsComponent implements OnInit {
       const rowMechanicalClosing = Number(raw.mechanical_closing_index);
 
       const rowElectronicDelta = Number.isFinite(rowElectronicOpening) && Number.isFinite(rowElectronicClosing)
-        ? rowElectronicOpening - rowElectronicClosing
+        ? rowElectronicClosing - rowElectronicOpening
         : null;
       const rowMechanicalDelta = Number.isFinite(rowMechanicalOpening) && Number.isFinite(rowMechanicalClosing)
-        ? rowMechanicalOpening - rowMechanicalClosing
+        ? rowMechanicalClosing - rowMechanicalOpening
         : null;
 
       row.patchValue({
@@ -1002,12 +1002,12 @@ export class AnalyseReportsComponent implements OnInit {
       electronicOpening: electronicOpeningTotal,
       electronicClosing: electronicClosingTotal,
       electronicDelta: electronicOpeningTotal !== null && electronicClosingTotal !== null
-        ? electronicOpeningTotal - electronicClosingTotal
+        ? electronicClosingTotal - electronicOpeningTotal
         : null,
       mechanicalOpening: mechanicalOpeningTotal,
       mechanicalClosing: mechanicalClosingTotal,
       mechanicalDelta: mechanicalOpeningTotal !== null && mechanicalClosingTotal !== null
-        ? mechanicalOpeningTotal - mechanicalClosingTotal
+        ? mechanicalClosingTotal - mechanicalOpeningTotal
         : null
     };
   }
