@@ -30,13 +30,42 @@ export class NotificationComponent {
     }
 
     getDateTimeToLocale(date1:string){
-
+        if(!date1){
+            return '--';
+        }
         return ''+Utility.toLocalDateTime(date1);
 
     }
 
-    getRoundedValue(num:number){
-        return Math.round(num*100)/100;
+    getEventTime(): string {
+        return this.notiData?.event_time ?? this.notiData?.updated_at ?? this.notiData?.created_at ?? '';
+    }
+
+    getNotificationCode(): string {
+        return this.notiData?.type_notification_code
+            ?? this.notiData?.code
+            ?? this.notiData?.type_notification?.code
+            ?? '';
+    }
+
+    getNotificationTypeWording(): string {
+        return this.notiData?.type_notification_wording
+            ?? this.notiData?.wording
+            ?? this.notiData?.type_notification?.wording
+            ?? this.notiData?.type_notification?.name
+            ?? this.getNotificationCode()
+            ?? '--';
+    }
+
+    getRoundedValue(num:any){
+        if(num === null || num === undefined || num === ''){
+            return '--';
+        }
+        const parsed = Number(num);
+        if(Number.isNaN(parsed)){
+            return '--';
+        }
+        return Math.round(parsed*100)/100;
     }
 
 }

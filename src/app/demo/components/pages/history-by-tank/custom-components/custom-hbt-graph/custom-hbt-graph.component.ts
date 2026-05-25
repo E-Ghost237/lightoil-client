@@ -49,11 +49,12 @@ export class CustomHbtGraphComponent {
       this.listRecord?.density, this.listRecord?.level,
       this.listRecord?.listDate); */
       this.initData(this.listRecord?.temp,
-        this.listRecord?.volume,
+        this.resolveFuelVolumeSeries(this.listRecord),
         this.listRecord?.volume15,
         this.listRecord?.density,
         this.listRecord?.level,
-        this.listRecord?.listDate);
+        this.listRecord?.listDate,
+        this.resolveWaterVolumeSeries(this.listRecord));
       this.getInteractionMsg();
 
 
@@ -67,52 +68,75 @@ export class CustomHbtGraphComponent {
     return computeListDate;
   }
 
-  initData(temp:any[], volume:any[], volume15:any[], density:any[], level:any[], listDate:any[]){
+  private resolveFuelVolumeSeries(series: any): any[] {
+    return series?.fuel_volume ?? series?.volume ?? [];
+  }
+
+  private resolveWaterVolumeSeries(series: any): any[] {
+    return series?.water_volume ?? [];
+  }
+
+  initData(temp:any[], volume:any[], volume15:any[], density:any[], level:any[], listDate:any[], waterVolume:any[] = []){
 
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color');
     const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
 
+    const datasets: any[] = [
+      {
+          label: 'Volume carburant',
+          data: volume,
+          fill: false,
+          borderColor: documentStyle.getPropertyValue('--blue-800'),
+          tension: 0.4
+      }
+    ];
+
+    if (waterVolume?.length) {
+      datasets.push({
+          label: 'Volume eau',
+          data: waterVolume,
+          fill: false,
+          borderColor: documentStyle.getPropertyValue('--cyan-800'),
+          tension: 0.4
+      });
+    }
+
+    datasets.push(
+      {
+          label: 'Volume à 15',
+          data: volume15,
+          fill: false,
+          borderColor: documentStyle.getPropertyValue('--pink-800'),
+          tension: 0.4
+      },
+      {
+        label: 'Temperature',
+        data: temp,
+        fill: false,
+        borderColor: documentStyle.getPropertyValue('--red-800'),
+        tension: 0.4
+      },
+      {
+        label: 'Densite',
+        data: density,
+        fill: false,
+        borderColor: documentStyle.getPropertyValue('--green-800'),
+        tension: 0.4
+      },
+      {
+        label: 'Niveau',
+        data: level,
+        fill: false,
+        borderColor: documentStyle.getPropertyValue('--orange-800'),
+        tension: 0.4
+      }
+    );
+
     this.data = {
       labels: this.computeTheListDateToRightGmt(listDate),
-      datasets: [
-        {
-            label: 'Volume',
-            data: volume,
-            fill: false,
-            borderColor: documentStyle.getPropertyValue('--blue-800'),
-            tension: 0.4
-        },
-        {
-            label: 'Volume à 15',
-            data: volume15,
-            fill: false,
-            borderColor: documentStyle.getPropertyValue('--pink-800'),
-            tension: 0.4
-        },
-        {
-          label: 'Temperature',
-          data: temp,
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--red-800'),
-          tension: 0.4
-        },
-        {
-          label: 'Densite',
-          data: density,
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--green-800'),
-          tension: 0.4
-        },
-        {
-          label: 'Niveau',
-          data: level,
-          fill: false,
-          borderColor: documentStyle.getPropertyValue('--orange-800'),
-          tension: 0.4
-        },
-      ]
+      datasets
     };
 
     this.options = {
@@ -169,11 +193,12 @@ export class CustomHbtGraphComponent {
           this.tank = msg.selectedTank;
           this.period = msg.period;
           this.initData(this.listRecord?.temp,
-            this.listRecord?.volume,
+            this.resolveFuelVolumeSeries(this.listRecord),
             this.listRecord?.volume15,
             this.listRecord?.density,
             this.listRecord?.level,
-            this.listRecord?.listDate);
+            this.listRecord?.listDate,
+            this.resolveWaterVolumeSeries(this.listRecord));
       }else if(msg.from == "hbt-graph" &&
               msg.for == "custom-hbt-graph" &&
               msg.action == "empty the graph"){

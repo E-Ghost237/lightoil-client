@@ -43,9 +43,14 @@ export class TableTankComponent {
     }
 
 
-    getVolumeAtT(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            return ''+ Math.round(this.tankDetailsData.listLastRecord[0].volume*100)/100 +' / '+this.tankDetailsData.listLastRecord[0].total_volume;
+  getVolumeAtT(){
+      if(this.tankDetailsData?.listLastRecord?.length > 0){
+            const record = this.tankDetailsData.listLastRecord[0];
+            const fuelVolume = this.parseMetric(record?.fuel_volume ?? record?.volume);
+            if (fuelVolume === null) {
+                return '---';
+            }
+            return this.formatFuelVolume(fuelVolume) + ' / ' + record.total_volume;
         }
         return '0';
     }
@@ -77,7 +82,7 @@ export class TableTankComponent {
 
     getVolumeAtT15(){
         if(this.tankDetailsData?.listLastRecord?.length > 0){
-            return ''+Math.round(this.tankDetailsData.listLastRecord[0].volume_at_fift*100)/100;
+            return ''+Math.round(this.getFuelVolumeAtFift(this.tankDetailsData.listLastRecord[0])*100)/100;
         }
         return '0';
     }
@@ -164,6 +169,63 @@ export class TableTankComponent {
 
     getRoundValue(num:number){
         return Math.round(num*100)/100;
+    }
+
+    private formatFuelVolume(value: number): string {
+        return value.toFixed(2);
+    }
+
+    private parseMetric(value: any): number | null {
+        if (value === null || value === undefined || value === '') {
+            return null;
+        }
+
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    getFuelVolumeValue(record: any) {
+        const fuelVolume = this.parseMetric(record?.fuel_volume ?? record?.volume);
+
+        if (fuelVolume === null) {
+            return '---';
+        }
+
+        return this.formatFuelVolume(fuelVolume);
+    }
+
+    getFuelVolumeAtFiftValue(record: any) {
+        return this.getRoundValue(this.getFuelVolumeAtFift(record));
+    }
+
+    private getFuelVolumeAtFift(record: any): number {
+        const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+        if (normalizedVolumeAtFift !== null) {
+            return normalizedVolumeAtFift;
+        }
+
+        const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+        return legacyVolumeAtFift ?? 0;
+    }
+
+    getWaterLevelValue(record: any) {
+        const waterHeight = this.parseMetric(record?.water_height);
+
+        if (waterHeight === null) {
+            return '---';
+        }
+
+        return '' + this.getRoundValue(waterHeight);
+    }
+
+    getWaterVolumeValue(record: any) {
+        const waterVolume = this.parseMetric(record?.water_volume);
+
+        if (waterVolume === null) {
+            return '---';
+        }
+
+        return '' + this.getRoundValue(waterVolume);
     }
 
 }

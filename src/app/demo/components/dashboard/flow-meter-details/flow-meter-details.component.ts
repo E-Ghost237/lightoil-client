@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Subscription, interval } from 'rxjs';
 import { InteractionService } from 'src/app/demo/services/interaction.service';
+import { RealtimeRecordUpdatesService } from 'src/app/demo/services/realtime-record-updates.service';
 import * as Utility from '../../../utilities/utility';
 import { UIChart } from 'primeng/chart';
 import { AuthService } from '../../auth/services/auth.service';
 import { FlowMeterSensorService } from '../../pages/services/flow-meter-sensor.service';
+import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
 
 @Component({
   selector: 'app-flow-meter-details',
@@ -15,13 +17,13 @@ import { FlowMeterSensorService } from '../../pages/services/flow-meter-sensor.s
   changeDetection: ChangeDetectionStrategy.Default,
   providers: [ MessageService ]
 })
-export class FlowMeterDetailsComponent {
+export class FlowMeterDetailsComponent implements OnInit, OnDestroy {
 
   flowSensorId: number;
   volume: any = "indéterminée";
 
   records: any[]=[];
-  d:string = new Date().toLocaleString();
+  d:string = Utility.toLocalDateTime(new Date());
   t1:Subscription;
   stationId:any;
   flowMeterId:any;
@@ -31,6 +33,9 @@ export class FlowMeterDetailsComponent {
   data: any;
   options: any;
   shareData: any;
+  private silentRefreshSubscription: Subscription | null = null;
+  private realtimeStationUnsubscribe: (() => void) | null = null;
+  private realtimeRefreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private interactionService: InteractionService,
@@ -38,7 +43,9 @@ export class FlowMeterDetailsComponent {
     private route: ActivatedRoute,
     private authService: AuthService,
     private router: Router,
-    private flowSensorService: FlowMeterSensorService
+    private flowSensorService: FlowMeterSensorService,
+    private silentRefreshService: SilentRefreshService,
+    private realtimeRecordUpdatesService: RealtimeRecordUpdatesService
     ) {
 
   }
@@ -46,10 +53,15 @@ export class FlowMeterDetailsComponent {
   ngOnInit() {
     this.user_details = this.authService.getUserData();
     this.stationId = this.user_details?.service_station_id;
+    this.bindRealtimeStationUpdates();
     ("flow meter init function: ");
     this.flowMeterId = this.route.snapshot.paramMap.get('id');
     this.flowSensorId = this.flowMeterId;
     this.t1=interval(1000).subscribe(n => this.getStringDate());
+    this.silentRefreshSubscription = this.silentRefreshService.create(300000).subscribe(() => {
+      this.getFlowMeterDetailsData();
+      this.getLastHourVolume();
+    });
 
     this.getFlowMeterDetailsData();
     this.getLastHourVolume();
@@ -131,7 +143,7 @@ export class FlowMeterDetailsComponent {
   }
 
   getStringDate(){
-    this.d = new Date().toLocaleString();
+    this.d = Utility.toLocalDateTime(new Date());
   }
 
   backToDashboard(){
@@ -277,6 +289,54 @@ export class FlowMeterDetailsComponent {
     }else{
       return 'Indisponible';
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.t1) {
+      this.t1.unsubscribe();
+    }
+    if (this.silentRefreshSubscription) {
+      this.silentRefreshSubscription.unsubscribe();
+      this.silentRefreshSubscription = null;
+    }
+    if (this.realtimeStationUnsubscribe) {
+      this.realtimeStationUnsubscribe();
+      this.realtimeStationUnsubscribe = null;
+    }
+    if (this.realtimeRefreshTimeoutId !== null) {
+      clearTimeout(this.realtimeRefreshTimeoutId);
+      this.realtimeRefreshTimeoutId = null;
+    }
+  }
+
+  private bindRealtimeStationUpdates(): void {
+    const stationId = Number(this.stationId);
+    if (!Number.isFinite(stationId) || stationId <= 0) {
+      return;
+    }
+
+    if (this.realtimeStationUnsubscribe) {
+      this.realtimeStationUnsubscribe();
+      this.realtimeStationUnsubscribe = null;
+    }
+
+    this.realtimeStationUnsubscribe = this.realtimeRecordUpdatesService.subscribeToStationRecorded(
+      [stationId],
+      () => this.scheduleRealtimeRefresh()
+    );
+  }
+
+  private scheduleRealtimeRefresh(delayMs = 300): void {
+    if (this.realtimeRefreshTimeoutId !== null) {
+      clearTimeout(this.realtimeRefreshTimeoutId);
+      this.realtimeRefreshTimeoutId = null;
+    }
+
+    this.realtimeRefreshTimeoutId = setTimeout(() => {
+      this.realtimeRefreshTimeoutId = null;
+      this.getFlowMeterDetailsData();
+      this.getLastHourVolume();
+    }, delayMs);
   }
 
 

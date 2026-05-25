@@ -4,7 +4,7 @@
 <div class="text-bg-secondary m-2 border-round flex flex-column justify-content-center">
     <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
         <div class="col p-0 text-center">
-            {{'Cuve '+notiData?.sensor_reference}}
+            {{'Cuve '+(notiData?.sensor_reference || notiData?.tank?.sensor_reference || '--')}}
         </div>
         <div class="col p-0 text-center">
             <span>
@@ -15,7 +15,7 @@
             </span>
         </div>
         <div class="col p-0 text-center">
-            {{getDateTimeToLocale(notiData?.updated_at)}}
+            {{getDateTimeToLocale(getEventTime())}}
         </div>
     </div>
 
@@ -24,7 +24,7 @@
             {{'Type de notification : '}}
         </div>
         <div class="col p-0 text-right">
-            {{notiData.wording }}
+            {{getNotificationTypeWording()}}
         </div>
     </div>
 
@@ -32,12 +32,12 @@
         <div class="col p-0 text-left">
             {{'Niveau : '}}
         </div>
-        <div *ngIf="notiData.code == 'niv-cri'">
+        <div *ngIf="getNotificationCode() == 'niv-cri'">
             <div class="col p-0 text-right text-red-500">
                 {{''+getRoundedValue(notiData?.liquid_height)+' cm'}}
             </div>
         </div>
-        <div *ngIf="notiData.code != 'niv-cri'">
+        <div *ngIf="getNotificationCode() != 'niv-cri'">
             <div class="col p-0 text-right">
                 {{''+getRoundedValue(notiData?.liquid_height)+' cm'}}
             </div>
@@ -57,12 +57,12 @@
         <div class="col p-0 text-left">
             {{'Nombre de jours restants : '}}
         </div>
-        <div *ngIf="notiData.code == 'jo-co-re'">
+        <div *ngIf="getNotificationCode() == 'jo-co-re'">
             <div class="col p-0 text-right text-red-500">
                 {{getRoundedValue(notiData.remaining_day)}}
             </div>
         </div>
-        <div *ngIf="notiData.code != 'jo-co-re'">
+        <div *ngIf="getNotificationCode() != 'jo-co-re'">
             <div class="col p-0 text-right">
                 {{getRoundedValue(notiData.remaining_day)}}
             </div>
@@ -82,12 +82,12 @@
         <div class="col p-0 text-left">
             {{"Pourcentage d'occupation : "}}
         </div>
-        <div *ngIf="notiData.code == 'de-de' || notiData.code == 'de-en-co' || notiData.code == 'fi-de'">
+        <div *ngIf="getNotificationCode() == 'de-de' || getNotificationCode() == 'de-en-co' || getNotificationCode() == 'fi-de'">
             <div class="col p-0 text-right text-red-500">
                 {{''+getRoundedValue(notiData.percent)+' %'}}
             </div>
         </div>
-        <div *ngIf="notiData.code != 'de-de' && notiData.code != 'de-en-co' && notiData.code != 'fi-de'">
+        <div *ngIf="getNotificationCode() != 'de-de' && getNotificationCode() != 'de-en-co' && getNotificationCode() != 'fi-de'">
             <div class="col p-0 text-right">
                 {{''+getRoundedValue(notiData.percent)+' %'}}
             </div>

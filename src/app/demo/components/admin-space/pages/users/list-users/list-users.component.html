@@ -2,8 +2,10 @@
 <p-toast key="tst"></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
+<div class="users-list-page">
+
 <!-- Page header -->
-<div class="card pb-0 mb-5">
+<div class="card pb-0 mb-4 users-page-header">
   <div class="card-body align-content-center justify-content-between pt-0">
     <div class="text-center align-content-center text-xl text-uppercase">
       <h1 class="font-bold">Liste des utilisateurs</h1>
@@ -18,7 +20,7 @@
 </div>
 
 <!-- Table -->
-<div class="card p-2 pb-3">
+<div class="card p-2 pb-3 users-page-table">
   <p-table
     #dt
     [value]="users"
@@ -270,21 +272,19 @@
     </div>
 
     <div class="col-12 md:col-6">
-      <label class="block text-600 font-semibold mb-2">Rôle(s)</label>
-      <p-multiSelect
+      <label class="block text-600 font-semibold mb-2">Rôle</label>
+      <p-dropdown
         [options]="roleOptions"
-        formControlName="roles"
+        formControlName="role_id"
         optionLabel="label"
         optionValue="value"
-        display="chip"
         [filter]="true"
         appendTo="body"
         [autoZIndex]="true"
-        [scrollHeight]="'260px'"
         placeholder="Sélectionner..."
         class="w-full"
-      ></p-multiSelect>
-      <small class="text-red-500" *ngIf="editForm.get('roles')?.touched && editForm.get('roles')?.invalid">Au moins un rôle.</small>
+      ></p-dropdown>
+      <small class="text-red-500" *ngIf="editForm.get('role_id')?.touched && editForm.get('role_id')?.invalid">Le rôle est requis.</small>
     </div>
 
     <div class="col-12 md:col-6">

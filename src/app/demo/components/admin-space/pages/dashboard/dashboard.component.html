@@ -103,7 +103,7 @@
 </p-dialog>
 
 <!-- Header bloc -->
-<div class="card pb-0 mb-5">
+<div class="card pb-0 mb-4 admin-dash-header">
     <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
         <div class="col-12 xl:col lg:col text-center align-content-center text-3xl text-uppercase md:mb-2 sm:mb-2">
             <span class="w-full xl:w-auto lg:w-auto md:w-auto font-bold">Tableau de bord</span>
@@ -113,6 +113,7 @@
             <p-dropdown (onChange)="onSalePointTypeChange($event)"
                 styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase" inputId="sale-point-types"
                 [options]="sale_point_types" [(ngModel)]="selected_sale_point_type" optionLabel="name"
+                [appendTo]="'body'"
                 [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un réseau" />
         </div>
         <div class="col align-content-center xl:pt-0 lg:pt-0">
@@ -120,6 +121,7 @@
             <p-multiSelect (onChange)="onSalePointsChange($event)"
                 (onSelectAllChange)="onSelectAllSalePointsChange($event)"
                 styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase" inputId="sale-points"
+                [appendTo]="'body'"
                 [options]="sale_points_matching_type" [showToggleAll]="true" [selectAll]="select_all_sale_points"
                 [(ngModel)]="selected_sale_points" optionLabel="name" display="chip" [virtualScroll]="true"
                 [virtualScrollItemSize]="30" class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="1"
@@ -137,6 +139,7 @@
             <label for="daily-date" class="block font-bold text-lg">Journnée du :</label>
             <p-calendar (onSelect)="onDateSelect($event)"
                 styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase" inputId="daily-date"
+                [appendTo]="'body'"
                 dateFormat="dd/mm/yy" [(ngModel)]="daily_date" [readonlyInput]="true" [maxDate]="max_date"
                 placeholder="Sélectionner un jour" />
         </div>

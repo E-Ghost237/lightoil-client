@@ -61,6 +61,10 @@ export class HbpCustomGraphComponent {
     return computeListDate;
   }
 
+  private resolveFuelVolumeSeries(series: any): any[] {
+    return series?.fuel_volume ?? series?.volume ?? [];
+  }
+
   initData(listRecord:any[]){
 
     const documentStyle = getComputedStyle(document.documentElement);
@@ -113,8 +117,8 @@ export class HbpCustomGraphComponent {
     for (let i = 0; i < listRecord.length; i++) {
       if (listRecord[i].data.status == true) {
         datasets.push({
-          label: 'Volume '+listRecord[i].tank.sensor_reference,
-          data: listRecord[i].data.volume,
+          label: 'Volume carburant '+listRecord[i].tank.sensor_reference,
+          data: this.resolveFuelVolumeSeries(listRecord[i].data),
           fill: false,
           borderColor: documentStyle.getPropertyValue(listColors[Math.round(Math.random()*(listColors.length-1))]),
           tension: 0.4

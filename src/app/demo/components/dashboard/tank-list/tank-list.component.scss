@@ -1,55 +1,47 @@
-.anim-fade{
-    animation: none;
+:host {
+  display: block;
 }
 
-.anim-fade:hover{
-    cursor: pointer;
-    animation: 4s linear 0s infinite alternate both animationFade;
+.tank-list-page {
+  color: #0b1220;
 }
 
+.tank-list-header {
+  border: 1px solid #d8e3f2;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #ffffff, #f4f8ff);
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.9rem;
+  box-shadow: 0 14px 30px -26px rgba(2, 6, 23, 0.55);
+}
 
-@keyframes animationFade {
-    0% {
-      transform: scale(1);
-    }
+.tank-list-date {
+  color: #3b4b66;
+  font-weight: 600;
+}
 
-    10% {
-      transform: scale(1.01);
-    }
+.anim-fade {
+  animation: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-    20% {
-        transform: scale(1.02);
-    }
+.anim-fade:hover {
+  cursor: pointer;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -24px rgba(2, 6, 23, 0.65);
+}
 
-    30% {
-        transform: scale(1.03);
-    }
+.report-loading-state {
+  min-height: 46vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
 
-    40% {
-      transform: scale(1.04);
-    }
-
-    50% {
-      transform: scale(1.05);
-    }
-
-    60% {
-        transform: scale(1.05);
-    }
-
-    70% {
-        transform: scale(1.04);
-    }
-
-    80% {
-        transform: scale(1.03);
-    }
-
-    90% {
-      transform: scale(1.02);
-    }
-
-    100% {
-      transform: scale(1);
-    }
-  }
+.report-loading-state p {
+  margin: 0;
+  color: #334155;
+  font-weight: 600;
+}

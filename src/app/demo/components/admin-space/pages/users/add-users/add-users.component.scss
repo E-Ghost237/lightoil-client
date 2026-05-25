@@ -2,12 +2,26 @@
   display: block;
 }
 
+.users-add-header {
+  border: 1px solid #d6e1f3;
+  background: linear-gradient(155deg, #ffffff, #f7fbff);
+}
+
+.users-add-header h1 {
+  color: #0f3d92;
+}
+
+.users-add-card {
+  border: 1px solid #d8e3f2;
+}
+
 .section-title {
   margin: 0 0 1rem 0;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .04em;
-  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+  color: #1c3560;
 }
 
 .form-section {
@@ -27,4 +41,16 @@
 .field small {
   display: block;
   margin-top: 0.35rem;
+}
+
+:host ::ng-deep .users-add-card .p-inputtext,
+:host ::ng-deep .users-add-card .p-dropdown,
+:host ::ng-deep .users-add-card .p-multiselect {
+  border-radius: 10px;
+}
+
+:host ::ng-deep .users-add-card .p-dropdown,
+:host ::ng-deep .users-add-card .p-multiselect,
+:host ::ng-deep .users-add-card .p-inputtext {
+  border-color: #c8d6ed;
 }

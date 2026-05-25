@@ -38,6 +38,7 @@ export class HbpDumpingsComponent {
     dataReport!:any;
 
     user_details!:any;
+    stationTimezone = 'Africa/Douala';
 
 
     constructor(
@@ -57,9 +58,55 @@ export class HbpDumpingsComponent {
     ngOnInit() {
         this.maxDate = new Date();
         this.user_details = this.authService.getUserData();
+        this.stationTimezone = this.resolveStationTimezone();
         //;
         this.getListQuartWorking();
         this.getListProducts();
+    }
+
+    private resolveStationTimezone(): string {
+        const fallback = 'Africa/Douala';
+        const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
+        const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.user_details?.service_station_id)) ?? null;
+
+        const candidates = [
+            this.user_details?.timezone,
+            this.user_details?.time_zone,
+            currentStation?.timezone,
+            currentStation?.time_zone
+        ];
+
+        for (const candidate of candidates) {
+            if (typeof candidate !== 'string') {
+                continue;
+            }
+
+            const timezone = candidate.trim();
+            if (!timezone) {
+                continue;
+            }
+
+            try {
+                Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+                return timezone;
+            } catch {
+                // Ignore invalid timezone values and continue searching.
+            }
+        }
+
+        return fallback;
+    }
+
+    hasOutputRows(): boolean {
+        if (Array.isArray(this.dataOutputs?.listDayRecord)) {
+            return this.dataOutputs.listDayRecord.length > 0;
+        }
+
+        if (Array.isArray(this.dataOutputs?.periodRecord)) {
+            return this.dataOutputs.periodRecord.length > 0;
+        }
+
+        return false;
     }
 
     getListProducts(){
@@ -200,7 +247,8 @@ export class HbpDumpingsComponent {
         let usefullData = {
             user_details: this.user_details,
             stationProduct: this.selectedStationProduct,
-            dataOuptuts: this.dataOutputs
+            dataOuptuts: this.dataOutputs,
+            timezone: this.stationTimezone
         };
         this.pdfService.generateTankProductOutputsPdf(usefullData);
     }

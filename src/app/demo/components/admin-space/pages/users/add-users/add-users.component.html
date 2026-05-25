@@ -2,7 +2,7 @@
 <p-toast key="tst"></p-toast>
 
 <!-- Page header -->
-<div class="card pb-0 mb-5">
+<div class="card pb-0 mb-4 users-add-header">
   <div class="card-body align-content-center justify-content-between pt-0">
     <div class="text-center align-content-center text-xl text-uppercase">
       <h1 class="font-bold">Créer un utilisateur</h1>
@@ -14,7 +14,7 @@
 </div>
 
 <!-- Content -->
-<div class="card p-3">
+<div class="card p-3 users-add-card">
   <ng-container *ngIf="!loadingContext; else loadingTpl">
 
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="p-fluid">
@@ -172,8 +172,10 @@
 
   <ng-template #loadingTpl>
     <div class="flex align-items-center justify-content-center" style="min-height: 220px;">
-      <i class="pi pi-spin pi-spinner" style="font-size: 1.6rem;"></i>
-      <span class="ml-2 text-600">Chargement...</span>
+      <div class="lightgroup-loader">
+        <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+        <p class="lightgroup-loader__text">Chargement...</p>
+      </div>
     </div>
   </ng-template>
 </div>

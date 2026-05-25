@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { PusherService } from '../../services/pusher.service';
@@ -12,13 +12,15 @@ import { AuthService } from '../../../auth/services/auth.service';
   templateUrl: './tank-image.component.html',
   styleUrls: ['./tank-image.component.scss']
 })
-export class TankImageComponent {
+export class TankImageComponent implements OnChanges {
     @Input() dataFromTankList:any;
     @Input() type:any="vanne de surveillance";
     stationId: number;
     flowSensorId: number;
     user_details: any;
     volume: any = "indéterminée";
+    dayOutputTotal = 0;
+    notificationTimezone = 'Africa/Douala';
 
 
     constructor(
@@ -34,64 +36,244 @@ export class TankImageComponent {
 
 
     ngOnInit(): void {
-        //;
-        //("date: ", this.getLastIncomeDateRecord());
-        this.user_details = this.authService.getUserData();
-        this.stationId = this.user_details?.service_station_id;
-        this.flowSensorId = this.dataFromTankList.tank.id;
-        this.getLastHourVolume();
+        if (!this.dataFromTankList) {
+            this.refreshContextAndMetrics();
+        }
+    }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['dataFromTankList'] || changes['type']) {
+            this.refreshContextAndMetrics();
+        }
+    }
+
+    private isFlowMeterType(): boolean {
+        return this.type == 'Debimetre' || this.type == 'Débimètre';
+    }
+
+    private refreshContextAndMetrics(): void {
+        this.user_details = this.user_details ?? this.authService.getUserData();
+        this.stationId = this.user_details?.service_station_id;
+        this.notificationTimezone = this.resolveStationTimezone();
+        this.flowSensorId = Number(this.dataFromTankList?.tank?.id ?? 0);
+
+        if (this.isFlowMeterType()) {
+            this.getLastHourVolume();
+            return;
+        }
+
+        this.refreshDayOutputTotal();
+    }
+
+    private getRecordMoment(record: any): number {
+        const createdAt = record?.created_at ? new Date(record.created_at).getTime() : 0;
+        const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
+        return Math.max(createdAt, updatedAt);
+    }
+
+    private getSortedRecords(records: any[] = this.dataFromTankList?.listLastRecord ?? []) {
+        return [...records].sort(
+            (a, b) => this.getRecordMoment(b) - this.getRecordMoment(a)
+        );
+    }
+
+    private getLatestRecord() {
+        return this.getSortedRecords()[0] ?? null;
+    }
+
+    private getPreviousRecord() {
+        return this.getSortedRecords()[1] ?? null;
+    }
+
+    private parseMetric(value: any): number | null {
+        if (value === null || value === undefined || value === '') {
+            return null;
+        }
+
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    private getFuelVolume(record: any): number | null {
+        return this.parseMetric(record?.fuel_volume ?? record?.volume);
+    }
+
+    private getFuelVolumeAtFift(record: any): number {
+        const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+        if (normalizedVolumeAtFift !== null) {
+            return normalizedVolumeAtFift;
+        }
+
+        const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+        return legacyVolumeAtFift ?? 0;
+    }
+
+    private formatFuelVolume(value: number): string {
+        return value.toFixed(2);
+    }
+
+    private getWaterHeight(record: any): number | null {
+        return this.parseMetric(record?.water_height);
+    }
+
+    private getWaterVolumeMetric(record: any): number | null {
+        return this.parseMetric(record?.water_volume);
     }
 
     getLevel(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+Math.round(this.dataFromTankList.listLastRecord[0].liquid_height*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Math.round(latestRecord.liquid_height*100)/100;
         }else{
             return '---';
         }
     }
 
     getVolumeAtT(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+ Math.round(this.dataFromTankList.listLastRecord[0].volume*100)/100 +' / '+this.dataFromTankList.listLastRecord[0].total_volume;
+        const latestRecord = this.getLatestRecord();
+        const fuelVolume = this.getFuelVolume(latestRecord);
+        if(latestRecord && fuelVolume !== null){
+            return this.formatFuelVolume(fuelVolume) + ' / ' + latestRecord.total_volume;
         }else{
             return '---';
         }
     }
 
     getVolumeAtT15(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+Math.round(this.dataFromTankList.listLastRecord[0].volume_at_fift*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Math.round(this.getFuelVolumeAtFift(latestRecord)*100)/100;
         }else{
             return '---';
         }
     }
 
-    getOutputVolume() {
-        let last_volume: number;
-        let new_volume: number;
-        let output_volume!: number;
-        let records = this.dataFromTankList.listLastRecord;
-        // ;
+    private resolveStationTimezone(): string {
+        const fallback = 'Africa/Douala';
+        const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
+        const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.stationId)) ?? null;
 
-        if (records.length > 0) {
-            new_volume = records[0]?.volume;
-            last_volume = records[1]?.volume;
+        const candidates = [
+            this.user_details?.timezone,
+            this.user_details?.time_zone,
+            currentStation?.timezone,
+            currentStation?.time_zone
+        ].filter((value: any) => typeof value === 'string' && value.trim().length > 0);
 
-            if (new_volume <= last_volume) {
-                output_volume = last_volume - new_volume;
-                // ;
+        for (const candidate of candidates) {
+            const timezone = String(candidate).trim();
+            try {
+                Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+                return timezone;
+            } catch {
+                // Ignore invalid timezone identifiers and continue.
             }
-            return Math.round(output_volume*100)/100;
         }
-        else {
-            return '---';
+
+        return fallback;
+    }
+
+    private getLocalDateKey(date: Date = new Date(), timezone: string = this.notificationTimezone): string {
+        try {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+
+            const year = parts.find((part) => part.type === 'year')?.value;
+            const month = parts.find((part) => part.type === 'month')?.value;
+            const day = parts.find((part) => part.type === 'day')?.value;
+            if (year && month && day) {
+                return `${year}-${month}-${day}`;
+            }
+        } catch {
+            // Fallback to local timezone if Intl timezone formatting fails.
         }
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
+        const candidate = record?.updated_at ?? record?.created_at ?? null;
+        if (!candidate) {
+            return null;
+        }
+
+        const timestamp = new Date(candidate);
+        if (Number.isNaN(timestamp.getTime())) {
+            return null;
+        }
+
+        return this.getLocalDateKey(timestamp, timezone);
+    }
+
+    private getRoundValue(num: number): number {
+        return Math.round(num * 100) / 100;
+    }
+
+    private computeOutputSumFromRecords(records: any[]): number {
+        if (!Array.isArray(records) || records.length < 2) {
+            return 0;
+        }
+
+        const sorted = this.getSortedRecords(records);
+        let total = 0;
+
+        for (let i = 0; i < sorted.length - 1; i++) {
+            const latestVolume = this.getFuelVolume(sorted[i]);
+            const previousVolume = this.getFuelVolume(sorted[i + 1]);
+
+            if (latestVolume !== null && previousVolume !== null && latestVolume <= previousVolume) {
+                total += (previousVolume - latestVolume);
+            }
+        }
+
+        return this.getRoundValue(total);
+    }
+
+    private computeDayOutputFromCurrentRecords(dayKey: string): number {
+        const sourceRecords = Array.isArray(this.dataFromTankList?.listLastRecord) ? this.dataFromTankList.listLastRecord : [];
+        const sameDayRecords = sourceRecords.filter((record: any) => this.getRecordDateKey(record) === dayKey);
+        return this.computeOutputSumFromRecords(sameDayRecords);
+    }
+
+    private refreshDayOutputTotal(): void {
+        const tankId = Number(this.dataFromTankList?.tank?.id ?? 0);
+        if (!tankId) {
+            this.dayOutputTotal = 0;
+            return;
+        }
+
+        const dayKey = this.getLocalDateKey();
+        this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
+
+        this.recordService.getListRecordsForOneDay({
+            tankId,
+            dateStart: dayKey
+        }).subscribe({
+            next: (response: any) => {
+                const dayRecords = Array.isArray(response) ? response : [];
+                this.dayOutputTotal = this.computeOutputSumFromRecords(dayRecords);
+            },
+            error: () => {
+                this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
+            }
+        });
+    }
+
+    getOutputVolume() {
+        return this.getRoundValue(this.dayOutputTotal);
     }
 
     getLiquidTemp(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            let value = Math.round(this.dataFromTankList.listLastRecord[0].liquid_temperature*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let value = Math.round(latestRecord.liquid_temperature*100)/100;
             if(value > 0){
                 return ''+value;
             }else{
@@ -103,8 +285,9 @@ export class TankImageComponent {
     }
 
     getEnvTemp(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            let value = Math.round(this.dataFromTankList.listLastRecord[0].env_temperature*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let value = Math.round(latestRecord.env_temperature*100)/100;
             if(value > 0){
                 return ''+value;
             }else{
@@ -116,8 +299,9 @@ export class TankImageComponent {
     }
 
     getDensity(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            let value = Math.round( this.dataFromTankList.listLastRecord[0].density*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let value = Math.round(latestRecord.density*100)/100;
             if(value > 0){
                 return ''+value;
             }else{
@@ -137,8 +321,9 @@ export class TankImageComponent {
     }
 
     getLastIncomeDateRecord(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+Utility.toLocalDateTime(this.dataFromTankList.listLastRecord[0].updated_at);
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Utility.toLocalDateTime(latestRecord.updated_at);
         }else{
             return 'Pas de derniere donnee';
         }
@@ -184,8 +369,9 @@ export class TankImageComponent {
         if(this.type == "Debimetre"){
             routeImage = "../../../../assets/demo/images/debimetreXl-removebg.png";
         }else{
-            if(this.dataFromTankList?.listLastRecord?.length > 0 && this.dataFromTankList.listLastRecord[0]?.total_volume > 0){
-                let percent = (this.dataFromTankList.listLastRecord[0].volume*100)/this.dataFromTankList.listLastRecord[0].total_volume;
+            const latestRecord = this.getLatestRecord();
+            if(latestRecord?.total_volume > 0){
+                let percent = (latestRecord.volume*100)/latestRecord.total_volume;
                 if(percent < 10){
                     routeImage = "../../../../assets/demo/images/"+nameProduct+"/p00.svg";
                 }else if(percent >= 10 && percent < 20){
@@ -217,33 +403,57 @@ export class TankImageComponent {
         return routeImage;
     }
 
+    getWaterLevel() {
+        const waterHeight = this.getWaterHeight(this.getLatestRecord());
+
+        if (waterHeight === null) {
+            return '---';
+        }
+
+        return '' + Math.round(waterHeight * 100) / 100;
+    }
+
+    getWaterVolume() {
+        const waterVolume = this.getWaterVolumeMetric(this.getLatestRecord());
+
+        if (waterVolume === null) {
+            return '---';
+        }
+
+        return '' + Math.round(waterVolume * 100) / 100;
+    }
+
     getInstantFlow(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+Math.round(this.dataFromTankList.listLastRecord[0].instant_flow*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Math.round(latestRecord.instant_flow*100)/100;
         }else{
             return '---';
         }
     }
 
     getLastIncomeDateRecordFlow(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+Utility.toLocalDateTime(this.dataFromTankList.listLastRecord[0].updated_at);
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Utility.toLocalDateTime(latestRecord.updated_at);
         }else{
             return 'Pas de derniere donnee';
         }
     }
 
     getCumulativeFlow(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+Math.round(this.dataFromTankList.listLastRecord[0].cumulative_flow*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Math.round(latestRecord.cumulative_flow*100)/100;
         }else{
             return '---';
         }
     }
 
     getUnitMeasurement(){
-        if(this.dataFromTankList?.listLastRecord?.length > 0){
-            return ''+this.dataFromTankList.listLastRecord[0].unit_measurement_flow;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+latestRecord.unit_measurement_flow;
         }else{
             return '---';
         }
@@ -271,5 +481,3 @@ export class TankImageComponent {
 
     }
 }
-
-

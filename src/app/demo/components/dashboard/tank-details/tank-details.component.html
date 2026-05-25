@@ -39,7 +39,11 @@
                         </p-badge>
                     </span>
                 </div>
-                <div class="col pr-0 text-end" pTooltip="Nombre de notifications de la journee" >
+                <div
+                    class="col pr-0 text-end"
+                    pTooltip="Nombre de notifications de la journee"
+                    style="cursor: pointer;"
+                    (click)="notiPanel.toggle($event, targetEl)">
                     <span class="mr-4"> Notifications: </span>
                     <span><p-badge value="{{getTotalNotification()}}" size="large" severity="{{getSeverityNoti()}}"></p-badge></span>
                 </div>
@@ -90,7 +94,7 @@
             <div class="row justify-content-end ">
 
                 <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Niveau(cm): </span>
+                    <span class=""> Hauteur carburant(cm): </span>
                     <span><p-badge value="{{getLevel()}}" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
                 </div>
                 <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
@@ -103,7 +107,7 @@
             <div class="row justify-content-end ">
 
                 <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Volume à {{getLiquidTemp()+ 'C(l)'}}: </span>
+                    <span class=""> Volume carburant à {{getLiquidTemp()+ 'C(l)'}}: </span>
                     <span><p-badge value="{{getVolumeAtT()}}" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
                 </div>
                 <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
@@ -114,24 +118,27 @@
 
             </div>
             <div class="row justify-content-end ">
-                <div class="col-10 card mx-4 d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Quantité Sortie : </span>
+                <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Quantité Sortie (aujourd'hui) : </span>
                     <span><p-badge value="{{getOutputVolume()}} litre(s)" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
                 </div>
+                <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Volume d'eau(l): </span>
+                    <span><p-badge value="{{getWaterVolume()}}" size="large" severity="info"></p-badge></span>
+                </div>
                 <span></span>
+
             </div>
             <div class="row justify-content-end ">
-
-                <!-- <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Temp. ambiante(Celsius): </span>
-                    <span><p-badge value="{{getEnvTemp()}}" size="large" severity="info"></p-badge></span>
-                </div> -->
+                <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Hauteur d'eau(cm): </span>
+                    <span><p-badge value="{{getWaterLevel()}}" size="large" severity="info"></p-badge></span>
+                </div>
                 <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
                     <span class=""> Temp. liquide(Celsius): </span>
                     <span><p-badge value="{{getLiquidTemp()}}" size="large" severity="info"></p-badge></span>
                 </div>
                 <span></span>
-
             </div>
             <div class="row card justify-content-center mx-1 p-0">
                 <div class="col p-0 pl-1 pr-1">
@@ -164,9 +171,11 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Relevé à</th>
-                                    <th pTooltip="en centimetres" tooltipPosition="bottom">Niveau(cm)</th>
-                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume a T(litres)</th>
+                                    <th pTooltip="en centimetres" tooltipPosition="bottom">Hauteur carburant(cm)</th>
+                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume carburant a T(litres)</th>
                                     <th pTooltip="en litres" tooltipPosition="bottom">Qté. Sortie(litre)</th>
+                                    <th>Hauteur d'eau(cm)</th>
+                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume d'eau(l)</th>
                                     <th pTooltip="en degres celsius" tooltipPosition="bottom">T(C) liquide</th>
                                     <th pTooltip="rapport des masses volumiques" tooltipPosition="bottom">Densite</th>
                                 </tr>
@@ -176,8 +185,10 @@
                                     <td>{{rowIndex+1}}</td>
                                     <td>{{getToLocalDateTime(record.updated_at)}}</td>
                                     <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
-                                    <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
+                                    <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
                                     <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
+                                    <td>{{getWaterLevelValue(record)}}</td>
+                                    <td>{{getWaterVolumeValue(record)}}</td>
                                     <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
                                     <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
                                 </tr>
@@ -225,10 +236,12 @@
                         <tr>
                             <th>#</th>
                             <th>Releve a</th>
-                            <th pTooltip="en centimetres">Niveau(cm)</th>
-                            <th pTooltip="en litres">Volume a T</th>
+                            <th pTooltip="en centimetres">Hauteur carburant(cm)</th>
+                            <th pTooltip="en litres">Volume carburant a T</th>
                             <th pTooltip="en litres">Volume a 15C</th>
                             <th pTooltip="en litres" tooltipPosition="bottom">Qté. Sortie (en litre)</th>
+                            <th>Hauteur d'eau(cm)</th>
+                            <th pTooltip="en litres">Volume d'eau(l)</th>
                             <th pTooltip="en degres celsius">T(C) liquide</th>
                             <th pTooltip="rapport des masses volumiques">Densite</th>
                         </tr>
@@ -238,14 +251,63 @@
                             <td>{{rowIndex+1}}</td>
                             <td>{{getToLocalDateTime(record.updated_at)}}</td>
                             <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
-                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
-                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume_at_fift)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeAtFiftValue(record)}}</td>
                             <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
+                            <td>{{getWaterLevelValue(record)}}</td>
+                            <td>{{getWaterVolumeValue(record)}}</td>
                             <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
                             <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
                         </tr>
                     </ng-template>
                 </p-table>
+            </div>
+        </ng-template>
+    </p-overlayPanel>
+
+    <!-- notifications -->
+    <p-overlayPanel #notiPanel [style]="{'width': '60rem'}" [showCloseIcon]="true">
+        <ng-template pTemplate="content">
+            <div class="row">
+                <div class="col text-center h5">
+                    Notifications de la journee
+                </div>
+            </div>
+            <div class="row mt-2">
+                <ng-container *ngIf="dayNotifications.length > 0; else noTodayNotifications">
+                    <p-table
+                        [value]="dayNotifications"
+                        styleClass="p-datatable-striped"
+                        [paginator]="true"
+                        [rows]="10"
+                        [rowsPerPageOptions]="[10, 20, 50]"
+                        [showCurrentPageReport]="true"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>#</th>
+                                <th>Heure</th>
+                                <th>Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-notification let-rowIndex="rowIndex">
+                            <tr>
+                                <td>{{rowIndex + 1}}</td>
+                                <td>{{getToLocalDateTime(getNotificationEventTime(notification))}}</td>
+                                <td>
+                                    <p-tag [value]="getNotificationType(notification)" [severity]="getNotificationSeverity(notification)"></p-tag>
+                                </td>
+                                <td>{{getNotificationDescription(notification)}}</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </ng-container>
+                <ng-template #noTodayNotifications>
+                    <div class="col text-center text-secondary py-4">
+                        Aucune notification pour la journee en cours.
+                    </div>
+                </ng-template>
             </div>
         </ng-template>
     </p-overlayPanel>
@@ -289,4 +351,3 @@
         <img width="150rem" src="../../../../../assets/layout/images/logo.gif" alt="Loading" srcset="">
     </div>
 </ng-template>
-

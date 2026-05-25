@@ -1,26 +1,19 @@
-<ng-container *ngIf="model.length <= 0; else elseTemplate" >
-    <div style="
-      height: 90%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      ">
-      <div>
-        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-      </div>
+<ng-container *ngIf="model.length <= 0; else menuLoadedTemplate">
+    <div class="menu-loading-shell">
+        <i class="pi pi-spin pi-spinner"></i>
     </div>
 </ng-container>
-<ng-template #elseTemplate>
-    <ul class="layout-menu mt-8">
+
+<ng-template #menuLoadedTemplate>
+    <ul class="layout-menu mt-5">
         <ng-container *ngFor="let item of model; let i = index;">
-            <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true" class="list-group-item list-group-item-action"></li>
+            <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
             <li *ngIf="item.separator" class="menu-separator"></li>
         </ng-container>
-        <li>
-            <a href="https://www.primefaces.org/primeblocks-ng/#/">
-                <img width="20%" style="margin-left: 35%; margin-top: 20%;"  src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'Capture2' : 'Capture'}}.PNG" alt="Light Oil" />
-            </a>
+        <li class="menu-branding mt-5">
+            <img src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'lightoil-brand-black' : 'lightoil-brand-white'}}.png"
+                alt="Light Oil" class="w-full rounded" />
+            <small>Fuel operations platform</small>
         </li>
     </ul>
 </ng-template>

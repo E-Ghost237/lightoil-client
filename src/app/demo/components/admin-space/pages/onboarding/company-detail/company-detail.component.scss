@@ -1,0 +1,121 @@
+.detail-page {
+  display: grid;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  background: linear-gradient(135deg, rgba(15, 61, 146, 0.10), rgba(30, 85, 175, 0.08)), #fff;
+}
+
+.hero h1,
+.section-card h2 {
+  margin: 0;
+}
+
+.hero p,
+.muted {
+  margin: 0.35rem 0 0;
+  color: #64748b;
+}
+
+.actions,
+.footer-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+  gap: 1rem;
+}
+
+.grid-two > * {
+  min-width: 0;
+}
+
+.section-card {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.required-hint {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.required-indicator {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+.field-span-2 {
+  grid-column: span 2;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber,
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-inputtextarea,
+:host ::ng-deep .p-inputnumber-input {
+  width: 100%;
+  max-width: 100%;
+}
+
+:host ::ng-deep .p-dropdown,
+:host ::ng-deep .p-inputnumber {
+  display: inline-flex;
+  align-items: center;
+}
+
+.loading-card {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+}
+
+@media (max-width: 900px) {
+  .grid-two,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-span-2 {
+    grid-column: span 1;
+  }
+
+  .hero {
+    flex-direction: column;
+  }
+}

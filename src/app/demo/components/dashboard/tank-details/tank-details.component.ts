@@ -13,6 +13,7 @@ import * as Utility from '../../../utilities/utility';
 import { UIChart } from 'primeng/chart';
 import { PdfService } from 'src/app/demo/services/pdf.service';
 import { LocalStorageService } from '../../auth/services/local-storage.service';
+import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
 
 @Component({
   selector: 'app-tank-details',
@@ -25,7 +26,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     records: any[]=[];
     t1:Subscription;
-    d:string = new Date().toLocaleString();
+    d:string = Utility.toLocalDateTime(new Date());
     stationId:any;
     tankId:any;
     user_details:any;
@@ -38,6 +39,12 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     options: any;
     output_volumes: Array<any> = [];
     ajusted_records: Array<any> = [];
+    dayNotifications: any[] = [];
+    dayNotificationTotal = 0;
+    dayOutputTotal = 0;
+    notificationTimezone = 'Africa/Douala';
+    notificationDateKey = '';
+    private silentRefreshSubscription: Subscription | null = null;
 
     constructor(
         private messageService: MessageService,
@@ -49,7 +56,8 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         private ref: ChangeDetectorRef,
         private pusherService: PusherService,
         private localStorageService: LocalStorageService,
-        private pdfService: PdfService
+        private pdfService: PdfService,
+        private silentRefreshService: SilentRefreshService
         ) { }
 
     ngOnInit() {
@@ -59,10 +67,15 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         this.stationId = this.localStorageService.getServiceStationId();
         //;
         this.tankId = this.route.snapshot.paramMap.get('id');
+        this.notificationTimezone = this.resolveStationTimezone();
+        this.notificationDateKey = this.getLocalDateKey();
         this.getTankDetailsData();
         //;
         this.subscribeToChannelSocket();
         this.t1=interval(1000).subscribe(n => this.getStringDate());
+        this.silentRefreshSubscription = this.silentRefreshService.create(300000).subscribe(() => {
+            this.getTankDetailsData(false);
+        });
         this.getSubscribeData();
 
     }
@@ -85,7 +98,74 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     }
 
-    initGraphData(){
+    private getRecordMoment(record: any): number {
+        const createdAt = record?.created_at ? new Date(record.created_at).getTime() : 0;
+        const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
+        return Math.max(createdAt, updatedAt);
+    }
+
+    private getSortedRecords(records: any[] = []): any[] {
+        return [...records].sort((a, b) => this.getRecordMoment(b) - this.getRecordMoment(a));
+    }
+
+    private getLatestRecord() {
+        return this.tankDetailsData?.listLastRecord?.length ? this.tankDetailsData.listLastRecord[0] : null;
+    }
+
+    private getPreviousRecord() {
+        return this.tankDetailsData?.listLastRecord?.length > 1 ? this.tankDetailsData.listLastRecord[1] : null;
+    }
+
+    private parseMetric(value: any): number | null {
+        if (value === null || value === undefined || value === '') {
+            return null;
+        }
+
+        const parsed = Number(value);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    private getFuelVolume(record: any): number | null {
+        return this.parseMetric(record?.fuel_volume ?? record?.volume);
+    }
+
+    private getFuelVolumeAtFift(record: any): number {
+        const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+        if (normalizedVolumeAtFift !== null) {
+            return normalizedVolumeAtFift;
+        }
+
+        const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+        return legacyVolumeAtFift ?? 0;
+    }
+
+    private formatFuelVolume(value: number): string {
+        return value.toFixed(2);
+    }
+
+    getFuelVolumeDisplay(record: any): string {
+        const fuelVolume = this.getFuelVolume(record);
+        return fuelVolume === null ? '---' : this.formatFuelVolume(fuelVolume);
+    }
+
+    getFuelVolumeAtFiftValue(record: any): number {
+        return this.getRoundValue(this.getFuelVolumeAtFift(record));
+    }
+
+    private getWaterHeight(record: any): number | null {
+        return this.parseMetric(record?.water_height);
+    }
+
+    private getWaterVolumeMetric(record: any): number | null {
+        return this.parseMetric(record?.water_volume);
+    }
+
+    private getRoundedMetricOrNull(value: any): number | null {
+        const parsed = this.parseMetric(value);
+        return parsed === null ? null : this.getRoundValue(parsed);
+    }
+
+    initGraphData(dayRecords: any[] = []){
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
         const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
@@ -96,19 +176,21 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         let t:any[]=[];
         let d:any[]=[];
         let l:any[]=[];
+        let wv:any[]=[];
         let time:any[]=[];
 
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let listRecord = this.tankDetailsData?.listLastRecord;
+        if(dayRecords?.length > 0){
+            const listRecord = dayRecords;
 
             for (let i = (listRecord.length-1); i >=0; i--) {
                 const record = listRecord[i];
                 time.push(this.getToLocalDateTime(record?.updated_at))
                 d.push(this.getRoundValue(record?.density));
                 l.push(this.getRoundValue(record?.liquid_height));
-                v.push(this.getRoundValue(record?.volume));
-                v15.push(this.getRoundValue(record?.volume_at_fift));
+                v.push(this.getFuelVolume(record));
+                v15.push(this.getRoundValue(this.getFuelVolumeAtFift(record)));
                 t.push(this.getRoundValue(record?.liquid_temperature));
+                wv.push(this.getRoundedMetricOrNull(this.getWaterVolumeMetric(record)));
             }
 
             this.data = {
@@ -122,11 +204,18 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                         borderColor: documentStyle.getPropertyValue('--blue-500')
                     },
                     {
-                        label: 'Volume (litres)',
+                        label: 'Volume carburant (litres)',
                         data: v,
                         fill: false,
                         tension: 0.4,
                         borderColor: documentStyle.getPropertyValue('--teal-500')
+                    },
+                    {
+                        label: 'Volume eau (litres)',
+                        data: wv,
+                        fill: false,
+                        tension: 0.4,
+                        borderColor: documentStyle.getPropertyValue('--cyan-500')
                     },
                     {
                         label: 'Density',
@@ -183,6 +272,11 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 }
             };
 
+        } else {
+            this.data = {
+                labels: [],
+                datasets: []
+            };
         }
         this.line?.refresh();
 
@@ -214,8 +308,9 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     } */
 
     getLevel(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            return ''+Math.round(this.tankDetailsData.listLastRecord[0].liquid_height*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Math.round(latestRecord.liquid_height*100)/100;
         }
         return '---';
     }
@@ -231,37 +326,22 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
 
     getVolumeAtT(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            return ''+ (Math.round(this.tankDetailsData.listLastRecord[0].volume*100)/100) +' / '+this.tankDetailsData.listLastRecord[0].total_volume;
+        const latestRecord = this.getLatestRecord();
+        const fuelVolume = this.getFuelVolume(latestRecord);
+        if(latestRecord && fuelVolume !== null){
+            return this.formatFuelVolume(fuelVolume) + ' / ' + latestRecord.total_volume;
         }
         return '---';
     }
 
     getOutputVolume() {
-        let last_volume: number;
-        let new_volume: number;
-        let output_volume: number;
-        let records = this.tankDetailsData.listLastRecord;
-        // ;
-
-        if (records.length > 0) {
-            new_volume = records[0].volume;
-            last_volume = records[1].volume;
-
-            if (new_volume <= last_volume) {
-                output_volume = last_volume - new_volume;
-                // ;
-            }
-            return Math.round(output_volume*100)/100;
-        }
-        else {
-            return '---';
-        }
+        return this.getRoundValue(this.dayOutputTotal);
     }
 
     getPercentOccupation(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let percent = Math.round(this.tankDetailsData.listLastRecord[0].volume*10000/this.tankDetailsData.listLastRecord[0].total_volume)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let percent = Math.round(latestRecord.volume*10000/latestRecord.total_volume)/100;
             return ''+ percent;
         }
         return '---';
@@ -277,23 +357,26 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getVolumeToDepote(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let v = Math.round((this.tankDetailsData.listLastRecord[0].total_volume - this.tankDetailsData.listLastRecord[0].volume)*1000)/1000;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let v = Math.round((latestRecord.total_volume - latestRecord.volume)*1000)/1000;
             return ''+ v + ' litres';
         }
         return '---';
     }
 
     getVolumeAtT15(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            return ''+Math.round(this.tankDetailsData.listLastRecord[0].volume_at_fift*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Math.round(this.getFuelVolumeAtFift(latestRecord)*100)/100;
         }
         return '---';
     }
 
     getLiquidTemp(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let value = this.tankDetailsData.listLastRecord[0].liquid_temperature;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let value = latestRecord.liquid_temperature;
             if(value > 0){
                 return ''+value;
             }else{
@@ -304,8 +387,9 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getEnvTemp(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let value = this.tankDetailsData.listLastRecord[0].env_temperature;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let value = latestRecord.env_temperature;
             if(value > 0){
                 return ''+value;
             }else{
@@ -316,8 +400,9 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getDensity(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            let value = Math.round( this.tankDetailsData.listLastRecord[0].density*100)/100;
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            let value = Math.round(latestRecord.density*100)/100;
             if(value > 0){
                 return ''+value;
             }else{
@@ -344,22 +429,351 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getLastIncomeDateRecord(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-            return ''+Utility.toLocalDateTime(this.tankDetailsData.listLastRecord[0].updated_at);
+        const latestRecord = this.getLatestRecord();
+        if(latestRecord){
+            return ''+Utility.toLocalDateTime(latestRecord.updated_at);
         }
         return '---';
+    }
+
+    getWaterLevel() {
+        return this.getWaterLevelValue(this.getLatestRecord());
+    }
+
+    getWaterLevelValue(record: any) {
+        const waterHeight = this.getWaterHeight(record);
+
+        if (waterHeight === null) {
+            return '---';
+        }
+
+        return '' + this.getRoundValue(waterHeight);
+    }
+
+    getWaterVolume() {
+        return this.getWaterVolumeValue(this.getLatestRecord());
+    }
+
+    getWaterVolumeValue(record: any) {
+        const waterVolume = this.getWaterVolumeMetric(record);
+
+        if (waterVolume === null) {
+            return '---';
+        }
+
+        return '' + this.getRoundValue(waterVolume);
     }
 
     getToLocalDateTime(date1:string){
         return Utility.toLocalDateTime(date1);
     }
 
-    getNotiMessage(){
-        if(this.tankDetailsData?.lastNotification != null ){
-            return this.tankDetailsData?.lastNotification?.type_notification?.wording+" le "+
-                    Utility.toLocalDateTime(this.tankDetailsData?.lastNotification?.updated_at);
+    private resolveStationTimezone(): string {
+        const fallback = 'Africa/Douala';
+        const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
+        const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.stationId)) ?? null;
+
+        const candidates = [
+            this.user_details?.timezone,
+            this.user_details?.time_zone,
+            currentStation?.timezone,
+            currentStation?.time_zone
+        ].filter((value: any) => typeof value === 'string' && value.trim().length > 0);
+
+        for (const candidate of candidates) {
+            const timezone = String(candidate).trim();
+            try {
+                // Validate timezone identifier before using it.
+                Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+                return timezone;
+            } catch {
+                // Ignore invalid identifiers and keep searching.
+            }
         }
-        return null;
+
+        return fallback;
+    }
+
+    private getLocalDateKey(date: Date = new Date(), timezone: string = this.notificationTimezone): string {
+        try {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+                timeZone: timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).formatToParts(date);
+
+            const year = parts.find((part) => part.type === 'year')?.value;
+            const month = parts.find((part) => part.type === 'month')?.value;
+            const day = parts.find((part) => part.type === 'day')?.value;
+            if (year && month && day) {
+                return `${year}-${month}-${day}`;
+            }
+        } catch {
+            // Fallback to local timezone if Intl timezone formatting fails.
+        }
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
+        const candidate = record?.updated_at ?? record?.created_at ?? null;
+        if (!candidate) {
+            return null;
+        }
+
+        const timestamp = new Date(candidate);
+        if (Number.isNaN(timestamp.getTime())) {
+            return null;
+        }
+
+        return this.getLocalDateKey(timestamp, timezone);
+    }
+
+    private getValidatedOutingStep(record: any, currentVolume: number | null, nextVolume: number | null): number {
+        const selected = this.parseMetric(record?.qte_sortie);
+        if (selected !== null) {
+            return Math.max(0, this.getRoundValue(selected));
+        }
+
+        const mode = String(record?.outputs_mode ?? '').toLowerCase();
+        const validated = this.parseMetric(record?.qte_sortie_validated);
+        const legacy = this.parseMetric(record?.qte_sortie_legacy);
+
+        if (mode === 'new') {
+            if (validated !== null) {
+                return Math.max(0, this.getRoundValue(validated));
+            }
+        } else {
+            if (legacy !== null) {
+                return Math.max(0, this.getRoundValue(legacy));
+            }
+        }
+
+        if (currentVolume === null || nextVolume === null || currentVolume > nextVolume) {
+            return 0;
+        }
+
+        // Fallback aligns with validated outing floor to avoid micro-jitter (e.g. 0.01L).
+        const rawDrop = nextVolume - currentVolume;
+        return rawDrop >= 20 ? this.getRoundValue(rawDrop) : 0;
+    }
+
+    private computeOutputSumFromRecords(records: any[]): number {
+        if (!Array.isArray(records) || records.length < 2) {
+            return 0;
+        }
+
+        const sorted = this.getSortedRecords(records);
+        let total = 0;
+
+        for (let i = 0; i < sorted.length - 1; i++) {
+            const latestVolume = this.getFuelVolume(sorted[i]);
+            const previousVolume = this.getFuelVolume(sorted[i + 1]);
+            total += this.getValidatedOutingStep(sorted[i], latestVolume, previousVolume);
+        }
+
+        return this.getRoundValue(total);
+    }
+
+    private computeDayOutputFromCurrentRecords(dayKey: string): number {
+        const sourceRecords = Array.isArray(this.records) ? this.records : [];
+        const sameDayRecords = sourceRecords.filter((record: any) => this.getRecordDateKey(record) === dayKey);
+        return this.computeOutputSumFromRecords(sameDayRecords);
+    }
+
+    private getStrictDayRecords(records: any[], dayKey: string): any[] {
+        const source = Array.isArray(records) ? records : [];
+        return source
+            .filter((record: any) => this.getRecordDateKey(record) === dayKey)
+            .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
+    }
+
+    private refreshDayOutputTotal(): void {
+        if (!this.tankId) {
+            this.dayOutputTotal = 0;
+            return;
+        }
+
+        const dayKey = this.getLocalDateKey();
+        const payload = {
+            tankId: Number(this.tankId),
+            dateStart: dayKey
+        };
+
+        this.recordService.getListRecordsForOneDay(payload).subscribe({
+            next: (response: any) => {
+                const dayRecordsRaw = Array.isArray(response) ? response : [];
+                const strictDayRecords = this.getStrictDayRecords(dayRecordsRaw, dayKey);
+                this.dayOutputTotal = this.computeOutputSumFromRecords(strictDayRecords);
+            },
+            error: () => {
+                this.dayOutputTotal = this.computeDayOutputFromCurrentRecords(dayKey);
+            }
+        });
+    }
+
+    private refreshDayNotifications(): void {
+        if (!this.tankId) {
+            this.dayNotifications = [];
+            this.dayNotificationTotal = 0;
+            return;
+        }
+
+        const date = this.getLocalDateKey();
+        this.recordService.getTankDayNotifications(Number(this.tankId), date, this.notificationTimezone).subscribe({
+            next: (response: any) => {
+                const payload = response?.data ?? [];
+                this.dayNotifications = Array.isArray(payload)
+                    ? payload.sort((a: any, b: any) => this.getNotificationTimestamp(b) - this.getNotificationTimestamp(a))
+                    : [];
+                this.dayNotificationTotal = Number(response?.total ?? this.dayNotifications.length) || 0;
+                this.notificationDateKey = date;
+            },
+            error: () => {
+                // Keep graceful fallback when endpoint fails.
+                const fallback = this.getFallbackNotifications();
+                this.dayNotifications = fallback;
+                this.dayNotificationTotal = fallback.length;
+                this.notificationDateKey = date;
+            }
+        });
+    }
+
+    private getNotificationTimestamp(notification: any): number {
+        const candidate = notification?.event_time ?? notification?.updated_at ?? notification?.created_at ?? null;
+        if (!candidate) {
+            return 0;
+        }
+
+        const parsed = new Date(candidate).getTime();
+        return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    private isSameLocalDay(timestamp: number, now: Date = new Date()): boolean {
+        if (!timestamp) {
+            return false;
+        }
+
+        const date = new Date(timestamp);
+        return date.getFullYear() === now.getFullYear()
+            && date.getMonth() === now.getMonth()
+            && date.getDate() === now.getDate();
+    }
+
+    getTodayNotifications(): any[] {
+        return this.dayNotifications;
+    }
+
+    private getFallbackNotifications(): any[] {
+        const now = new Date();
+        let list = this.tankDetailsData?.listLastNotifications ?? [];
+        if (!Array.isArray(list)) {
+            list = [];
+        }
+
+        if (!list.length && this.tankDetailsData?.lastNotification) {
+            list = [this.tankDetailsData.lastNotification];
+        }
+
+        const filtered = list.filter((notification: any) => this.isSameLocalDay(this.getNotificationTimestamp(notification), now));
+
+        return filtered.sort((a: any, b: any) => this.getNotificationTimestamp(b) - this.getNotificationTimestamp(a));
+    }
+
+    private getLatestTodayNotification(): any | null {
+        return this.getTodayNotifications()[0] ?? null;
+    }
+
+    private getNotificationTypeCode(notification: any): string | null {
+        return notification?.type_notification_code
+            ?? notification?.type_notification?.code
+            ?? notification?.type_code
+            ?? notification?.code
+            ?? null;
+    }
+
+    getNotificationDescription(notification: any): string {
+        if (!notification) {
+            return '---';
+        }
+
+        const typeCode = this.getNotificationTypeCode(notification);
+        if (typeCode === 'jo-co-re' && notification?.remaining_day !== null && notification?.remaining_day !== undefined) {
+            return 'Jours restants: ' + notification.remaining_day;
+        }
+
+        if (notification?.percent !== null && notification?.percent !== undefined) {
+            return 'Occupation: ' + notification.percent + '%';
+        }
+
+        if (notification?.volume !== null && notification?.volume !== undefined) {
+            return 'Volume: ' + this.getRoundValue(notification.volume) + ' L';
+        }
+
+        return notification?.message ?? '---';
+    }
+
+    getNotificationType(notification: any): string {
+        return notification?.type_notification_wording
+            ?? notification?.type_notification?.wording
+            ?? notification?.type_notification?.name
+            ?? notification?.notification_type?.wording
+            ?? notification?.notification_type?.name
+            ?? notification?.type_wording
+            ?? notification?.wording
+            ?? this.getNotificationTypeCode(notification)
+            ?? 'Notification';
+    }
+
+    getNotificationEventTime(notification: any): string {
+        return notification?.event_time ?? notification?.updated_at ?? notification?.created_at ?? '';
+    }
+
+    getNotificationSeverity(notification: any): string {
+        const code = (this.getNotificationTypeCode(notification) || '').toLowerCase();
+
+        if (!code) {
+            return 'info';
+        }
+
+        if (code.includes('cri') || code.includes('critical')) {
+            return 'danger';
+        }
+
+        if (code.includes('de-en-co') || code.includes('depotage') || code.includes('warn') || code.includes('jo-co-re')) {
+            return 'warning';
+        }
+
+        if (code.includes('fi-de') || code.includes('ok') || code.includes('recovered')) {
+            return 'success';
+        }
+
+        return 'info';
+    }
+
+    getNotiMessage(){
+        const latest = this.getLatestTodayNotification();
+        if (!latest) {
+            return null;
+        }
+
+        const timestamp = this.getNotificationTimestamp(latest);
+        if (!timestamp) {
+            return null;
+        }
+
+        const maxDisplayDurationMs = 5 * 60 * 1000;
+        const elapsed = Date.now() - timestamp;
+
+        if (elapsed > maxDisplayDurationMs) {
+            return null;
+        }
+
+        return this.getNotificationType(latest) + " le " + Utility.toLocalDateTime(latest?.updated_at ?? latest?.created_at);
     }
 
     getNameProduct(){
@@ -438,11 +852,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getTotalNotification(){
-        let numNoti = 0;
-        if(this.tankDetailsData?.listLastNotifications?.length > 0){
-            numNoti = this.tankDetailsData?.listLastNotifications?.length;
-        }
-        return numNoti;
+        return this.dayNotificationTotal;
     }
 
     getSeverityNoti(){
@@ -480,7 +890,12 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getStringDate(){
-        this.d = new Date().toLocaleString();
+        this.d = Utility.toLocalDateTime(new Date());
+        const currentDayKey = this.getLocalDateKey();
+        if (currentDayKey !== this.notificationDateKey) {
+            this.refreshDayNotifications();
+            this.refreshDayOutputTotal();
+        }
         //;
     }
 
@@ -497,10 +912,10 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     output_volume = { id: 0, volume: 0 };
     getOutputVolumes(records: Array<any>) {
         let i = 0;
-        let last_volume: number;
-        let new_volume: number;
-        records = this.tankDetailsData.listLastRecord;
-        // ;
+        let last_volume: number | null;
+        let new_volume: number | null;
+        records = this.records;
+        this.output_volumes = [];
 
         if (records.length > 0) {
             records.forEach(record => {
@@ -508,12 +923,12 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                     i = i+1;
                     // ("Record "+[i]+":", records[i]);
                 }
-                new_volume = record.volume;
-                last_volume = records[i].volume;
+                new_volume = this.getFuelVolume(record);
+                last_volume = this.getFuelVolume(records[i]);
                 // this.output_volume = { id: record.id, volume: last_volume - new_volume };
                 // this.output_volumes.push(this.output_volume);
 
-                if (new_volume <= last_volume) {
+                if (new_volume !== null && last_volume !== null && new_volume <= last_volume) {
                     this.output_volume = { id: record.id, volume: last_volume - new_volume };
                     this.output_volumes.push(this.output_volume);
                 }
@@ -522,8 +937,9 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     }
 
-    ajustedRecords() {
-        this.ajusted_records = this.records.map(record => {
+    ajustedRecords(records: Array<any> = []) {
+        const sourceRecords = Array.isArray(records) ? records : [];
+        this.ajusted_records = sourceRecords.map(record => {
             const output_volume = this.output_volumes.find(item => item.id === record.id);
             return {
                 id: record.id,
@@ -534,11 +950,16 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 level: record.level,
                 liquid_height: record.liquid_height,
                 liquid_temperature: record.liquid_temperature,
+                water_level: record.water_level,
+                water_height: record.water_height ?? null,
+                water_volume: record.water_volume ?? null,
                 sensor_reference: record.sensor_reference,
                 tank_id: record.tank_id,
                 total_volume: record.total_volume,
-                volume: record.volume,
-                volume_at_fift: record.volume_at_fift,
+                raw_volume: record.volume,
+                volume: this.getFuelVolume(record),
+                fuel_volume: this.getFuelVolume(record),
+                volume_at_fift: this.getFuelVolumeAtFift(record),
                 output_volume: output_volume ? output_volume.volume : null,  // Get volume from output_volumes
                 created_at: record.created_at,
                 updated_at: record.updated_at,
@@ -548,16 +969,25 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
         // ;
     }
 
-    getTankDetailsData(){
+    getTankDetailsData(showNotification = true){
         this.recordService.getTankDetailsData(this.tankId).subscribe((res)=>{
             if(res && res.length > 0){
                 this.tankDetailsData = res[0];
+                this.tankDetailsData.listLastRecord = this.getSortedRecords(this.tankDetailsData.listLastRecord);
                 this.records = this.tankDetailsData.listLastRecord;
-                this.getOutputVolumes(this.records);
-                this.ajustedRecords();
-                this.showNotificationMessage();
-                this.initGraphData();
+                const dayKey = this.getLocalDateKey();
+                const strictDayRecords = this.getStrictDayRecords(this.records, dayKey);
+                this.refreshDayNotifications();
+                this.refreshDayOutputTotal();
+                this.getOutputVolumes(strictDayRecords);
+                this.ajustedRecords(strictDayRecords);
+                if (showNotification) {
+                    this.showNotificationMessage();
+                }
+                this.initGraphData(strictDayRecords);
                 //this.ref.detectChanges();
+            } else {
+                this.dayOutputTotal = 0;
             }
 
         });
@@ -590,6 +1020,10 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.pusherService.echo1.leaveChannel('record_channel.tank'+this.tankId);
         this.t1.unsubscribe();
+        if (this.silentRefreshSubscription) {
+            this.silentRefreshSubscription.unsubscribe();
+            this.silentRefreshSubscription = null;
+        }
     }
 
 

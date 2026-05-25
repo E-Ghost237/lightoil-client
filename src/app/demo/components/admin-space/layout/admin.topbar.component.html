@@ -4,10 +4,10 @@
         <i class="pi pi-bars"></i>
     </button>
 
-    <a class="layout-topbar-logo" routerLink="/admin/dashboard">
-        <img src="assets/img/logos/{{layoutService.config().colorScheme === 'light' ? 'lightoil-logo-black' : 'lightoil-logo-white'}}.png" 
+    <a class="layout-topbar-logo" [routerLink]="homeRoute">
+        <img src="assets/img/logos/lightoil-logo-white.png"
             alt="lightoil-logo" class="mr-3" />
-        <span class="mt-1 font-bold">Admin</span>
+        <span class="mt-1 font-bold">Administrateur</span>
     </a>
 
     <button type="button" #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button" 

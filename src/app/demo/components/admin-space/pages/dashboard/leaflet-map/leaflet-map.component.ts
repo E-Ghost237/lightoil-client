@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import * as L from 'leaflet';
 import LayersOptions = L.Control.LayersOptions;
 import { CommonService } from '../../../services/common-services.service';
@@ -8,7 +8,7 @@ import { CommonService } from '../../../services/common-services.service';
   templateUrl: './leaflet-map.component.html',
   styleUrls: ['./leaflet-map.component.scss']
 })
-export class LeafletMapComponent implements OnChanges {
+export class LeafletMapComponent implements OnChanges, OnDestroy {
   @Input() sale_point_type!: string;
   @Input() stock_of_products!: any;
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
@@ -20,6 +20,7 @@ export class LeafletMapComponent implements OnChanges {
   layers: L.Layer[] = [];
   isFullScreen: boolean = false;
   company_id!: number;
+  private animationIntervalIds: ReturnType<typeof setInterval>[] = [];
 
   constructor(private commonService: CommonService) { }
 
@@ -56,6 +57,7 @@ export class LeafletMapComponent implements OnChanges {
 
   private initMapAndaddMarkers(): void {
     if (this.stock_per_tank_of_sale_points.length > 0) {
+      this.clearAnimationIntervals();
       // if (this.map) {
       //   this.layers.forEach(layer => this.map.removeLayer(layer));
       // }
@@ -128,16 +130,17 @@ export class LeafletMapComponent implements OnChanges {
     let radius = 10;
     let maxRadius = 40;
 
-    setInterval(() => {
+    const rippleIntervalId = setInterval(() => {
       radius += 10;
       if (radius > maxRadius) { radius = 10; }
       ripple.setRadius(radius);
     }, 100);
+    this.animationIntervalIds.push(rippleIntervalId);
   }
 
   // Marker animation
   animateMarker(marker: L.Marker, opacity: number) {
-    setInterval(() => {
+    const markerIntervalId = setInterval(() => {
       if (opacity == 1) {
         opacity = 0;
         marker.setOpacity(opacity);
@@ -146,6 +149,7 @@ export class LeafletMapComponent implements OnChanges {
         marker.setOpacity(opacity);
       }
     }, 600);
+    this.animationIntervalIds.push(markerIntervalId);
   }
   
   private markerBehavior(marker: L.Marker, point_of_sale_id: number) {
@@ -253,5 +257,14 @@ export class LeafletMapComponent implements OnChanges {
       case 'petrole': return '#007138';
       default: return 'inherit';
     }
+  }
+
+  ngOnDestroy(): void {
+    this.clearAnimationIntervals();
+  }
+
+  private clearAnimationIntervals(): void {
+    this.animationIntervalIds.forEach((intervalId) => clearInterval(intervalId));
+    this.animationIntervalIds = [];
   }
 }

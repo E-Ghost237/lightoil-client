@@ -132,7 +132,7 @@ export class SspTankComponent implements OnInit {
     try {
       const payload: any = {
         date: line.date,
-        vente_l: line.vente_l ?? null,
+        vente_l: this.getVenteVolume(line),
         remise_cuves_l: line.remise_cuves_l ?? null,
       };
 
@@ -165,6 +165,24 @@ export class SspTankComponent implements OnInit {
   downloadPdf(): void {
     if (!this.sheet) return;
     this.stockSheets.downloadPdf(this.sheet.id);
+  }
+
+  getVenteVolume(line: any): number | null {
+    const value =
+      line?.volume_solde_l ??
+      line?.volume_solde ??
+      line?.sold_volume_l ??
+      line?.sold_volume ??
+      line?.sales_volume_l ??
+      line?.sales_volume ??
+      line?.vente_l;
+
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
   }
 
   private isoDate(date: any): string {

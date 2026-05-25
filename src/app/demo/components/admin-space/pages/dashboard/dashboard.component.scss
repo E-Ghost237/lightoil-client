@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.admin-dash-header {
+  border: 1px solid #d6e1f3;
+  background: linear-gradient(155deg, #ffffff, #f7fbff);
+}
+
+:host ::ng-deep .admin-dash-header h1,
+:host ::ng-deep .admin-dash-header span {
+  color: #0f3d92;
+  letter-spacing: 0.03em;
+}
+
+:host ::ng-deep .admin-dash-header .p-dropdown,
+:host ::ng-deep .admin-dash-header .p-multiselect,
+:host ::ng-deep .admin-dash-header .p-calendar .p-inputtext {
+  border: 1px solid #c9d8ef;
+  border-radius: 10px;
+  min-height: 2.7rem;
+}
+
+:host ::ng-deep .admin-dash-header .p-dropdown:not(.p-disabled).p-focus,
+:host ::ng-deep .admin-dash-header .p-multiselect:not(.p-disabled).p-focus,
+:host ::ng-deep .admin-dash-header .p-calendar .p-inputtext:focus {
+  box-shadow: 0 0 0 0.15rem rgba(15, 61, 146, 0.16);
+  border-color: #0f3d92;
+}
+
+:host ::ng-deep app-cumulative-sales .card,
+:host ::ng-deep app-sales-evolution .card,
+:host ::ng-deep app-network-summary .card,
+:host ::ng-deep app-leaflet-map .card {
+  border: 1px solid #d8e3f2;
+  box-shadow: 0 16px 34px -28px rgba(2, 6, 23, 0.58);
+}
+
+:host ::ng-deep .border-primary {
+  border-color: #1f5fc0 !important;
+}
+
+:host ::ng-deep h3.text-900 {
+  color: #0b1f45 !important;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 991px) {
+  :host ::ng-deep .admin-dash-header .card-body {
+    gap: 0.75rem;
+  }
+
+  :host ::ng-deep h3.text-900 {
+    font-size: 1rem;
+  }
+}

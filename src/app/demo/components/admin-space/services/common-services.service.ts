@@ -12,22 +12,22 @@ export class CommonService {
   constructor(private httpClient: HttpClient) { }
   
   formatDateToShortFR(date: Date) {
-    return formatDate(new Date(date), 'short', 'fr-FR');
+    return formatDate(new Date(date), 'dd/MM/yyyy HH:mm', 'fr-FR');
   }
   
   formatDateToShortDateFR(date: Date) {
-    return formatDate(new Date(date), 'shortDate', 'fr-FR');
+    return formatDate(new Date(date), 'dd/MM/yyyy', 'fr-FR');
   }
   
   formatDateToMeduimFR(date: Date) {
-    return formatDate(new Date(date), 'medium', 'fr-FR');
+    return formatDate(new Date(date), 'dd/MM/yyyy HH:mm:ss', 'fr-FR');
   }
   
   formatDateToMeduimDateFR(date: Date) {
-    return formatDate(new Date(date), 'mediumDate', 'fr-FR');
+    return formatDate(new Date(date), 'dd/MM/yyyy', 'fr-FR');
   }
   
   formatDateToLongDateFR(date: Date) {
-    return formatDate(new Date(date), 'longDate', 'fr-FR');
+    return formatDate(new Date(date), 'dd/MM/yyyy', 'fr-FR');
   }
 }

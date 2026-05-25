@@ -1,37 +1,31 @@
-
-
-<ng-container *ngIf="dashboardData?.length > 0; else elseTemplate">
-    <p-toast></p-toast>
-    <div class="row justify-content-between">
-        <div class="col h4">
-            Cliquez sur une cuve pour plus de details
-        </div>
-        <div class="col text-center">
-            {{d}}
-        </div>
-        <div class="col text-right">
-            <span class="mr-4"> Total de cuves: </span>
-            <span>
+<div class="tank-list-page">
+    <ng-container *ngIf="dashboardData?.length > 0; else elseTemplate">
+        <p-toast></p-toast>
+        <div class="tank-list-header row justify-content-between align-items-center">
+            <div class="col h5 mb-0">
+                Cliquez sur une cuve pour plus de details
+            </div>
+            <div class="col text-center tank-list-date">
+                {{d}}
+            </div>
+            <div class="col text-right">
+                <span class="mr-3">Total de cuves:</span>
                 <p-badge [value]="getBigTotalOfTank()" size="large" severity="info"></p-badge>
-            </span>
+            </div>
         </div>
-    </div>
 
+        <div>
+            <app-tank-list-by-type *ngFor="let dashboardDataType of exempleDashBoardData" [listTank]="dashboardDataType">
+            </app-tank-list-by-type>
+        </div>
 
-    <div >
-        <app-tank-list-by-type *ngFor="let dashboardDataType of exempleDashBoardData" [listTank]="dashboardDataType">
+        <app-chatbot></app-chatbot>
+    </ng-container>
 
-        </app-tank-list-by-type>
-    </div>
-
-    <!-- Chatbot -->
-    <app-chatbot></app-chatbot>
-</ng-container>
-<ng-template #elseTemplate>
-    <div class="d-flex flex-row justify-content-center align-content-center" style="margin-top: 20%;">
-        <img width="150rem" src="../../../../../assets/layout/images/logo.gif" alt="Loading..." srcset="">
-    </div>
-</ng-template>
-
-
-
+    <ng-template #elseTemplate>
+        <div class="report-loading-state">
+            <img width="150" src="../../../../../assets/layout/images/logo.gif" alt="Chargement...">
+            <p>Chargement des cuves en cours...</p>
+        </div>
+    </ng-template>
+</div>

@@ -88,12 +88,9 @@ export class LoginComponent {
       if (role_type == 'Service Station') {
         this.router.navigateByUrl('/pages/dashboard');
       }
-      else if (role_type === 'Admin' || role_type === 'Moderator') {
+      else if (role_type === 'Admin' || role_type === 'Moderator' || role_type === 'Super Admin') {
         this.router.navigateByUrl('/admin');
         // window.location.href = environment.admin_view + '?' + 'uli=' + token;
-      }
-      else if (role_type == 'Super Admin') {
-        window.location.href = environment.super_admin_view;
       }
     }
 
