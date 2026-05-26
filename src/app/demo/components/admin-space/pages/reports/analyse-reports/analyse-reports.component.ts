@@ -14,12 +14,16 @@ import {
   ComparativeAnalysisUserData,
   ComparativeAnalysisUserDataRow,
   ComparativeMetric,
-  FuelReportsService
+  ComparativeRollupBucket,
+  ComparativeRollupPayload,
+  FuelReportsService,
+  UnifiedComparativeRunPayload
 } from '../../../services/fuel-reports.service';
 
 interface SelectOption {
   label: string;
   value: number;
+  unitPrice?: number | null;
 }
 
 type NumericUserDataKey = {
@@ -30,15 +34,55 @@ type StringUserDataKey = {
   [K in keyof ComparativeAnalysisUserData]-?: ComparativeAnalysisUserData[K] extends string | undefined ? K : never
 }[keyof ComparativeAnalysisUserData];
 
+const coerceDateOnly = (value: any): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  const text = String(value ?? '').trim();
+  if (!text) {
+    return null;
+  }
+
+  const isoMatch = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]) - 1;
+    const day = Number(isoMatch[3]);
+    const date = new Date(year, month, day);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const frMatch = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (frMatch) {
+    const day = Number(frMatch[1]);
+    const month = Number(frMatch[2]) - 1;
+    const year = Number(frMatch[3]);
+    const date = new Date(year, month, day);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+};
+
 const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
-  const start = String(control.get('date_start')?.value ?? '').trim();
-  const end = String(control.get('date_end')?.value ?? '').trim();
+  const start = coerceDateOnly(control.get('date_start')?.value);
+  const end = coerceDateOnly(control.get('date_end')?.value);
 
   if (!start || !end) {
     return null;
   }
 
-  return end >= start ? null : { date_range_invalid: true };
+  return end.getTime() >= start.getTime() ? null : { date_range_invalid: true };
 };
 
 const indexRangeValidator = (openingKey: string, closingKey: string, errorKey: string): ValidatorFn => {
@@ -62,7 +106,6 @@ const indexRangeValidator = (openingKey: string, closingKey: string, errorKey: s
 })
 export class AnalyseReportsComponent implements OnInit {
 
-  activeTab: number = 0;
   loadingLookups: boolean = false;
   launchingAnalysis: boolean = false;
   exporting: boolean = false;
@@ -84,6 +127,15 @@ export class AnalyseReportsComponent implements OnInit {
   analysisSessionId: number | null = null;
   analysisResult: ComparativeAnalysisResult | null = null;
   analysisGlobalStatus: 'NORMAL' | 'WARNING' | 'CRITICAL' | null = null;
+  unifiedResultMode: boolean = false;
+  rollupBucket: ComparativeRollupBucket = 'NONE';
+  rollupRows: any[] = [];
+  private lastRollupPayload: ComparativeRollupPayload | null = null;
+  private unifiedSessionIds: Partial<Record<AnalysisType, number>> = {};
+
+  get isRecapMode(): boolean {
+    return this.isRollupEnabled();
+  }
 
   private readonly messageLifeMs = 8000;
 
@@ -96,7 +148,7 @@ export class AnalyseReportsComponent implements OnInit {
     private productsService: ProductsService,
     private fuelReports: FuelReportsService
   ) {
-    const today = this.getCurrentDateIso();
+    const today = this.getTodayDate();
 
     this.filtersForm = this.fb.group({
       company_id: [null],
@@ -104,7 +156,11 @@ export class AnalyseReportsComponent implements OnInit {
       tank_id: [null, Validators.required],
       fuel_type_id: [null, Validators.required],
       date_start: [today, Validators.required],
-      date_end: [today, Validators.required]
+      date_end: [today, Validators.required],
+      reference_time: [''],
+      rollup_enabled: [false],
+      rollup_bucket: ['NONE'],
+      rollup_analysis_type: ['OUTINGS']
     }, { validators: dateRangeValidator });
 
     this.outingsForm = this.fb.group({
@@ -160,11 +216,9 @@ export class AnalyseReportsComponent implements OnInit {
       sold_by_mechanical_index: [{ value: null, disabled: true }],
       stock_based_sale: [{ value: null, disabled: true }],
 
-      unit_price: [null, [Validators.min(0)]],
+      unit_price: [{ value: null, disabled: true }],
       expected_amount: [{ value: null, disabled: true }],
       cash_sales_amount: [null, [Validators.min(0)]],
-      digital_sales_amount: [null, [Validators.min(0)]],
-      collected_amount: [{ value: null, disabled: true }],
       amount_gap: [{ value: null, disabled: true }]
     });
   }
@@ -210,20 +264,49 @@ export class AnalyseReportsComponent implements OnInit {
       }
     });
 
-    this.outingsForm.valueChanges.subscribe(() => this.updateOutingsComputedFields());
+    this.filtersForm.get('fuel_type_id')?.valueChanges.subscribe(() => {
+      this.syncSalesUnitPriceFromSelectedFuelType();
+    });
+
+    this.filtersForm.get('rollup_enabled')?.valueChanges.subscribe((enabled) => {
+      if (!enabled) {
+        this.filtersForm.patchValue({
+          rollup_bucket: 'NONE',
+          date_end: this.filtersForm.get('date_start')?.value ?? this.getTodayDate(),
+        }, { emitEvent: false });
+        this.rollupBucket = 'NONE';
+      }
+    });
+
+    this.filtersForm.get('rollup_bucket')?.valueChanges.subscribe((bucket) => {
+      const value = String(bucket ?? 'NONE').toUpperCase();
+      if (value === 'DAILY' || value === 'WEEKLY' || value === 'MONTHLY' || value === 'NONE') {
+        this.rollupBucket = value as ComparativeRollupBucket;
+      }
+    });
+
+    this.filtersForm.get('date_start')?.valueChanges.subscribe((dateStart) => {
+      if (!this.isRollupEnabled()) {
+        this.filtersForm.patchValue({ date_end: dateStart }, { emitEvent: false });
+      }
+    });
+
+    this.outingsForm.valueChanges.subscribe(() => {
+      this.updateOutingsComputedFields();
+      this.syncUnifiedSecondaryFormsFromOutings();
+    });
     this.stockForm.valueChanges.subscribe(() => this.updateStockComputedFields());
     this.salesForm.valueChanges.subscribe(() => this.updateSalesComputedFields());
 
     this.updateOutingsComputedFields();
+    this.syncUnifiedSecondaryFormsFromOutings();
     this.updateStockComputedFields();
     this.updateSalesComputedFields();
 
-    this.loadFuelTypes();
-  }
+    this.unifiedResultMode = false;
+    this.rollupBucket = (String(this.filtersForm.get('rollup_bucket')?.value ?? 'NONE').toUpperCase() as ComparativeRollupBucket);
 
-  onTabChange(event: any): void {
-    this.activeTab = event?.index ?? 0;
-    this.msg.clear();
+    this.loadFuelTypes();
   }
 
   getOutingsPistolIndexes(): FormArray {
@@ -257,6 +340,20 @@ export class AnalyseReportsComponent implements OnInit {
     this.refreshComputedByTarget(target);
   }
 
+  setRecapMode(enabled: boolean): void {
+    this.filtersForm.patchValue({
+      rollup_enabled: enabled,
+      date_end: enabled
+        ? (this.filtersForm.get('date_end')?.value ?? this.filtersForm.get('date_start')?.value ?? this.getTodayDate())
+        : (this.filtersForm.get('date_start')?.value ?? this.getTodayDate()),
+    }, { emitEvent: false });
+
+    if (!enabled) {
+      this.rollupBucket = 'NONE';
+      this.filtersForm.patchValue({ rollup_bucket: 'NONE' }, { emitEvent: false });
+    }
+  }
+
   async launchAnalysis(): Promise<void> {
     if (this.launchingAnalysis) {
       return;
@@ -268,31 +365,33 @@ export class AnalyseReportsComponent implements OnInit {
       return;
     }
 
-    const payload = this.buildComparativePayload();
-    if (!payload) {
-      return;
-    }
-
     this.launchingAnalysis = true;
 
     try {
-      const createdResponse: any = await firstValueFrom(this.fuelReports.createComparativeAnalysis(payload));
-      const createdPayload = createdResponse?.data ?? createdResponse ?? {};
-      const sessionId = Number(createdPayload?.id ?? createdPayload?.analysis_id ?? createdPayload?.session_id ?? 0) || null;
+      if (this.isRollupEnabled()) {
+        const payload = this.buildComparativePayload();
+        if (!payload) {
+          return;
+        }
+        await this.launchRollupAnalysis(payload);
+      } else {
+        const unifiedPayload = this.buildUnifiedPayload();
+        if (!unifiedPayload) {
+          return;
+        }
 
-      if (!sessionId) {
-        throw new Error('Session d\'analyse non retournée par le backend.');
+        const response: any = await firstValueFrom(this.fuelReports.runUnifiedComparativeAnalysis(unifiedPayload));
+        const normalized = this.normalizeUnifiedResult(response);
+
+        this.unifiedResultMode = true;
+        this.analysisSessionId = null;
+        this.lastRollupPayload = null;
+        this.rollupRows = [];
+        this.unifiedSessionIds = this.extractUnifiedSessionIds(response);
+        this.analysisResult = normalized;
+        this.analysisGlobalStatus = this.resolveGlobalStatus(normalized);
+        this.addMessage('success', 'Analyse lancée', 'Analyse comparative unifiée terminée avec succès.');
       }
-
-      this.analysisSessionId = sessionId;
-      await firstValueFrom(this.fuelReports.runComparativeAnalysis(sessionId));
-
-      const resultResponse: any = await firstValueFrom(this.fuelReports.getComparativeAnalysisResults(sessionId));
-      const result = this.normalizeResult(resultResponse, payload);
-
-      this.analysisResult = result;
-      this.analysisGlobalStatus = this.resolveGlobalStatus(result);
-      this.addMessage('success', 'Analyse lancée', 'Analyse comparative terminée avec succès.');
     } catch (error: any) {
       const detail = this.extractBackendErrorMessage(error) || 'La création ou l’exécution de l’analyse a échoué.';
       this.addMessage('error', 'Analyse échouée', detail);
@@ -306,52 +405,50 @@ export class AnalyseReportsComponent implements OnInit {
     this.analysisResult = null;
     this.analysisSessionId = null;
     this.analysisGlobalStatus = null;
+    this.unifiedResultMode = false;
+    this.rollupRows = [];
+    this.lastRollupPayload = null;
+    this.unifiedSessionIds = {};
 
-    if (this.activeTab === 0) {
-      this.outingsForm.reset({
-        initial_stock: null,
-        received_quantity: null,
-        final_stock: null,
-        declared_outing_quantity: null,
-        calculated_outing_quantity: null,
-        liquid_height: null,
-        liquid_volume: null,
-        nozzle: '',
-        pistol_indexes: [],
-        electronic_opening_index: null,
-        electronic_closing_index: null,
-        electronic_delta_index: null,
-        mechanical_opening_index: null,
-        mechanical_closing_index: null,
-        mechanical_delta_index: null
-      });
-      this.resetPistolIndexes(this.outingsForm);
-      this.updateOutingsComputedFields();
-      return;
-    }
+    this.outingsForm.reset({
+      initial_stock: null,
+      received_quantity: null,
+      final_stock: null,
+      declared_outing_quantity: null,
+      calculated_outing_quantity: null,
+      liquid_height: null,
+      liquid_volume: null,
+      nozzle: '',
+      pistol_indexes: [],
+      electronic_opening_index: null,
+      electronic_closing_index: null,
+      electronic_delta_index: null,
+      mechanical_opening_index: null,
+      mechanical_closing_index: null,
+      mechanical_delta_index: null
+    });
+    this.resetPistolIndexes(this.outingsForm);
+    this.updateOutingsComputedFields();
 
-    if (this.activeTab === 1) {
-      this.stockForm.reset({
-        initial_stock: null,
-        received_quantity: null,
-        declared_outing_quantity: null,
-        final_stock: null,
-        theoretical_stock: null,
-        stock_gap: null,
-        liquid_height: null,
-        liquid_volume: null,
-        pistol_indexes: [],
-        electronic_opening_index: null,
-        electronic_closing_index: null,
-        electronic_delta_index: null,
-        mechanical_opening_index: null,
-        mechanical_closing_index: null,
-        mechanical_delta_index: null
-      });
-      this.resetPistolIndexes(this.stockForm);
-      this.updateStockComputedFields();
-      return;
-    }
+    this.stockForm.reset({
+      initial_stock: null,
+      received_quantity: null,
+      declared_outing_quantity: null,
+      final_stock: null,
+      theoretical_stock: null,
+      stock_gap: null,
+      liquid_height: null,
+      liquid_volume: null,
+      pistol_indexes: [],
+      electronic_opening_index: null,
+      electronic_closing_index: null,
+      electronic_delta_index: null,
+      mechanical_opening_index: null,
+      mechanical_closing_index: null,
+      mechanical_delta_index: null
+    });
+    this.resetPistolIndexes(this.stockForm);
+    this.updateStockComputedFields();
 
     this.salesForm.reset({
       initial_stock: null,
@@ -371,12 +468,19 @@ export class AnalyseReportsComponent implements OnInit {
       unit_price: null,
       expected_amount: null,
       cash_sales_amount: null,
-      digital_sales_amount: null,
-      collected_amount: null,
       amount_gap: null
     });
     this.resetPistolIndexes(this.salesForm);
+    this.syncSalesUnitPriceFromSelectedFuelType();
     this.updateSalesComputedFields();
+
+    this.filtersForm.patchValue({
+      rollup_enabled: false,
+      rollup_bucket: 'NONE',
+      rollup_analysis_type: 'OUTINGS',
+      date_end: this.filtersForm.get('date_start')?.value ?? this.getTodayDate(),
+    }, { emitEvent: false });
+    this.rollupBucket = 'NONE';
   }
 
   async exportPdf(): Promise<void> {
@@ -388,7 +492,15 @@ export class AnalyseReportsComponent implements OnInit {
   }
 
   canExport(): boolean {
-    return !!this.analysisResult;
+    if (!this.analysisResult) {
+      return false;
+    }
+
+    if (this.unifiedResultMode) {
+      return this.getUnifiedExportSessions().length > 0;
+    }
+
+    return true;
   }
 
   getGlobalStatusLabel(status: 'NORMAL' | 'WARNING' | 'CRITICAL' | null): string {
@@ -501,7 +613,6 @@ export class AnalyseReportsComponent implements OnInit {
         label: String(company?.name ?? company?.label ?? `Compagnie #${company?.id ?? ''}`),
         value: Number(company?.id ?? 0)
       })).filter((option: SelectOption) => option.value > 0);
-
       const companyId = Number(this.filtersForm.get('company_id')?.value ?? 0) || this.companyOptions[0]?.value || null;
       this.filtersForm.patchValue({ company_id: companyId }, { emitEvent: false });
 
@@ -523,6 +634,8 @@ export class AnalyseReportsComponent implements OnInit {
           label: String(station?.formated_name ?? station?.name ?? `Station #${station?.id ?? ''}`),
           value: Number(station?.id ?? 0)
         })).filter((option: SelectOption) => option.value > 0);
+
+        this.syncSalesUnitPriceFromSelectedFuelType();
       },
       error: () => {
         this.stationOptions = [];
@@ -546,6 +659,8 @@ export class AnalyseReportsComponent implements OnInit {
           label: String(tank?.reference ?? tank?.sensor_reference ?? tank?.name ?? `Cuve #${tank?.id ?? ''}`),
           value: Number(tank?.id ?? 0)
         })).filter((option: SelectOption) => option.value > 0);
+
+        this.syncSalesUnitPriceFromSelectedFuelType();
       },
       error: () => {
         this.tankOptions = [];
@@ -559,49 +674,81 @@ export class AnalyseReportsComponent implements OnInit {
         const products = response?.data ?? response?.products ?? response ?? [];
         this.fuelTypeOptions = (Array.isArray(products) ? products : []).map((product: any) => ({
           label: String(product?.name ?? product?.label ?? `Produit #${product?.id ?? ''}`),
-          value: Number(product?.id ?? 0)
+          value: Number(product?.id ?? 0),
+          unitPrice: this.resolveProductUnitPrice(product)
         })).filter((option: SelectOption) => option.value > 0);
+
+        this.syncSalesUnitPriceFromSelectedFuelType();
       },
       error: () => {
         this.fuelTypeOptions = [];
+        this.syncSalesUnitPriceFromSelectedFuelType();
       }
     });
+  }
+
+  private resolveProductUnitPrice(product: any): number | null {
+    const candidates = [
+      product?.price,
+      product?.product_price,
+      product?.unit_price,
+      product?.pivot?.product_price,
+      product?.pivot?.unit_price
+    ];
+
+    for (const candidate of candidates) {
+      const num = Number(candidate);
+      if (Number.isFinite(num) && num >= 0) {
+        return num;
+      }
+    }
+
+    return null;
+  }
+
+  private syncSalesUnitPriceFromSelectedFuelType(): void {
+    const fuelTypeId = Number(this.filtersForm.get('fuel_type_id')?.value ?? 0) || null;
+    const matched = fuelTypeId
+      ? this.fuelTypeOptions.find((option) => option.value === fuelTypeId)
+      : null;
+
+    this.salesForm.patchValue({
+      unit_price: matched?.unitPrice ?? null
+    }, { emitEvent: false });
+
+    this.updateSalesComputedFields();
   }
 
   private validateBeforeSubmit(): boolean {
     this.filtersForm.markAllAsTouched();
 
     if (this.filtersForm.invalid) {
-      this.addMessage('warn', 'Filtre incomplet', 'Renseignez la période, la station, la cuve et le produit.');
+      this.addMessage('warn', 'Filtre incomplet', this.isRollupEnabled()
+        ? 'Renseignez la période, la station, la cuve et le produit.'
+        : 'Renseignez la date, la station, la cuve et le produit.');
       return false;
     }
 
-    const activeForm = this.getActiveForm();
-    activeForm.markAllAsTouched();
-    if (activeForm.invalid) {
-      this.addMessage('warn', 'Formulaire incomplet', 'Veuillez corriger les champs requis de l’analyse active.');
+    if (this.isRollupEnabled()) {
+      return true;
+    }
+
+    this.outingsForm.markAllAsTouched();
+    this.stockForm.markAllAsTouched();
+    this.salesForm.markAllAsTouched();
+
+    if (this.outingsForm.invalid || this.stockForm.invalid || this.salesForm.invalid) {
+      this.addMessage('warn', 'Formulaire incomplet', 'Veuillez corriger les champs requis avant de lancer l’analyse unifiée.');
       return false;
     }
 
     return true;
   }
 
-  private getActiveForm(): FormGroup {
-    if (this.activeTab === 1) {
-      return this.stockForm;
-    }
-    if (this.activeTab === 2) {
-      return this.salesForm;
-    }
-    return this.outingsForm;
-  }
-
   private getAnalysisType(): AnalysisType {
-    if (this.activeTab === 1) {
-      return 'STOCK';
-    }
-    if (this.activeTab === 2) {
-      return 'SALES';
+    const raw = String(this.filtersForm.get('rollup_analysis_type')?.value ?? 'OUTINGS').toUpperCase();
+    if (raw === 'STOCK' || raw === 'SALES') {
+      return raw as AnalysisType;
     }
     return 'OUTINGS';
   }
@@ -618,8 +765,15 @@ export class AnalyseReportsComponent implements OnInit {
       return null;
     }
 
-    const periodStart = `${String(filters.date_start)} 00:00:00`;
-    const periodEnd = this.getExclusivePeriodEnd(String(filters.date_end));
+    const dateStartIso = this.toIsoDate(filters.date_start);
+    const dateEndIso = this.toIsoDate(filters.date_end);
+    if (!dateStartIso || !dateEndIso) {
+      return null;
+    }
+
+    const periodStart = `${dateStartIso} 00:00:00`;
+    const periodEnd = this.getExclusivePeriodEnd(dateEndIso);
+    const referenceAt = this.buildReferenceAt(dateEndIso, filters.reference_time);
 
     const payload: ComparativeAnalysisPayload = {
       ...(this.isPlatformSuperAdmin && Number(filters.company_id ?? 0) > 0
@@ -633,10 +787,156 @@ export class AnalyseReportsComponent implements OnInit {
       period_start: periodStart,
       period_end: periodEnd,
       idempotency_key: this.buildIdempotencyKey(analysisType, stationId, tankId, fuelTypeId, periodStart, periodEnd),
-      user_data_rows: this.buildUserDataRows(analysisType, periodStart, periodEnd)
+      user_data_rows: this.buildUserDataRows(analysisType, periodStart, periodEnd, referenceAt)
     };
 
     return payload;
+  }
+
+  private buildUnifiedPayload(): UnifiedComparativeRunPayload | null {
+    const filters = this.filtersForm.getRawValue();
+    const stationId = Number(filters.station_id ?? 0) || null;
+    const tankId = Number(filters.tank_id ?? 0) || null;
+    const fuelTypeId = Number(filters.fuel_type_id ?? 0) || null;
+
+    if (!stationId || !tankId || !fuelTypeId) {
+      return null;
+    }
+
+    const dateStartIso = this.toIsoDate(filters.date_start);
+    if (!dateStartIso) {
+      return null;
+    }
+
+    const periodStart = `${dateStartIso} 00:00:00`;
+    const periodEnd = this.getExclusivePeriodEnd(dateStartIso);
+    const referenceAt = this.buildReferenceAt(dateStartIso, filters.reference_time);
+
+    const payload: UnifiedComparativeRunPayload = {
+      ...(this.isPlatformSuperAdmin && Number(filters.company_id ?? 0) > 0 ? { company_id: Number(filters.company_id) } : {}),
+      station_id: stationId,
+      tank_id: tankId,
+      fuel_type_id: fuelTypeId,
+      analysis_granularity: 'PERIOD',
+      period_start: periodStart,
+      period_end: periodEnd,
+      reference_at: referenceAt,
+      idempotency_key: this.buildIdempotencyKey('OUTINGS', stationId, tankId, fuelTypeId, periodStart, periodEnd) + ':unified',
+      manual_data: {
+        outings: this.buildUnifiedManualSection('OUTINGS'),
+        stock: this.buildUnifiedManualSection('STOCK'),
+        sales: this.buildUnifiedManualSection('SALES'),
+      }
+    };
+
+    return payload;
+  }
+
+  private buildUnifiedManualSection(analysisType: AnalysisType): any {
+    const userData = this.buildUserData(analysisType);
+    const pistols = this.buildPistolRows(this.resolveFormForAnalysis(analysisType), userData.declared_sales_quantity);
+
+    return {
+      initial_stock: userData.initial_stock,
+      received_quantity: userData.received_quantity,
+      final_stock: userData.final_stock,
+      declared_outing_quantity: userData.declared_outing_quantity,
+      declared_sales_quantity: userData.declared_sales_quantity,
+      liquid_height: userData.liquid_height,
+      liquid_volume: userData.liquid_volume,
+      pistols,
+    };
+  }
+
+  private normalizeUnifiedResult(response: any): ComparativeAnalysisResult {
+    const payload = response?.data ?? {};
+    const combined = Array.isArray(payload?.combined_metrics) ? payload.combined_metrics : [];
+    const metrics: ComparativeMetric[] = combined.map((metric: any) => ({
+      metric_key: String(metric?.metric_key ?? ''),
+      metric_label: String(metric?.metric_label ?? metric?.metric_key ?? ''),
+      user_value: this.toNullableNumber(metric?.user_value ?? metric?.manual_value),
+      system_value: this.toNullableNumber(metric?.system_value ?? metric?.digital_value),
+      difference: this.toNullableNumber(metric?.difference),
+      gap_percentage: this.toNullableNumber(metric?.gap_percentage),
+      status: this.normalizeStatus(metric?.status),
+      comment: this.localizeMetricComment(String(metric?.comment ?? '')),
+    }));
+
+    const warningCount = metrics.filter((item) => item.status === 'WARNING').length;
+    const criticalCount = metrics.filter((item) => item.status === 'CRITICAL').length;
+    const globalStatus: 'NORMAL' | 'WARNING' | 'CRITICAL' = criticalCount > 0
+      ? 'CRITICAL'
+      : warningCount > 0
+        ? 'WARNING'
+        : 'NORMAL';
+
+    return {
+      session: { type: 'UNIFIED', sessions: payload?.sessions ?? {}, global_status: globalStatus },
+      user_data: [],
+      summary: {
+        warning_count: warningCount,
+        critical_count: criticalCount,
+        metrics_count: metrics.length,
+        global_status: globalStatus,
+      },
+      metrics,
+      segment_metrics: metrics,
+      global_metrics: [],
+      summaries: [],
+    };
+  }
+
+  private async launchRollupAnalysis(payload: ComparativeAnalysisPayload): Promise<void> {
+    const rollupPayload = this.buildRollupPayloadFromComparative(payload);
+    this.lastRollupPayload = rollupPayload;
+
+    const response: any = await firstValueFrom(this.fuelReports.getComparativeRollupReconciliation(rollupPayload));
+    const data = response?.data ?? {};
+    const rows = Array.isArray(data?.rows) ? data.rows : [];
+    const summary = data?.summary ?? {};
+
+    this.unifiedResultMode = false;
+    this.analysisSessionId = null;
+    this.rollupRows = rows;
+    this.analysisGlobalStatus = 'NORMAL';
+    this.analysisResult = {
+      session: { type: 'ROLLUP' },
+      user_data: [],
+      summary: {
+        warning_count: 0,
+        critical_count: 0,
+        rows_count: Number(summary?.rows_count ?? rows.length) || 0,
+        source_sessions_count: Number(summary?.source_sessions_count ?? 0) || 0,
+      },
+      metrics: []
+    };
+
+    this.addMessage('success', 'Récapitulatif prêt', 'Le rapprochement historique a été chargé avec succès.');
+  }
+
+  private buildRollupPayloadFromComparative(payload: ComparativeAnalysisPayload): ComparativeRollupPayload {
+    return {
+      ...(payload.company_id ? { company_id: payload.company_id } : {}),
+      station_id: payload.station_id,
+      tank_id: payload.tank_id,
+      fuel_type_id: payload.fuel_type_id,
+      analysis_type: payload.analysis_type,
+      period_start: payload.period_start,
+      period_end: payload.period_end,
+      bucket: this.resolveRollupBucket()
+    };
+  }
+
+  isRollupEnabled(): boolean {
+    return !!this.filtersForm.get('rollup_enabled')?.value;
+  }
+
+  private resolveRollupBucket(): ComparativeRollupBucket {
+    const raw = String(this.filtersForm.get('rollup_bucket')?.value ?? 'NONE').toUpperCase();
+    if (raw === 'DAILY' || raw === 'WEEKLY' || raw === 'MONTHLY') {
+      return raw as ComparativeRollupBucket;
+    }
+    return 'NONE';
   }
 
   private buildUserData(analysisType: AnalysisType): ComparativeAnalysisUserData {
@@ -692,11 +992,12 @@ export class AnalyseReportsComponent implements OnInit {
     return userData;
   }
 
-  private buildUserDataRows(analysisType: AnalysisType, segmentStart: string, segmentEnd: string): ComparativeAnalysisUserDataRow[] {
+  private buildUserDataRows(analysisType: AnalysisType, segmentStart: string, segmentEnd: string, referenceAt: string | null): ComparativeAnalysisUserDataRow[] {
     const userData = this.buildUserData(analysisType);
     const row: ComparativeAnalysisUserDataRow = {
       segment_start: segmentStart,
       segment_end: segmentEnd,
+      ...(referenceAt ? { reference_at: referenceAt } : {}),
       segment_label: 'Période complète',
       initial_stock: userData.initial_stock,
       received_quantity: userData.received_quantity,
@@ -707,9 +1008,72 @@ export class AnalyseReportsComponent implements OnInit {
     };
 
     const declaredSalesTotal = userData.declared_sales_quantity;
-    row.pistols = this.buildPistolRows(this.getActiveForm(), declaredSalesTotal);
+    row.pistols = this.buildPistolRows(this.resolveFormForAnalysis(analysisType), declaredSalesTotal);
 
     return [row];
+  }
+
+  private resolveFormForAnalysis(analysisType: AnalysisType): FormGroup {
+    if (analysisType === 'STOCK') {
+      return this.stockForm;
+    }
+    if (analysisType === 'SALES') {
+      return this.salesForm;
+    }
+    return this.outingsForm;
+  }
+
+  private syncUnifiedSecondaryFormsFromOutings(): void {
+    const outingsRaw = this.outingsForm.getRawValue();
+
+    this.stockForm.patchValue({
+      initial_stock: outingsRaw.initial_stock,
+      received_quantity: outingsRaw.received_quantity,
+      declared_outing_quantity: outingsRaw.declared_outing_quantity,
+      final_stock: outingsRaw.final_stock,
+      liquid_height: outingsRaw.liquid_height,
+      liquid_volume: outingsRaw.liquid_volume,
+    }, { emitEvent: false });
+
+    this.salesForm.patchValue({
+      initial_stock: outingsRaw.initial_stock,
+      received_quantity: outingsRaw.received_quantity,
+      final_stock: outingsRaw.final_stock,
+    }, { emitEvent: false });
+
+    this.copyPistolIndexes(this.outingsForm, this.stockForm);
+    this.copyPistolIndexes(this.outingsForm, this.salesForm);
+
+    this.updateStockComputedFields();
+    this.updateSalesComputedFields();
+  }
+
+  private copyPistolIndexes(fromForm: FormGroup, toForm: FormGroup): void {
+    const sourceRows = this.getPistolIndexes(fromForm).controls.map((control: AbstractControl) => (control as FormGroup).getRawValue());
+    const targetIndexes = this.getPistolIndexes(toForm);
+
+    while (targetIndexes.length > 0) {
+      targetIndexes.removeAt(0);
+    }
+
+    if (sourceRows.length === 0) {
+      targetIndexes.push(this.createPistolIndexGroup('Pistolet 1'));
+      return;
+    }
+
+    sourceRows.forEach((row: any, index: number) => {
+      const group = this.createPistolIndexGroup(String(row?.nozzle_label ?? `Pistolet ${index + 1}`));
+      group.patchValue({
+        nozzle_label: row?.nozzle_label ?? `Pistolet ${index + 1}`,
+        electronic_opening_index: row?.electronic_opening_index,
+        electronic_closing_index: row?.electronic_closing_index,
+        electronic_delta_index: row?.electronic_delta_index,
+        mechanical_opening_index: row?.mechanical_opening_index,
+        mechanical_closing_index: row?.mechanical_closing_index,
+        mechanical_delta_index: row?.mechanical_delta_index,
+      }, { emitEvent: false });
+      targetIndexes.push(group);
+    });
   }
 
   private buildPistolRows(form: FormGroup, declaredSalesTotal?: number): ComparativeAnalysisPistolRow[] {
@@ -852,7 +1216,6 @@ export class AnalyseReportsComponent implements OnInit {
     const declaredSales = Number(raw.declared_sales_quantity);
     const unitPrice = Number(raw.unit_price);
     const cashSales = Number(raw.cash_sales_amount);
-    const digitalSales = Number(raw.digital_sales_amount);
 
     const stockBasedSale = Number.isFinite(initialStock) && Number.isFinite(received) && Number.isFinite(finalStock)
       ? initialStock + received - finalStock
@@ -861,13 +1224,8 @@ export class AnalyseReportsComponent implements OnInit {
     const expectedAmount = Number.isFinite(declaredSales) && Number.isFinite(unitPrice)
       ? declaredSales * unitPrice
       : null;
-
-    const collectedAmount = Number.isFinite(cashSales) && Number.isFinite(digitalSales)
-      ? cashSales + digitalSales
-      : null;
-
-    const amountGap = expectedAmount !== null && collectedAmount !== null
-      ? collectedAmount - expectedAmount
+    const amountGap = expectedAmount !== null && Number.isFinite(cashSales)
+      ? cashSales - expectedAmount
       : null;
 
     this.salesForm.patchValue({
@@ -881,7 +1239,6 @@ export class AnalyseReportsComponent implements OnInit {
       sold_by_mechanical_index: totals.mechanicalDelta,
       stock_based_sale: stockBasedSale,
       expected_amount: expectedAmount,
-      collected_amount: collectedAmount,
       amount_gap: amountGap
     }, { emitEvent: false });
   }
@@ -1039,7 +1396,7 @@ export class AnalyseReportsComponent implements OnInit {
   }
 
   private async exportResult(format: 'pdf' | 'excel'): Promise<void> {
-    if (!this.analysisResult || !this.analysisSessionId || this.exporting) {
+    if (!this.analysisResult || this.exporting) {
       return;
     }
 
@@ -1047,16 +1404,53 @@ export class AnalyseReportsComponent implements OnInit {
     this.exportingFormat = format;
 
     try {
-      const blob: Blob = format === 'pdf'
-        ? await firstValueFrom(this.fuelReports.exportComparativeAnalysisPdf(this.analysisSessionId))
-        : await firstValueFrom(this.fuelReports.exportComparativeAnalysisExcel(this.analysisSessionId));
+      if (this.unifiedResultMode) {
+        const sessions = this.getUnifiedExportSessions();
+        if (sessions.length === 0) {
+          throw new Error('Aucune session unifiée disponible pour export.');
+        }
 
-      const extension = format === 'pdf' ? 'pdf' : 'csv';
-      this.downloadBlob(blob, `analyse-comparative_${this.analysisSessionId}.${extension}`);
+        for (const session of sessions) {
+          const blob = format === 'pdf'
+            ? await firstValueFrom(this.fuelReports.exportComparativeAnalysisPdf(session.id))
+            : await firstValueFrom(this.fuelReports.exportComparativeAnalysisExcel(session.id));
+          const extension = format === 'pdf' ? 'pdf' : 'xlsx';
+          this.downloadBlob(blob, `analyse-comparative-${session.code.toLowerCase()}_${session.id}.${extension}`);
+        }
+
+        this.addMessage('success', 'Export terminé', `Export ${format.toUpperCase()} généré pour Sorties, Stock et Ventes.`);
+        return;
+      }
+
+      let blob: Blob;
+      let fileName = 'analyse-comparative';
+
+      if (this.isRollupEnabled() && this.lastRollupPayload) {
+        blob = format === 'pdf'
+          ? await firstValueFrom(this.fuelReports.exportComparativeRollupPdf(this.lastRollupPayload))
+          : await firstValueFrom(this.fuelReports.exportComparativeRollupExcel(this.lastRollupPayload));
+        const dateStartIso = this.toIsoDate(this.filtersForm.get('date_start')?.value) ?? '';
+        const dateEndIso = this.toIsoDate(this.filtersForm.get('date_end')?.value) ?? '';
+        fileName = 'analyse-comparative-rollup_' + this.rollupBucket.toLowerCase() + '_' + dateStartIso + '_' + dateEndIso;
+      } else {
+        if (!this.analysisSessionId) {
+          throw new Error('Aucune session d\'analyse à exporter.');
+        }
+
+        blob = format === 'pdf'
+          ? await firstValueFrom(this.fuelReports.exportComparativeAnalysisPdf(this.analysisSessionId))
+          : await firstValueFrom(this.fuelReports.exportComparativeAnalysisExcel(this.analysisSessionId));
+        fileName = 'analyse-comparative_' + this.analysisSessionId;
+      }
+
+      const extension = format === 'pdf' ? 'pdf' : 'xlsx';
+      this.downloadBlob(blob, fileName + '.' + extension);
     } catch {
-      if (format === 'excel') {
+      if (format === 'excel' && !this.isRollupEnabled() && !this.unifiedResultMode) {
         this.exportResultAsCsv();
         this.addMessage('warn', 'Export Excel', 'Export API indisponible. Un CSV local a été généré.');
+      } else if (format === 'excel') {
+        this.addMessage('error', 'Export Excel', 'Impossible de générer le fichier Excel pour ce récapitulatif.');
       } else {
         this.addMessage('error', 'Export PDF', 'Impossible de générer le PDF pour cette analyse.');
       }
@@ -1064,6 +1458,32 @@ export class AnalyseReportsComponent implements OnInit {
       this.exporting = false;
       this.exportingFormat = null;
     }
+  }
+
+
+  private extractUnifiedSessionIds(response: any): Partial<Record<AnalysisType, number>> {
+    const sessions = response?.data?.sessions ?? {};
+    const result: Partial<Record<AnalysisType, number>> = {};
+
+    const setSession = (code: AnalysisType): void => {
+      const id = Number(sessions?.[code]?.id ?? 0) || null;
+      if (id) {
+        result[code] = id;
+      }
+    };
+
+    setSession('OUTINGS');
+    setSession('STOCK');
+    setSession('SALES');
+
+    return result;
+  }
+
+  private getUnifiedExportSessions(): Array<{ code: AnalysisType; id: number }> {
+    const ordered: AnalysisType[] = ['OUTINGS', 'STOCK', 'SALES'];
+    return ordered
+      .map((code) => ({ code, id: Number(this.unifiedSessionIds[code] ?? 0) || 0 }))
+      .filter((item) => item.id > 0);
   }
 
   private exportResultAsCsv(): void {
@@ -1420,6 +1840,40 @@ export class AnalyseReportsComponent implements OnInit {
     return `${year}-${month}-${day} 00:00:00`;
   }
 
+  private normalizeReferenceTime(raw: any): string | null {
+    const value = String(raw ?? "").trim();
+    if (!value) {
+      return null;
+    }
+
+    const parts = value.split(":");
+    if (parts.length !== 2) {
+      return null;
+    }
+
+    const hour = Number(parts[0]);
+    const minute = Number(parts[1]);
+    if (!Number.isFinite(hour) || !Number.isFinite(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      return null;
+    }
+
+    return String(hour).padStart(2, "0") + ":" + String(minute).padStart(2, "0");
+  }
+
+  private buildReferenceAt(dateIso: string, timeRaw: any): string | null {
+    const normalizedTime = this.normalizeReferenceTime(timeRaw);
+    if (!normalizedTime) {
+      return null;
+    }
+
+    const safeDate = String(dateIso ?? "").trim();
+    if (!safeDate) {
+      return null;
+    }
+
+    return safeDate + " " + normalizedTime + ":00";
+  }
+
   private buildIdempotencyKey(
     analysisType: AnalysisType,
     stationId: number,
@@ -1470,11 +1924,20 @@ export class AnalyseReportsComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  private getCurrentDateIso(): string {
+  private getTodayDate(): Date {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  private toIsoDate(value: any): string | null {
+    const date = coerceDateOnly(value);
+    if (!date) {
+      return null;
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
