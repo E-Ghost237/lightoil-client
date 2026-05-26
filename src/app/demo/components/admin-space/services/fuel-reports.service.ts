@@ -79,6 +79,7 @@ export interface ComparativeAnalysisPistolRow {
 export interface ComparativeAnalysisUserDataRow {
   segment_start: string;
   segment_end: string;
+  reference_at?: string;
   segment_label?: string;
   initial_stock?: number;
   received_quantity?: number;
@@ -102,6 +103,19 @@ export interface ComparativeAnalysisPayload {
   user_data_rows: ComparativeAnalysisUserDataRow[];
 }
 
+export type ComparativeRollupBucket = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+
+export interface ComparativeRollupPayload {
+  company_id?: number;
+  station_id: number;
+  tank_id: number;
+  fuel_type_id: number;
+  analysis_type: AnalysisType;
+  period_start: string; // YYYY-MM-DD HH:mm:ss
+  period_end: string;   // YYYY-MM-DD HH:mm:ss
+  bucket?: ComparativeRollupBucket;
+}
+
 export interface ComparativeMetric {
   metric_key: string;
   metric_label: string;
@@ -121,6 +135,34 @@ export interface ComparativeAnalysisResult {
   segment_metrics?: ComparativeMetric[];
   global_metrics?: ComparativeMetric[];
   summaries?: any[];
+}
+
+export interface UnifiedComparativeManualSection {
+  initial_stock?: number;
+  received_quantity?: number;
+  final_stock?: number;
+  declared_outing_quantity?: number;
+  liquid_height?: number;
+  liquid_volume?: number;
+  declared_sales_quantity?: number;
+  pistols?: ComparativeAnalysisPistolRow[];
+}
+
+export interface UnifiedComparativeRunPayload {
+  company_id?: number;
+  station_id: number;
+  tank_id: number;
+  fuel_type_id: number;
+  analysis_granularity?: AnalysisGranularity;
+  period_start: string;
+  period_end: string;
+  reference_at?: string | null;
+  idempotency_key?: string;
+  manual_data: {
+    outings: UnifiedComparativeManualSection;
+    stock: UnifiedComparativeManualSection;
+    sales: UnifiedComparativeManualSection;
+  };
 }
 
 @Injectable({
@@ -218,5 +260,21 @@ export class FuelReportsService {
 
   exportComparativeAnalysisExcel(id: number): Observable<Blob> {
     return this.http.get(environment.apiUrl + `${this.comparativeBasePath}/${id}/export/excel`, { responseType: 'blob' });
+  }
+
+  getComparativeRollupReconciliation(payload: ComparativeRollupPayload): Observable<any> {
+    return this.http.post<any>(environment.apiUrl + `${this.comparativeBasePath}/rollup/reconciliation`, payload);
+  }
+
+  runUnifiedComparativeAnalysis(payload: UnifiedComparativeRunPayload): Observable<any> {
+    return this.http.post<any>(environment.apiUrl + `${this.comparativeBasePath}/unified/run`, payload);
+  }
+
+  exportComparativeRollupPdf(payload: ComparativeRollupPayload): Observable<Blob> {
+    return this.http.post(environment.apiUrl + `${this.comparativeBasePath}/rollup/reconciliation/export/pdf`, payload, { responseType: 'blob' });
+  }
+
+  exportComparativeRollupExcel(payload: ComparativeRollupPayload): Observable<Blob> {
+    return this.http.post(environment.apiUrl + `${this.comparativeBasePath}/rollup/reconciliation/export/excel`, payload, { responseType: 'blob' });
   }
 }

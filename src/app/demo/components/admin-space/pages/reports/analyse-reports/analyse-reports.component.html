@@ -10,6 +10,11 @@
 
   <div class="card analysis-filter-card mb-3">
     <div class="card-body">
+      <div class="analysis-mode-tabs mb-3">
+        <button type="button" class="mode-tab" [class.active]="!isRecapMode" (click)="setRecapMode(false)">Analyse journalière</button>
+        <button type="button" class="mode-tab" [class.active]="isRecapMode" (click)="setRecapMode(true)">Récapitulatif</button>
+      </div>
+
       <form [formGroup]="filtersForm" novalidate>
         <div class="grid">
           <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isPlatformSuperAdmin">
@@ -28,16 +33,48 @@
             </p-dropdown>
           </div>
 
-          <div class="col-12 xl:col-2 lg:col-3 md:col-4">
-            <label class="field-label" for="filter-start-date">Date début</label>
-            <input id="filter-start-date" type="date" class="form-control" formControlName="date_start">
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="!isRecapMode">
+            <label class="field-label" for="filter-start-date">Date d’analyse</label>
+            <p-calendar
+              inputId="filter-start-date"
+              formControlName="date_start"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-calendar>
+            <small class="field-error" *ngIf="hasFiltersError('date_start')">Date requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-start-date-recap">Date début</label>
+            <p-calendar
+              inputId="filter-start-date-recap"
+              formControlName="date_start"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-calendar>
             <small class="field-error" *ngIf="hasFiltersError('date_start')">Date début requise.</small>
           </div>
 
-          <div class="col-12 xl:col-2 lg:col-3 md:col-4">
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
             <label class="field-label" for="filter-end-date">Date fin</label>
-            <input id="filter-end-date" type="date" class="form-control" formControlName="date_end">
+            <p-calendar
+              inputId="filter-end-date"
+              formControlName="date_end"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-calendar>
             <small class="field-error" *ngIf="hasFiltersError('date_end')">Date fin requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="!isRecapMode">
+            <label class="field-label" for="filter-reference-time">Heure de référence (optionnelle)</label>
+            <input id="filter-reference-time" type="time" class="form-control" formControlName="reference_time">
           </div>
 
           <div class="col-12 xl:col-2 lg:col-3 md:col-4">
@@ -87,9 +124,44 @@
             </p-dropdown>
             <small class="field-error" *ngIf="hasFiltersError('fuel_type_id')">Produit requis.</small>
           </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-rollup-analysis-type">Type d’analyse (récap)</label>
+            <p-dropdown
+              id="filter-rollup-analysis-type"
+              [options]="[
+                { label: 'Analyse de sortie', value: 'OUTINGS' },
+                { label: 'Analyse de stock', value: 'STOCK' },
+                { label: 'Analyse de ventes', value: 'SALES' }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              formControlName="rollup_analysis_type"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-rollup-bucket">Regroupement période</label>
+            <p-dropdown
+              id="filter-rollup-bucket"
+              [options]="[
+                { label: 'Aucun regroupement', value: 'NONE' },
+                { label: 'Journalier', value: 'DAILY' },
+                { label: 'Hebdomadaire', value: 'WEEKLY' },
+                { label: 'Mensuel', value: 'MONTHLY' }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              formControlName="rollup_bucket"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-dropdown>
+          </div>
         </div>
 
-        <div class="grid" *ngIf="hasDateRangeError()">
+        <div class="grid" *ngIf="isRecapMode && hasDateRangeError()">
           <div class="col-12">
             <small class="field-error">La date fin doit être supérieure ou égale à la date début.</small>
           </div>
@@ -100,52 +172,36 @@
 
   <div class="card analysis-form-card mb-3">
     <div class="card-header font-bold text-xl pt-0">
-      <ul class="nav nav-tabs nav-justified card-header-tabs analysis-tabs" role="tablist" id="analysis-tab">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link text-uppercase" [class.active]="activeTab === 0" type="button" (click)="activeTab = 0; onTabChange({ index: 0 })">
-            Analyse de sortie
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link text-uppercase" [class.active]="activeTab === 1" type="button" (click)="activeTab = 1; onTabChange({ index: 1 })">
-            Analyse de stock
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link text-uppercase" [class.active]="activeTab === 2" type="button" (click)="activeTab = 2; onTabChange({ index: 2 })">
-            Analyse de ventes
-          </button>
-        </li>
-      </ul>
+      <h3 class="section-title mt-2">{{ isRecapMode ? 'Récapitulatif historique' : 'Saisie utilisateur unifiée' }}</h3>
     </div>
 
     <div class="card-body">
-      <ng-container *ngIf="activeTab === 0">
+      <ng-container *ngIf="!isRecapMode; else recapInfoPanel">
         <form
           [formGroup]="outingsForm"
           novalidate
           (keydown)="preventNonNumericInput($event)"
           (paste)="preventNonNumericPaste($event)"
           (input)="sanitizeNumericInput($event)">
-          <h3 class="section-title">Saisie utilisateur - Sorties</h3>
+          <h3 class="section-title">Saisie utilisateur - Données communes</h3>
           <div class="grid">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Stock initial</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="initial_stock">
-              <small class="field-error" *ngIf="hasControlError(outingsForm, 'initial_stock')">Champ requis (>= 0).</small>
+              <small class="field-error" *ngIf="hasControlError(outingsForm, 'initial_stock')">Champ requis (&gt;= 0).</small>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Volume reçu</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
-              <small class="field-error" *ngIf="hasControlError(outingsForm, 'received_quantity')">Champ requis (>= 0).</small>
+              <small class="field-error" *ngIf="hasControlError(outingsForm, 'received_quantity')">Champ requis (&gt;= 0).</small>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Stock final</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="final_stock">
-              <small class="field-error" *ngIf="hasControlError(outingsForm, 'final_stock')">Champ requis (>= 0).</small>
+              <small class="field-error" *ngIf="hasControlError(outingsForm, 'final_stock')">Champ requis (&gt;= 0).</small>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume sorti déclaré</label>
+              <label class="field-label">Quantité sortie déclarée</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="declared_outing_quantity">
             </div>
           </div>
@@ -160,7 +216,7 @@
               <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_volume">
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume sorti calculé</label>
+              <label class="field-label">Sortie calculée (stock)</label>
               <input type="number" class="form-control readonly-field" formControlName="calculated_outing_quantity" readonly>
             </div>
           </div>
@@ -252,38 +308,9 @@
             </div>
           </div>
         </form>
-      </ng-container>
 
-      <ng-container *ngIf="activeTab === 1">
-        <form
-          [formGroup]="stockForm"
-          novalidate
-          (keydown)="preventNonNumericInput($event)"
-          (paste)="preventNonNumericPaste($event)"
-          (input)="sanitizeNumericInput($event)">
-          <h3 class="section-title">Saisie utilisateur - Stock</h3>
-          <div class="grid">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock initial</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="initial_stock">
-              <small class="field-error" *ngIf="hasControlError(stockForm, 'initial_stock')">Champ requis (>= 0).</small>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume reçu</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
-              <small class="field-error" *ngIf="hasControlError(stockForm, 'received_quantity')">Champ requis (>= 0).</small>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume sorti</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="declared_outing_quantity">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock physique</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="final_stock">
-              <small class="field-error" *ngIf="hasControlError(stockForm, 'final_stock')">Champ requis (>= 0).</small>
-            </div>
-          </div>
-
+        <form [formGroup]="stockForm" novalidate>
+          <h3 class="section-title">Indicateurs stock (automatiques)</h3>
           <div class="grid mt-1">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Stock théorique</label>
@@ -293,217 +320,13 @@
               <label class="field-label">Écart de stock</label>
               <input type="number" class="form-control readonly-field" formControlName="stock_gap" readonly>
             </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Hauteur liquide</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_height">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume liquide</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_volume">
-            </div>
-          </div>
-
-          <p-divider></p-divider>
-
-          <div class="pistol-section">
-            <div class="pistol-section-header">
-              <h4 class="pistol-title">Index par pistolet</h4>
-              <p-button label="Ajouter un pistolet" severity="secondary" [outlined]="true" (onClick)="addPistolRow('stock')"></p-button>
-            </div>
-
-            <div formArrayName="pistol_indexes">
-              <div class="pistol-row" *ngFor="let row of getStockPistolIndexes().controls; let i = index" [formGroupName]="i">
-                <div class="grid">
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Pistolet</label>
-                    <input type="text" class="form-control" formControlName="nozzle_label" placeholder="Ex: Pistolet 1">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ouv. électronique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_opening_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ferm. électronique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_closing_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Delta électronique</label>
-                    <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ouv. mécanique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_opening_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ferm. mécanique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_closing_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Delta mécanique</label>
-                    <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6 flex align-items-end">
-                    <p-button
-                      label="Retirer"
-                      severity="danger"
-                      [outlined]="true"
-                      [disabled]="getStockPistolIndexes().length <= 1"
-                      (onClick)="removePistolRow('stock', i)">
-                    </p-button>
-                  </div>
-                </div>
-
-                <small class="field-error" *ngIf="hasPistolRowError(row, 'electronic_index_range_invalid')">
-                  L’index fermeture électronique doit être supérieur ou égal à l’index ouverture.
-                </small>
-                <small class="field-error ml-2" *ngIf="hasPistolRowError(row, 'mechanical_index_range_invalid')">
-                  L’index fermeture mécanique doit être supérieur ou égal à l’index ouverture.
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid mt-2">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index ouverture électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_opening_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index fermeture électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_closing_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Delta index électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index ouverture mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_opening_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index fermeture mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_closing_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Delta index mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
-            </div>
           </div>
         </form>
-      </ng-container>
 
-      <ng-container *ngIf="activeTab === 2">
-        <form
-          [formGroup]="salesForm"
-          novalidate
-          (keydown)="preventNonNumericInput($event)"
-          (paste)="preventNonNumericPaste($event)"
-          (input)="sanitizeNumericInput($event)">
-          <h3 class="section-title">Saisie utilisateur - Ventes</h3>
+        <form [formGroup]="salesForm" novalidate>
+          <h3 class="section-title">Données ventes</h3>
+
           <div class="grid">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock initial</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="initial_stock">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume reçu</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock final</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="final_stock">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Vente basée sur stock</label>
-              <input type="number" class="form-control readonly-field" formControlName="stock_based_sale" readonly>
-            </div>
-          </div>
-
-          <p-divider></p-divider>
-
-          <div class="pistol-section">
-            <div class="pistol-section-header">
-              <h4 class="pistol-title">Index par pistolet</h4>
-              <p-button label="Ajouter un pistolet" severity="secondary" [outlined]="true" (onClick)="addPistolRow('sales')"></p-button>
-            </div>
-
-            <div formArrayName="pistol_indexes">
-              <div class="pistol-row" *ngFor="let row of getSalesPistolIndexes().controls; let i = index" [formGroupName]="i">
-                <div class="grid">
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Pistolet</label>
-                    <input type="text" class="form-control" formControlName="nozzle_label" placeholder="Ex: Pistolet 1">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ouv. électronique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_opening_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ferm. électronique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_closing_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Delta électronique</label>
-                    <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ouv. mécanique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_opening_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ferm. mécanique</label>
-                    <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_closing_index">
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Delta mécanique</label>
-                    <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
-                  </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6 flex align-items-end">
-                    <p-button
-                      label="Retirer"
-                      severity="danger"
-                      [outlined]="true"
-                      [disabled]="getSalesPistolIndexes().length <= 1"
-                      (onClick)="removePistolRow('sales', i)">
-                    </p-button>
-                  </div>
-                </div>
-
-                <small class="field-error" *ngIf="hasPistolRowError(row, 'electronic_index_range_invalid')">
-                  L’index fermeture électronique doit être supérieur ou égal à l’index ouverture.
-                </small>
-                <small class="field-error ml-2" *ngIf="hasPistolRowError(row, 'mechanical_index_range_invalid')">
-                  L’index fermeture mécanique doit être supérieur ou égal à l’index ouverture.
-                </small>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid mt-2">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index ouverture électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_opening_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index fermeture électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_closing_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Delta index électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index ouverture mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_opening_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index fermeture mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_closing_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Delta index mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
-            </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Volume vendu par index électronique</label>
               <input type="number" class="form-control readonly-field" formControlName="sold_by_electronic_index" readonly>
@@ -512,37 +335,28 @@
               <label class="field-label">Volume vendu par index mécanique</label>
               <input type="number" class="form-control readonly-field" formControlName="sold_by_mechanical_index" readonly>
             </div>
-          </div>
-
-          <p-divider></p-divider>
-
-          <div class="grid">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Volume vendu déclaré</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="declared_sales_quantity">
+              <input type="number" min="0" step="0.01" class="form-control" formControlName="declared_sales_quantity" (keydown)="preventNonNumericInput($event)" (paste)="preventNonNumericPaste($event)" (input)="sanitizeNumericInput($event)">
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Prix unitaire</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="unit_price">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Montant théorique</label>
-              <input type="number" class="form-control readonly-field" formControlName="expected_amount" readonly>
+              <label class="field-label">Vente basée sur stock</label>
+              <input type="number" class="form-control readonly-field" formControlName="stock_based_sale" readonly>
             </div>
           </div>
 
           <div class="grid mt-1">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+              <label class="field-label">Prix unitaire</label>
+              <input type="number" class="form-control readonly-field" formControlName="unit_price" readonly>
+            </div>
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+              <label class="field-label">Montant théorique</label>
+              <input type="number" class="form-control readonly-field" formControlName="expected_amount" readonly>
+            </div>
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Ventes cash</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="cash_sales_amount">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Ventes digitales</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="digital_sales_amount">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Total encaissé</label>
-              <input type="number" class="form-control readonly-field" formControlName="collected_amount" readonly>
+              <input type="number" min="0" step="0.01" class="form-control" formControlName="cash_sales_amount" (keydown)="preventNonNumericInput($event)" (paste)="preventNonNumericPaste($event)" (input)="sanitizeNumericInput($event)">
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Écart de montant</label>
@@ -552,10 +366,19 @@
         </form>
       </ng-container>
 
+      <ng-template #recapInfoPanel>
+        <div class="recap-tab-panel">
+          <h3 class="section-title">Récapitulatif historique</h3>
+          <p class="analysis-subtitle mb-0">
+            Sélectionnez une période et cliquez sur "Générer le tableau de rapprochement".
+          </p>
+        </div>
+      </ng-template>
+
       <div class="actions-row mt-4">
         <div class="left-actions">
           <p-button
-            label="Lancer l’analyse"
+            [label]="isRecapMode ? 'Générer le tableau de rapprochement' : 'Lancer l’analyse unifiée'"
             severity="primary"
             [raised]="true"
             [loading]="launchingAnalysis"
@@ -641,34 +464,78 @@
         </div>
       </div>
 
-      <p-table [value]="analysisResult.metrics" responsiveLayout="scroll" styleClass="p-datatable-striped p-datatable-gridlines" [rowHover]="true">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Métrique</th>
-            <th class="text-right">Valeur utilisateur</th>
-            <th class="text-right">Valeur système</th>
-            <th class="text-right">Différence</th>
-            <th class="text-right">Écart (%)</th>
-            <th>Statut</th>
-            <th>Commentaire</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-row>
-          <tr>
-            <td>{{ row.metric_label }}</td>
-            <td class="text-right">{{ row.user_value ?? '--' }}</td>
-            <td class="text-right">{{ row.system_value ?? '--' }}</td>
-            <td class="text-right">{{ row.difference ?? '--' }}</td>
-            <td class="text-right">{{ row.gap_percentage ?? '--' }}</td>
-            <td>
-              <span class="metric-status" [ngClass]="getGlobalStatusClass(row.status)">
-                {{ getGlobalStatusLabel(row.status) }}
-              </span>
-            </td>
-            <td>{{ row.comment || '--' }}</td>
-          </tr>
-        </ng-template>
-      </p-table>
+      <ng-container *ngIf="!isRollupEnabled(); else rollupResultTable">
+        <p-table [value]="analysisResult.metrics" responsiveLayout="scroll" styleClass="p-datatable-striped p-datatable-gridlines" [rowHover]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Métrique</th>
+              <th class="text-right">Valeur utilisateur</th>
+              <th class="text-right">Valeur système</th>
+              <th class="text-right">Différence</th>
+              <th class="text-right">Écart (%)</th>
+              <th>Statut</th>
+              <th>Commentaire</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.metric_label }}</td>
+              <td class="text-right">{{ row.user_value ?? '--' }}</td>
+              <td class="text-right">{{ row.system_value ?? '--' }}</td>
+              <td class="text-right">{{ row.difference ?? '--' }}</td>
+              <td class="text-right">{{ row.gap_percentage ?? '--' }}</td>
+              <td>
+                <span class="metric-status" [ngClass]="getGlobalStatusClass(row.status)">
+                  {{ getGlobalStatusLabel(row.status) }}
+                </span>
+              </td>
+              <td>{{ row.comment || '--' }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+      <ng-template #rollupResultTable>
+        <div class="mb-2 text-sm">
+          <strong>Sessions source:</strong> {{ analysisResult.summary?.source_sessions_count ?? 0 }}
+          <span class="mx-2">|</span>
+          <strong>Lignes:</strong> {{ analysisResult.summary?.rows_count ?? 0 }}
+        </div>
+
+        <p-table [value]="rollupRows" responsiveLayout="scroll" styleClass="p-datatable-striped p-datatable-gridlines" [rowHover]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Segment</th>
+              <th>Date</th>
+              <th>Heure</th>
+              <th class="text-right">Hauteur manuelle</th>
+              <th class="text-right">Volume manuel</th>
+              <th>Pistolets</th>
+              <th class="text-right">Qte sortie manuelle</th>
+              <th>Heure LightOil</th>
+              <th class="text-right">Hauteur LightOil</th>
+              <th class="text-right">Volume LightOil</th>
+              <th class="text-right">Qte sortie LightOil</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.segment_label ?? '--' }}</td>
+              <td>{{ row.manual_date ?? '--' }}</td>
+              <td>{{ row.manual_hour ?? '--' }}</td>
+              <td class="text-right">{{ row.manual_height ?? 0 }}</td>
+              <td class="text-right">{{ row.manual_volume ?? 0 }}</td>
+              <td>{{ row.manual_pistols ?? '--' }}</td>
+              <td class="text-right">{{ row.manual_outing ?? 0 }}</td>
+              <td>{{ row.digital_hour ?? '--' }}</td>
+              <td class="text-right">{{ row.digital_height ?? 0 }}</td>
+              <td class="text-right">{{ row.digital_volume ?? 0 }}</td>
+              <td class="text-right">{{ row.digital_outing ?? 0 }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-template>
+
     </div>
   </div>
 </div>
