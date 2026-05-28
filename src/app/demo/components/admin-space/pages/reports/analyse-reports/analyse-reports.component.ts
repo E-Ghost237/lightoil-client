@@ -23,7 +23,6 @@ import {
 interface SelectOption {
   label: string;
   value: number;
-  unitPrice?: number | null;
 }
 
 type NumericUserDataKey = {
@@ -211,15 +210,10 @@ export class AnalyseReportsComponent implements OnInit {
       mechanical_closing_index: [{ value: null, disabled: true }],
       mechanical_delta_index: [{ value: null, disabled: true }],
 
-      declared_sales_quantity: [null, [Validators.min(0)]],
+      declared_sales_quantity: [{ value: null, disabled: true }],
       sold_by_electronic_index: [{ value: null, disabled: true }],
       sold_by_mechanical_index: [{ value: null, disabled: true }],
-      stock_based_sale: [{ value: null, disabled: true }],
-
-      unit_price: [{ value: null, disabled: true }],
-      expected_amount: [{ value: null, disabled: true }],
-      cash_sales_amount: [null, [Validators.min(0)]],
-      amount_gap: [{ value: null, disabled: true }]
+      stock_based_sale: [{ value: null, disabled: true }]
     });
   }
 
@@ -262,10 +256,6 @@ export class AnalyseReportsComponent implements OnInit {
       if (numericStationId) {
         this.loadTanks(numericStationId);
       }
-    });
-
-    this.filtersForm.get('fuel_type_id')?.valueChanges.subscribe(() => {
-      this.syncSalesUnitPriceFromSelectedFuelType();
     });
 
     this.filtersForm.get('rollup_enabled')?.valueChanges.subscribe((enabled) => {
@@ -464,14 +454,9 @@ export class AnalyseReportsComponent implements OnInit {
       declared_sales_quantity: null,
       sold_by_electronic_index: null,
       sold_by_mechanical_index: null,
-      stock_based_sale: null,
-      unit_price: null,
-      expected_amount: null,
-      cash_sales_amount: null,
-      amount_gap: null
+      stock_based_sale: null
     });
     this.resetPistolIndexes(this.salesForm);
-    this.syncSalesUnitPriceFromSelectedFuelType();
     this.updateSalesComputedFields();
 
     this.filtersForm.patchValue({
@@ -634,8 +619,6 @@ export class AnalyseReportsComponent implements OnInit {
           label: String(station?.formated_name ?? station?.name ?? `Station #${station?.id ?? ''}`),
           value: Number(station?.id ?? 0)
         })).filter((option: SelectOption) => option.value > 0);
-
-        this.syncSalesUnitPriceFromSelectedFuelType();
       },
       error: () => {
         this.stationOptions = [];
@@ -659,8 +642,6 @@ export class AnalyseReportsComponent implements OnInit {
           label: String(tank?.reference ?? tank?.sensor_reference ?? tank?.name ?? `Cuve #${tank?.id ?? ''}`),
           value: Number(tank?.id ?? 0)
         })).filter((option: SelectOption) => option.value > 0);
-
-        this.syncSalesUnitPriceFromSelectedFuelType();
       },
       error: () => {
         this.tankOptions = [];
@@ -674,49 +655,13 @@ export class AnalyseReportsComponent implements OnInit {
         const products = response?.data ?? response?.products ?? response ?? [];
         this.fuelTypeOptions = (Array.isArray(products) ? products : []).map((product: any) => ({
           label: String(product?.name ?? product?.label ?? `Produit #${product?.id ?? ''}`),
-          value: Number(product?.id ?? 0),
-          unitPrice: this.resolveProductUnitPrice(product)
+          value: Number(product?.id ?? 0)
         })).filter((option: SelectOption) => option.value > 0);
-
-        this.syncSalesUnitPriceFromSelectedFuelType();
       },
       error: () => {
         this.fuelTypeOptions = [];
-        this.syncSalesUnitPriceFromSelectedFuelType();
       }
     });
-  }
-
-  private resolveProductUnitPrice(product: any): number | null {
-    const candidates = [
-      product?.price,
-      product?.product_price,
-      product?.unit_price,
-      product?.pivot?.product_price,
-      product?.pivot?.unit_price
-    ];
-
-    for (const candidate of candidates) {
-      const num = Number(candidate);
-      if (Number.isFinite(num) && num >= 0) {
-        return num;
-      }
-    }
-
-    return null;
-  }
-
-  private syncSalesUnitPriceFromSelectedFuelType(): void {
-    const fuelTypeId = Number(this.filtersForm.get('fuel_type_id')?.value ?? 0) || null;
-    const matched = fuelTypeId
-      ? this.fuelTypeOptions.find((option) => option.value === fuelTypeId)
-      : null;
-
-    this.salesForm.patchValue({
-      unit_price: matched?.unitPrice ?? null
-    }, { emitEvent: false });
-
-    this.updateSalesComputedFields();
   }
 
   private validateBeforeSubmit(): boolean {
@@ -834,14 +779,18 @@ export class AnalyseReportsComponent implements OnInit {
 
   private buildUnifiedManualSection(analysisType: AnalysisType): any {
     const userData = this.buildUserData(analysisType);
-    const pistols = this.buildPistolRows(this.resolveFormForAnalysis(analysisType), userData.declared_sales_quantity);
+    const declaredSalesFromOutings = this.toNullableNumber(this.outingsForm.get('declared_outing_quantity')?.value);
+    const declaredSalesQuantity = analysisType === 'SALES'
+      ? declaredSalesFromOutings
+      : userData.declared_sales_quantity;
+    const pistols = this.buildPistolRows(this.resolveFormForAnalysis(analysisType), declaredSalesQuantity ?? undefined);
 
     return {
       initial_stock: userData.initial_stock,
       received_quantity: userData.received_quantity,
       final_stock: userData.final_stock,
       declared_outing_quantity: userData.declared_outing_quantity,
-      declared_sales_quantity: userData.declared_sales_quantity,
+      declared_sales_quantity: declaredSalesQuantity ?? undefined,
       liquid_height: userData.liquid_height,
       liquid_volume: userData.liquid_volume,
       pistols,
@@ -987,7 +936,7 @@ export class AnalyseReportsComponent implements OnInit {
     this.setOptionalNumber(userData, 'mechanical_opening_index', raw.mechanical_opening_index);
     this.setOptionalNumber(userData, 'mechanical_closing_index', raw.mechanical_closing_index);
     this.setOptionalNumber(userData, 'mechanical_delta_index', raw.mechanical_delta_index);
-    this.setOptionalNumber(userData, 'declared_sales_quantity', raw.declared_sales_quantity);
+    this.setOptionalNumber(userData, 'declared_sales_quantity', this.outingsForm.get('declared_outing_quantity')?.value);
 
     return userData;
   }
@@ -1212,20 +1161,11 @@ export class AnalyseReportsComponent implements OnInit {
     const initialStock = Number(raw.initial_stock);
     const received = Number(raw.received_quantity);
     const finalStock = Number(raw.final_stock);
-
-    const declaredSales = Number(raw.declared_sales_quantity);
-    const unitPrice = Number(raw.unit_price);
-    const cashSales = Number(raw.cash_sales_amount);
+    const commonDeclaredOuting = Number(this.outingsForm.get('declared_outing_quantity')?.value);
+    const declaredSales = Number.isFinite(commonDeclaredOuting) ? commonDeclaredOuting : null;
 
     const stockBasedSale = Number.isFinite(initialStock) && Number.isFinite(received) && Number.isFinite(finalStock)
       ? initialStock + received - finalStock
-      : null;
-
-    const expectedAmount = Number.isFinite(declaredSales) && Number.isFinite(unitPrice)
-      ? declaredSales * unitPrice
-      : null;
-    const amountGap = expectedAmount !== null && Number.isFinite(cashSales)
-      ? cashSales - expectedAmount
       : null;
 
     this.salesForm.patchValue({
@@ -1235,11 +1175,10 @@ export class AnalyseReportsComponent implements OnInit {
       mechanical_opening_index: totals.mechanicalOpening,
       mechanical_closing_index: totals.mechanicalClosing,
       mechanical_delta_index: totals.mechanicalDelta,
+      declared_sales_quantity: declaredSales,
       sold_by_electronic_index: totals.electronicDelta,
       sold_by_mechanical_index: totals.mechanicalDelta,
-      stock_based_sale: stockBasedSale,
-      expected_amount: expectedAmount,
-      amount_gap: amountGap
+      stock_based_sale: stockBasedSale
     }, { emitEvent: false });
   }
 
