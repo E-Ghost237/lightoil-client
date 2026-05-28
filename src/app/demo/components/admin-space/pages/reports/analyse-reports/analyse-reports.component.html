@@ -183,7 +183,7 @@
           (keydown)="preventNonNumericInput($event)"
           (paste)="preventNonNumericPaste($event)"
           (input)="sanitizeNumericInput($event)">
-          <h3 class="section-title">Saisie utilisateur - Données communes</h3>
+          <h3 class="section-title">Données communes</h3>
           <div class="grid">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Stock initial</label>
@@ -191,7 +191,7 @@
               <small class="field-error" *ngIf="hasControlError(outingsForm, 'initial_stock')">Champ requis (&gt;= 0).</small>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume reçu</label>
+              <label class="field-label">Volume dépoté</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
               <small class="field-error" *ngIf="hasControlError(outingsForm, 'received_quantity')">Champ requis (&gt;= 0).</small>
             </div>
@@ -212,7 +212,7 @@
               <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_height">
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume liquide</label>
+              <label class="field-label">Volume liquide (à l'instant T)</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_volume">
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
@@ -337,30 +337,11 @@
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Volume vendu déclaré</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="declared_sales_quantity" (keydown)="preventNonNumericInput($event)" (paste)="preventNonNumericPaste($event)" (input)="sanitizeNumericInput($event)">
+              <input type="number" class="form-control readonly-field" formControlName="declared_sales_quantity" readonly>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Vente basée sur stock</label>
               <input type="number" class="form-control readonly-field" formControlName="stock_based_sale" readonly>
-            </div>
-          </div>
-
-          <div class="grid mt-1">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Prix unitaire</label>
-              <input type="number" class="form-control readonly-field" formControlName="unit_price" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Montant théorique</label>
-              <input type="number" class="form-control readonly-field" formControlName="expected_amount" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Ventes cash</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="cash_sales_amount" (keydown)="preventNonNumericInput($event)" (paste)="preventNonNumericPaste($event)" (input)="sanitizeNumericInput($event)">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Écart de montant</label>
-              <input type="number" class="form-control readonly-field" formControlName="amount_gap" readonly>
             </div>
           </div>
         </form>
