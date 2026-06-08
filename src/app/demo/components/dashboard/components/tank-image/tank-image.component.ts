@@ -6,6 +6,18 @@ import { RecordService } from '../../services/record.service';
 import * as Utility from '../../../../utilities/utility';
 import { FlowMeterSensorService } from '../../../pages/services/flow-meter-sensor.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import {
+    computeTankOutputSumFromRecords,
+    DEFAULT_TANK_TIMEZONE,
+    getStrictTankDayRecords,
+    getTankFuelVolume,
+    getTankLocalDateKey,
+    getTankRecordDateKey,
+    getTankRecordMoment,
+    parseTankMetric,
+    roundTankMetric,
+    sortTankRecordsByMoment
+} from '../../utils/tank-output.util';
 
 @Component({
   selector: 'app-tank-image',
@@ -20,7 +32,7 @@ export class TankImageComponent implements OnChanges {
     user_details: any;
     volume: any = "indéterminée";
     dayOutputTotal = 0;
-    notificationTimezone = 'Africa/Douala';
+    notificationTimezone = DEFAULT_TANK_TIMEZONE;
 
 
     constructor(
@@ -66,15 +78,11 @@ export class TankImageComponent implements OnChanges {
     }
 
     private getRecordMoment(record: any): number {
-        const createdAt = record?.created_at ? new Date(record.created_at).getTime() : 0;
-        const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
-        return Math.max(createdAt, updatedAt);
+        return getTankRecordMoment(record);
     }
 
     private getSortedRecords(records: any[] = this.dataFromTankList?.listLastRecord ?? []) {
-        return [...records].sort(
-            (a, b) => this.getRecordMoment(b) - this.getRecordMoment(a)
-        );
+        return sortTankRecordsByMoment(records);
     }
 
     private getLatestRecord() {
@@ -86,16 +94,11 @@ export class TankImageComponent implements OnChanges {
     }
 
     private parseMetric(value: any): number | null {
-        if (value === null || value === undefined || value === '') {
-            return null;
-        }
-
-        const parsed = Number(value);
-        return Number.isNaN(parsed) ? null : parsed;
+        return parseTankMetric(value);
     }
 
     private getFuelVolume(record: any): number | null {
-        return this.parseMetric(record?.fuel_volume ?? record?.volume);
+        return getTankFuelVolume(record);
     }
 
     private getFuelVolumeAtFift(record: any): number {
@@ -170,70 +173,23 @@ export class TankImageComponent implements OnChanges {
             }
         }
 
-        return fallback;
+        return fallback || DEFAULT_TANK_TIMEZONE;
     }
 
     private getLocalDateKey(date: Date = new Date(), timezone: string = this.notificationTimezone): string {
-        try {
-            const parts = new Intl.DateTimeFormat('en-CA', {
-                timeZone: timezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).formatToParts(date);
-
-            const year = parts.find((part) => part.type === 'year')?.value;
-            const month = parts.find((part) => part.type === 'month')?.value;
-            const day = parts.find((part) => part.type === 'day')?.value;
-            if (year && month && day) {
-                return `${year}-${month}-${day}`;
-            }
-        } catch {
-            // Fallback to local timezone if Intl timezone formatting fails.
-        }
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return getTankLocalDateKey(date, timezone);
     }
 
     private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
-        const candidate = record?.updated_at ?? record?.created_at ?? null;
-        if (!candidate) {
-            return null;
-        }
-
-        const timestamp = new Date(candidate);
-        if (Number.isNaN(timestamp.getTime())) {
-            return null;
-        }
-
-        return this.getLocalDateKey(timestamp, timezone);
+        return getTankRecordDateKey(record, timezone);
     }
 
     private getRoundValue(num: number): number {
-        return Math.round(num * 100) / 100;
+        return roundTankMetric(num);
     }
 
     private computeOutputSumFromRecords(records: any[]): number {
-        if (!Array.isArray(records) || records.length < 2) {
-            return 0;
-        }
-
-        const sorted = this.getSortedRecords(records);
-        let total = 0;
-
-        for (let i = 0; i < sorted.length - 1; i++) {
-            const latestVolume = this.getFuelVolume(sorted[i]);
-            const previousVolume = this.getFuelVolume(sorted[i + 1]);
-
-            if (latestVolume !== null && previousVolume !== null && latestVolume <= previousVolume) {
-                total += (previousVolume - latestVolume);
-            }
-        }
-
-        return this.getRoundValue(total);
+        return computeTankOutputSumFromRecords(records);
     }
 
     private computeDayOutputFromCurrentRecords(dayKey: string): number {
@@ -243,10 +199,7 @@ export class TankImageComponent implements OnChanges {
     }
 
     private getStrictDayRecords(records: any[], dayKey: string): any[] {
-        const source = Array.isArray(records) ? records : [];
-        return source
-            .filter((record: any) => this.getRecordDateKey(record) === dayKey)
-            .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
+        return getStrictTankDayRecords(records, dayKey, this.notificationTimezone);
     }
 
     private refreshDayOutputTotal(): void {
