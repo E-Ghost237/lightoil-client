@@ -316,9 +316,8 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getListDayRecord(){
-        if(this.tankDetailsData?.listLastRecord?.length > 0){
-
-            return this.tankDetailsData.listLastRecord;
+        if (this.ajusted_records?.length > 0) {
+            return this.ajusted_records;
         }
         return [];
     }
@@ -911,30 +910,24 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     output_volume = { id: 0, volume: 0 };
     getOutputVolumes(records: Array<any>) {
-        let i = 0;
-        let last_volume: number | null;
-        let new_volume: number | null;
-        records = this.records;
+        const sourceRecords = this.getSortedRecords(Array.isArray(records) ? records : []);
         this.output_volumes = [];
 
-        if (records.length > 0) {
-            records.forEach(record => {
-                if (i < (records.length - 1)) {
-                    i = i+1;
-                    // ("Record "+[i]+":", records[i]);
-                }
-                new_volume = this.getFuelVolume(record);
-                last_volume = this.getFuelVolume(records[i]);
-                // this.output_volume = { id: record.id, volume: last_volume - new_volume };
-                // this.output_volumes.push(this.output_volume);
-
-                if (new_volume !== null && last_volume !== null && new_volume <= last_volume) {
-                    this.output_volume = { id: record.id, volume: last_volume - new_volume };
-                    this.output_volumes.push(this.output_volume);
-                }
-            });
+        if (sourceRecords.length < 2) {
+            return;
         }
 
+        for (let i = 0; i < sourceRecords.length - 1; i++) {
+            const record = sourceRecords[i];
+            const currentVolume = this.getFuelVolume(record);
+            const nextVolume = this.getFuelVolume(sourceRecords[i + 1]);
+            const outingVolume = this.getValidatedOutingStep(record, currentVolume, nextVolume);
+
+            this.output_volumes.push({
+                id: record.id,
+                volume: outingVolume
+            });
+        }
     }
 
     ajustedRecords(records: Array<any> = []) {
