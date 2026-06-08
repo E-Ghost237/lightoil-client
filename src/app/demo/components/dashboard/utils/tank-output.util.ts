@@ -17,13 +17,53 @@ export function getTankFuelVolume(record: any): number | null {
     return parseTankMetric(record?.fuel_volume ?? record?.volume);
 }
 
+function getRawTankTimestamp(value: any): string | null {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    if (value instanceof Date) {
+        if (Number.isNaN(value.getTime())) {
+            return null;
+        }
+
+        const year = value.getFullYear();
+        const month = String(value.getMonth() + 1).padStart(2, '0');
+        const day = String(value.getDate()).padStart(2, '0');
+        const hours = String(value.getHours()).padStart(2, '0');
+        const minutes = String(value.getMinutes()).padStart(2, '0');
+        const seconds = String(value.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    const timestamp = String(value).trim();
+    return timestamp.length > 0 ? timestamp : null;
+}
+
+function getRawTankDateKey(value: any): string | null {
+    const timestamp = getRawTankTimestamp(value);
+    const match = timestamp?.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return match ? `${match[1]}-${match[2]}-${match[3]}` : null;
+}
+
+function getRawTankMoment(value: any): number {
+    const timestamp = getRawTankTimestamp(value);
+    if (!timestamp) {
+        return 0;
+    }
+
+    const normalized = timestamp.includes('T') ? timestamp : timestamp.replace(' ', 'T');
+    const parsed = new Date(normalized).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 export function getTankRecordMoment(record: any): number {
-    const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
+    const updatedAt = getRawTankMoment(record?.updated_at);
     if (updatedAt > 0) {
         return updatedAt;
     }
 
-    return record?.created_at ? new Date(record.created_at).getTime() : 0;
+    return getRawTankMoment(record?.created_at);
 }
 
 export function sortTankRecordsByMoment(records: any[] = []): any[] {
@@ -56,6 +96,11 @@ export function getTankLocalDateKey(date: Date = new Date(), timezone: string = 
 }
 
 export function getTankRecordDateKey(record: any, timezone: string = DEFAULT_TANK_TIMEZONE): string | null {
+    const rawDateKey = getRawTankDateKey(record?.updated_at ?? record?.created_at ?? null);
+    if (rawDateKey) {
+        return rawDateKey;
+    }
+
     const candidate = record?.updated_at ?? record?.created_at ?? null;
     if (!candidate) {
         return null;

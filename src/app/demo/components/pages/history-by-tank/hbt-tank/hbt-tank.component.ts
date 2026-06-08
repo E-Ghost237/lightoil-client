@@ -7,6 +7,7 @@ import { RecordService } from '../../../dashboard/services/record.service';
 import * as Utility from '../../../../utilities/utility';
 import { MessageService } from 'primeng/api';
 import { PdfService } from 'src/app/demo/services/pdf.service';
+import { getTankRecordDateKey, getTankRecordMoment } from '../../../dashboard/utils/tank-output.util';
 
 
 @Component({
@@ -98,23 +99,11 @@ export class HbtTankComponent {
   }
 
   private getRecordMoment(record: any): number {
-    const createdAt = record?.created_at ? new Date(record.created_at).getTime() : 0;
-    const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
-    return Math.max(createdAt, updatedAt);
+    return getTankRecordMoment(record);
   }
 
   private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
-    const candidate = record?.updated_at ?? record?.created_at ?? null;
-    if (!candidate) {
-      return null;
-    }
-
-    const timestamp = new Date(candidate);
-    if (Number.isNaN(timestamp.getTime())) {
-      return null;
-    }
-
-    return this.getLocalDateKey(timestamp, timezone);
+    return getTankRecordDateKey(record, timezone);
   }
 
   private getStrictDayRecords(records: any[], dayKey: string): any[] {
