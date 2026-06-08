@@ -242,6 +242,13 @@ export class TankImageComponent implements OnChanges {
         return this.computeOutputSumFromRecords(sameDayRecords);
     }
 
+    private getStrictDayRecords(records: any[], dayKey: string): any[] {
+        const source = Array.isArray(records) ? records : [];
+        return source
+            .filter((record: any) => this.getRecordDateKey(record) === dayKey)
+            .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
+    }
+
     private refreshDayOutputTotal(): void {
         const tankId = Number(this.dataFromTankList?.tank?.id ?? 0);
         if (!tankId) {
@@ -257,7 +264,7 @@ export class TankImageComponent implements OnChanges {
             dateStart: dayKey
         }).subscribe({
             next: (response: any) => {
-                const dayRecords = Array.isArray(response) ? response : [];
+                const dayRecords = this.getStrictDayRecords(Array.isArray(response) ? response : [], dayKey);
                 this.dayOutputTotal = this.computeOutputSumFromRecords(dayRecords);
             },
             error: () => {

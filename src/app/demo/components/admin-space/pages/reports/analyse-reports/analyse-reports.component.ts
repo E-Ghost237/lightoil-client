@@ -8,6 +8,9 @@ import { LocalStorageService } from '../../../../auth/services/local-storage.ser
 import { UsersService } from '../../../services/users.service';
 import {
   AnalysisType,
+  ComparativeAnalysisDraftContext,
+  ComparativeAnalysisDraftReading,
+  ComparativeAnalysisDraftReadingPayload,
   ComparativeAnalysisPistolRow,
   ComparativeAnalysisPayload,
   ComparativeAnalysisResult,
@@ -23,6 +26,17 @@ import {
 interface SelectOption {
   label: string;
   value: number;
+}
+
+interface ManualReadingEntry {
+  id?: number;
+  reference_at: string;
+  date: string;
+  time: string;
+  segment_label: string;
+  liquid_height?: number;
+  liquid_volume?: number;
+  pistols: ComparativeAnalysisPistolRow[];
 }
 
 type NumericUserDataKey = {
@@ -84,19 +98,6 @@ const dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationEr
   return end.getTime() >= start.getTime() ? null : { date_range_invalid: true };
 };
 
-const indexRangeValidator = (openingKey: string, closingKey: string, errorKey: string): ValidatorFn => {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const opening = Number(control.get(openingKey)?.value);
-    const closing = Number(control.get(closingKey)?.value);
-
-    if (!Number.isFinite(opening) || !Number.isFinite(closing)) {
-      return null;
-    }
-
-    return closing >= opening ? null : { [errorKey]: true };
-  };
-};
-
 @Component({
   selector: 'app-analyse-reports',
   templateUrl: './analyse-reports.component.html',
@@ -131,6 +132,11 @@ export class AnalyseReportsComponent implements OnInit {
   rollupRows: any[] = [];
   private lastRollupPayload: ComparativeRollupPayload | null = null;
   private unifiedSessionIds: Partial<Record<AnalysisType, number>> = {};
+  manualReadings: ManualReadingEntry[] = [];
+  loadingDraftReadings: boolean = false;
+  savingDraftReading: boolean = false;
+  clearingDraftReadings: boolean = false;
+  private draftLoadToken: number = 0;
 
   get isRecapMode(): boolean {
     return this.isRollupEnabled();
@@ -163,9 +169,9 @@ export class AnalyseReportsComponent implements OnInit {
     }, { validators: dateRangeValidator });
 
     this.outingsForm = this.fb.group({
-      initial_stock: [null, [Validators.required, Validators.min(0)]],
-      received_quantity: [null, [Validators.required, Validators.min(0)]],
-      final_stock: [null, [Validators.required, Validators.min(0)]],
+      initial_stock: [null, [Validators.min(0)]],
+      received_quantity: [null, [Validators.min(0)]],
+      final_stock: [null, [Validators.min(0)]],
       declared_outing_quantity: [null, [Validators.min(0)]],
       calculated_outing_quantity: [{ value: null, disabled: true }],
       liquid_height: [null, [Validators.min(0)]],
@@ -181,10 +187,10 @@ export class AnalyseReportsComponent implements OnInit {
     });
 
     this.stockForm = this.fb.group({
-      initial_stock: [null, [Validators.required, Validators.min(0)]],
-      received_quantity: [null, [Validators.required, Validators.min(0)]],
+      initial_stock: [null, [Validators.min(0)]],
+      received_quantity: [null, [Validators.min(0)]],
       declared_outing_quantity: [null, [Validators.min(0)]],
-      final_stock: [null, [Validators.required, Validators.min(0)]],
+      final_stock: [null, [Validators.min(0)]],
       theoretical_stock: [{ value: null, disabled: true }],
       stock_gap: [{ value: null, disabled: true }],
       liquid_height: [null, [Validators.min(0)]],
@@ -241,6 +247,8 @@ export class AnalyseReportsComponent implements OnInit {
       this.filtersForm.patchValue({ station_id: null, tank_id: null }, { emitEvent: false });
       this.stationOptions = [];
       this.tankOptions = [];
+      this.manualReadings = [];
+      this.draftLoadToken++;
 
       const numericCompanyId = Number(companyId ?? 0) || null;
       if (numericCompanyId) {
@@ -251,11 +259,23 @@ export class AnalyseReportsComponent implements OnInit {
     this.filtersForm.get('station_id')?.valueChanges.subscribe((stationId) => {
       this.filtersForm.patchValue({ tank_id: null }, { emitEvent: false });
       this.tankOptions = [];
+      this.manualReadings = [];
+      this.draftLoadToken++;
 
       const numericStationId = Number(stationId ?? 0) || null;
       if (numericStationId) {
         this.loadTanks(numericStationId);
       }
+    });
+
+    this.filtersForm.get('tank_id')?.valueChanges.subscribe(() => {
+      this.manualReadings = [];
+      void this.loadDraftReadingsForCurrentContext();
+    });
+
+    this.filtersForm.get('fuel_type_id')?.valueChanges.subscribe(() => {
+      this.manualReadings = [];
+      void this.loadDraftReadingsForCurrentContext();
     });
 
     this.filtersForm.get('rollup_enabled')?.valueChanges.subscribe((enabled) => {
@@ -278,6 +298,8 @@ export class AnalyseReportsComponent implements OnInit {
     this.filtersForm.get('date_start')?.valueChanges.subscribe((dateStart) => {
       if (!this.isRollupEnabled()) {
         this.filtersForm.patchValue({ date_end: dateStart }, { emitEvent: false });
+        this.manualReadings = [];
+        void this.loadDraftReadingsForCurrentContext();
       }
     });
 
@@ -331,6 +353,10 @@ export class AnalyseReportsComponent implements OnInit {
   }
 
   setRecapMode(enabled: boolean): void {
+    if (enabled) {
+      this.manualReadings = [];
+    }
+
     this.filtersForm.patchValue({
       rollup_enabled: enabled,
       date_end: enabled
@@ -341,7 +367,194 @@ export class AnalyseReportsComponent implements OnInit {
     if (!enabled) {
       this.rollupBucket = 'NONE';
       this.filtersForm.patchValue({ rollup_bucket: 'NONE' }, { emitEvent: false });
+      void this.loadDraftReadingsForCurrentContext();
     }
+  }
+
+  async addCurrentReading(): Promise<void> {
+    this.msg.clear();
+    this.filtersForm.markAllAsTouched();
+    this.outingsForm.markAllAsTouched();
+
+    const reading = this.buildCurrentManualReading();
+    if (!reading) {
+      this.addMessage('warn', 'Lecture incomplète', 'Renseignez la date, l’heure, le volume/hauteur et au moins un index de pistolet.');
+      return;
+    }
+
+    if (this.manualReadings.some((item) => this.isSameManualReading(item, reading))) {
+      this.addMessage('info', 'Lecture déjà ajoutée', 'Cette lecture existe déjà dans la liste.');
+      return;
+    }
+
+    const payload = this.buildDraftReadingPayload(reading);
+    if (!payload) {
+      this.addMessage('warn', 'Contexte incomplet', 'Sélectionnez la station, la cuve, le produit et la date avant d’ajouter une lecture.');
+      return;
+    }
+
+    this.savingDraftReading = true;
+    try {
+      const response: any = await firstValueFrom(this.fuelReports.storeComparativeDraftReading(payload));
+      const savedReading = this.mapDraftReadingToManualReading(response?.data ?? payload);
+      this.upsertManualReading(savedReading);
+      this.addMessage('success', 'Lecture enregistrée', `Lecture du ${savedReading.date} à ${savedReading.time} enregistrée au récapitulatif.`);
+    } catch (error: any) {
+      const detail = this.extractBackendErrorMessage(error) || 'La lecture n’a pas pu être enregistrée.';
+      this.addMessage('error', 'Lecture non enregistrée', detail);
+    } finally {
+      this.savingDraftReading = false;
+    }
+  }
+
+  async removeManualReading(index: number): Promise<void> {
+    if (index < 0 || index >= this.manualReadings.length) {
+      return;
+    }
+
+    const reading = this.manualReadings[index];
+    if (!reading.id) {
+      this.manualReadings = this.manualReadings.filter((_, itemIndex) => itemIndex !== index);
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.fuelReports.deleteComparativeDraftReading(reading.id));
+      this.manualReadings = this.manualReadings.filter((_, itemIndex) => itemIndex !== index);
+      this.addMessage('success', 'Lecture retirée', 'La lecture a été supprimée du brouillon.');
+    } catch (error: any) {
+      const detail = this.extractBackendErrorMessage(error) || 'La lecture n’a pas pu être supprimée.';
+      this.addMessage('error', 'Suppression impossible', detail);
+    }
+  }
+
+  async clearManualReadings(): Promise<void> {
+    const context = this.buildDraftReadingContext();
+    if (!context) {
+      this.manualReadings = [];
+      return;
+    }
+
+    this.clearingDraftReadings = true;
+    try {
+      await firstValueFrom(this.fuelReports.clearComparativeDraftReadings(context));
+      this.manualReadings = [];
+      this.addMessage('success', 'Lectures vidées', 'Les lectures en attente ont été supprimées.');
+    } catch (error: any) {
+      const detail = this.extractBackendErrorMessage(error) || 'Les lectures n’ont pas pu être supprimées.';
+      this.addMessage('error', 'Nettoyage impossible', detail);
+    } finally {
+      this.clearingDraftReadings = false;
+    }
+  }
+
+  getReadingSummaryLabel(reading: ManualReadingEntry): string {
+    const height = reading.liquid_height === undefined ? '--' : `${reading.liquid_height}`;
+    const volume = reading.liquid_volume === undefined ? '--' : `${reading.liquid_volume}`;
+    return `${reading.date} ${reading.time} - hauteur ${height} cm, volume ${volume} L`;
+  }
+
+  private buildDraftReadingContext(): ComparativeAnalysisDraftContext | null {
+    if (this.isRollupEnabled()) {
+      return null;
+    }
+
+    const filters = this.filtersForm.getRawValue();
+    const stationId = Number(filters.station_id ?? 0) || null;
+    const tankId = Number(filters.tank_id ?? 0) || null;
+    const fuelTypeId = Number(filters.fuel_type_id ?? 0) || null;
+    const analysisDate = this.toIsoDate(filters.date_start);
+
+    if (!stationId || !tankId || !fuelTypeId || !analysisDate) {
+      return null;
+    }
+
+    const companyId = Number(filters.company_id ?? 0) || null;
+    return {
+      ...(companyId ? { company_id: companyId } : {}),
+      station_id: stationId,
+      tank_id: tankId,
+      fuel_type_id: fuelTypeId,
+      analysis_date: analysisDate,
+    };
+  }
+
+  private buildDraftReadingPayload(reading: ManualReadingEntry): ComparativeAnalysisDraftReadingPayload | null {
+    const context = this.buildDraftReadingContext();
+    if (!context) {
+      return null;
+    }
+
+    return {
+      ...context,
+      reference_at: reading.reference_at,
+      segment_label: reading.segment_label,
+      ...(reading.liquid_height !== undefined ? { liquid_height: reading.liquid_height } : {}),
+      ...(reading.liquid_volume !== undefined ? { liquid_volume: reading.liquid_volume } : {}),
+      pistols: reading.pistols ?? [],
+    };
+  }
+
+  private async loadDraftReadingsForCurrentContext(): Promise<void> {
+    const context = this.buildDraftReadingContext();
+    const token = ++this.draftLoadToken;
+
+    if (!context) {
+      this.manualReadings = [];
+      this.loadingDraftReadings = false;
+      return;
+    }
+
+    this.loadingDraftReadings = true;
+    try {
+      const response: any = await firstValueFrom(this.fuelReports.getComparativeDraftReadings(context));
+      if (token !== this.draftLoadToken) {
+        return;
+      }
+
+      const rows = Array.isArray(response?.data) ? response.data : [];
+      this.manualReadings = rows
+        .map((row: ComparativeAnalysisDraftReading) => this.mapDraftReadingToManualReading(row))
+        .sort((left: ManualReadingEntry, right: ManualReadingEntry) => left.reference_at.localeCompare(right.reference_at));
+    } catch (error: any) {
+      if (token === this.draftLoadToken) {
+        this.manualReadings = [];
+      }
+      const detail = this.extractBackendErrorMessage(error) || 'Les lectures en attente n’ont pas pu être chargées.';
+      this.addMessage('warn', 'Lectures non chargées', detail);
+    } finally {
+      if (token === this.draftLoadToken) {
+        this.loadingDraftReadings = false;
+      }
+    }
+  }
+
+  private mapDraftReadingToManualReading(reading: Partial<ComparativeAnalysisDraftReading>): ManualReadingEntry {
+    const referenceAt = String(reading.reference_at ?? '');
+    const date = String(reading.date ?? referenceAt.slice(0, 10));
+    const rawTime = String(reading.time ?? referenceAt.slice(11, 16));
+    const time = this.normalizeReferenceTime(rawTime) || rawTime || '00:00';
+    const pistols = Array.isArray(reading.pistols) ? reading.pistols : [];
+    const liquidHeight = this.toNullableNumber(reading.liquid_height);
+    const liquidVolume = this.toNullableNumber(reading.liquid_volume);
+
+    return {
+      ...(reading.id ? { id: Number(reading.id) } : {}),
+      reference_at: referenceAt || `${date} ${time}:00`,
+      date,
+      time,
+      segment_label: String(reading.segment_label ?? `Lecture ${time}`),
+      ...(liquidHeight !== null ? { liquid_height: liquidHeight } : {}),
+      ...(liquidVolume !== null ? { liquid_volume: liquidVolume } : {}),
+      pistols,
+    };
+  }
+
+  private upsertManualReading(reading: ManualReadingEntry): void {
+    this.manualReadings = [
+      ...this.manualReadings.filter((item) => item.reference_at !== reading.reference_at && (!reading.id || item.id !== reading.id)),
+      reading,
+    ].sort((left, right) => left.reference_at.localeCompare(right.reference_at));
   }
 
   async launchAnalysis(): Promise<void> {
@@ -380,6 +593,7 @@ export class AnalyseReportsComponent implements OnInit {
         this.unifiedSessionIds = this.extractUnifiedSessionIds(response);
         this.analysisResult = normalized;
         this.analysisGlobalStatus = this.resolveGlobalStatus(normalized);
+        this.manualReadings = [];
         this.addMessage('success', 'Analyse lancée', 'Analyse comparative unifiée terminée avec succès.');
       }
     } catch (error: any) {
@@ -396,6 +610,7 @@ export class AnalyseReportsComponent implements OnInit {
     this.analysisSessionId = null;
     this.analysisGlobalStatus = null;
     this.unifiedResultMode = false;
+    this.manualReadings = [];
     this.rollupRows = [];
     this.lastRollupPayload = null;
     this.unifiedSessionIds = {};
@@ -687,6 +902,11 @@ export class AnalyseReportsComponent implements OnInit {
       return false;
     }
 
+    if (this.buildUnifiedReadingsPayload().length === 0) {
+      this.addMessage('warn', 'Lecture requise', 'Ajoutez au moins une lecture horodatée avant de lancer l’analyse.');
+      return false;
+    }
+
     return true;
   }
 
@@ -768,6 +988,8 @@ export class AnalyseReportsComponent implements OnInit {
       reference_at: referenceAt,
       idempotency_key: this.buildIdempotencyKey('OUTINGS', stationId, tankId, fuelTypeId, periodStart, periodEnd) + ':unified',
       manual_data: {
+        common: this.buildUnifiedCommonData(),
+        readings: this.buildUnifiedReadingsPayload(),
         outings: this.buildUnifiedManualSection('OUTINGS'),
         stock: this.buildUnifiedManualSection('STOCK'),
         sales: this.buildUnifiedManualSection('SALES'),
@@ -775,6 +997,76 @@ export class AnalyseReportsComponent implements OnInit {
     };
 
     return payload;
+  }
+
+  private buildUnifiedCommonData(): any {
+    const raw = this.outingsForm.getRawValue();
+    return {
+      received_quantity: this.toNullableNumber(raw.received_quantity) ?? 0,
+    };
+  }
+
+  private buildUnifiedReadingsPayload(): ManualReadingEntry[] {
+    return [...this.manualReadings].sort((left, right) => left.reference_at.localeCompare(right.reference_at));
+  }
+
+  private buildCurrentManualReading(): ManualReadingEntry | null {
+    const filters = this.filtersForm.getRawValue();
+    const dateIso = this.toIsoDate(filters.date_start);
+    const time = this.normalizeReferenceTime(filters.reference_time);
+    if (!dateIso || !time) {
+      return null;
+    }
+
+    const raw = this.outingsForm.getRawValue();
+    const liquidHeight = this.toNullableNumber(raw.liquid_height);
+    const liquidVolume = this.toNullableNumber(raw.liquid_volume);
+    const pistols = this.buildReadingPistolRows();
+
+    if (liquidHeight === null && liquidVolume === null && pistols.length === 0) {
+      return null;
+    }
+
+    return {
+      reference_at: `${dateIso} ${time}:00`,
+      date: dateIso,
+      time,
+      segment_label: `Lecture ${time}`,
+      ...(liquidHeight !== null ? { liquid_height: liquidHeight } : {}),
+      ...(liquidVolume !== null ? { liquid_volume: liquidVolume } : {}),
+      pistols,
+    };
+  }
+
+  private buildReadingPistolRows(): ComparativeAnalysisPistolRow[] {
+    const rows = this.getPistolIndexes(this.outingsForm).controls;
+    const pistols: ComparativeAnalysisPistolRow[] = [];
+
+    rows.forEach((control: AbstractControl) => {
+      const raw = (control as FormGroup).getRawValue();
+      const label = String(raw?.nozzle_label ?? '').trim();
+      const electronicIndex = this.toNullableNumber(raw?.electronic_opening_index);
+      const mechanicalIndex = this.toNullableNumber(raw?.mechanical_opening_index);
+
+      if (!label && electronicIndex === null && mechanicalIndex === null) {
+        return;
+      }
+
+      pistols.push({
+        ...(label ? { pistol_label: label } : {}),
+        ...(electronicIndex !== null ? { electronic_opening_index: electronicIndex } : {}),
+        ...(mechanicalIndex !== null ? { mechanical_opening_index: mechanicalIndex } : {}),
+      });
+    });
+
+    return pistols;
+  }
+
+  private isSameManualReading(left: ManualReadingEntry, right: ManualReadingEntry): boolean {
+    return left.reference_at === right.reference_at
+      && JSON.stringify(left.pistols ?? []) === JSON.stringify(right.pistols ?? [])
+      && left.liquid_height === right.liquid_height
+      && left.liquid_volume === right.liquid_volume;
   }
 
   private buildUnifiedManualSection(analysisType: AnalysisType): any {
@@ -1191,11 +1483,6 @@ export class AnalyseReportsComponent implements OnInit {
       mechanical_opening_index: [null, [Validators.min(0)]],
       mechanical_closing_index: [null, [Validators.min(0)]],
       mechanical_delta_index: [{ value: null, disabled: true }]
-    }, {
-      validators: [
-        indexRangeValidator('electronic_opening_index', 'electronic_closing_index', 'electronic_index_range_invalid'),
-        indexRangeValidator('mechanical_opening_index', 'mechanical_closing_index', 'mechanical_index_range_invalid')
-      ]
     });
   }
 
@@ -1243,68 +1530,42 @@ export class AnalyseReportsComponent implements OnInit {
   } {
     const indexes = this.getPistolIndexes(form);
     let electronicOpening = 0;
-    let electronicClosing = 0;
     let mechanicalOpening = 0;
-    let mechanicalClosing = 0;
     let hasElectronicOpening = false;
-    let hasElectronicClosing = false;
     let hasMechanicalOpening = false;
-    let hasMechanicalClosing = false;
 
     indexes.controls.forEach((control: AbstractControl) => {
       const row = control as FormGroup;
       const raw = row.getRawValue();
       const rowElectronicOpening = Number(raw.electronic_opening_index);
-      const rowElectronicClosing = Number(raw.electronic_closing_index);
       const rowMechanicalOpening = Number(raw.mechanical_opening_index);
-      const rowMechanicalClosing = Number(raw.mechanical_closing_index);
 
-      const rowElectronicDelta = Number.isFinite(rowElectronicOpening) && Number.isFinite(rowElectronicClosing)
-        ? rowElectronicClosing - rowElectronicOpening
-        : null;
-      const rowMechanicalDelta = Number.isFinite(rowMechanicalOpening) && Number.isFinite(rowMechanicalClosing)
-        ? rowMechanicalClosing - rowMechanicalOpening
-        : null;
-
+      // A manual reading is an instant measurement. Closing indexes and deltas are
+      // only derived later by the backend recap from the first and last readings.
       row.patchValue({
-        electronic_delta_index: rowElectronicDelta,
-        mechanical_delta_index: rowMechanicalDelta
+        electronic_closing_index: null,
+        electronic_delta_index: null,
+        mechanical_closing_index: null,
+        mechanical_delta_index: null
       }, { emitEvent: false });
 
       if (Number.isFinite(rowElectronicOpening)) {
         hasElectronicOpening = true;
         electronicOpening += rowElectronicOpening;
       }
-      if (Number.isFinite(rowElectronicClosing)) {
-        hasElectronicClosing = true;
-        electronicClosing += rowElectronicClosing;
-      }
       if (Number.isFinite(rowMechanicalOpening)) {
         hasMechanicalOpening = true;
         mechanicalOpening += rowMechanicalOpening;
       }
-      if (Number.isFinite(rowMechanicalClosing)) {
-        hasMechanicalClosing = true;
-        mechanicalClosing += rowMechanicalClosing;
-      }
     });
 
-    const electronicOpeningTotal = hasElectronicOpening ? electronicOpening : null;
-    const electronicClosingTotal = hasElectronicClosing ? electronicClosing : null;
-    const mechanicalOpeningTotal = hasMechanicalOpening ? mechanicalOpening : null;
-    const mechanicalClosingTotal = hasMechanicalClosing ? mechanicalClosing : null;
-
     return {
-      electronicOpening: electronicOpeningTotal,
-      electronicClosing: electronicClosingTotal,
-      electronicDelta: electronicOpeningTotal !== null && electronicClosingTotal !== null
-        ? electronicClosingTotal - electronicOpeningTotal
-        : null,
-      mechanicalOpening: mechanicalOpeningTotal,
-      mechanicalClosing: mechanicalClosingTotal,
-      mechanicalDelta: mechanicalOpeningTotal !== null && mechanicalClosingTotal !== null
-        ? mechanicalClosingTotal - mechanicalOpeningTotal
-        : null
+      electronicOpening: hasElectronicOpening ? electronicOpening : null,
+      electronicClosing: null,
+      electronicDelta: null,
+      mechanicalOpening: hasMechanicalOpening ? mechanicalOpening : null,
+      mechanicalClosing: null,
+      mechanicalDelta: null
     };
   }
 

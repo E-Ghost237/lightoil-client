@@ -73,8 +73,9 @@
           </div>
 
           <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="!isRecapMode">
-            <label class="field-label" for="filter-reference-time">Heure de référence (optionnelle)</label>
+            <label class="field-label" for="filter-reference-time">Heure de lecture</label>
             <input id="filter-reference-time" type="time" class="form-control" formControlName="reference_time">
+            <small class="field-error" *ngIf="hasFiltersError('reference_time')">Heure requise.</small>
           </div>
 
           <div class="col-12 xl:col-2 lg:col-3 md:col-4">
@@ -183,30 +184,15 @@
           (keydown)="preventNonNumericInput($event)"
           (paste)="preventNonNumericPaste($event)"
           (input)="sanitizeNumericInput($event)">
-          <h3 class="section-title">Données communes</h3>
+          <h3 class="section-title">Données de lecture</h3>
+          <p class="analysis-subtitle mb-3">
+            Saisissez une lecture à l’heure indiquée. La première lecture du jour servira d’état initial et la dernière d’état final dans le récapitulatif.
+          </p>
           <div class="grid">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock initial</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="initial_stock">
-              <small class="field-error" *ngIf="hasControlError(outingsForm, 'initial_stock')">Champ requis (&gt;= 0).</small>
-            </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Volume dépoté</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
-              <small class="field-error" *ngIf="hasControlError(outingsForm, 'received_quantity')">Champ requis (&gt;= 0).</small>
             </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock final</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="final_stock">
-              <small class="field-error" *ngIf="hasControlError(outingsForm, 'final_stock')">Champ requis (&gt;= 0).</small>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Quantité sortie déclarée</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="declared_outing_quantity">
-            </div>
-          </div>
-
-          <div class="grid mt-1">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Hauteur liquide</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_height">
@@ -214,10 +200,6 @@
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Volume liquide (à l'instant T)</label>
               <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_volume">
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Sortie calculée (stock)</label>
-              <input type="number" class="form-control readonly-field" formControlName="calculated_outing_quantity" readonly>
             </div>
           </div>
 
@@ -237,32 +219,33 @@
                     <input type="text" class="form-control" formControlName="nozzle_label" placeholder="Ex: Pistolet 1">
                   </div>
                   <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ouv. électronique</label>
+                    <label class="field-label">Index électronique</label>
                     <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_opening_index">
                   </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
                     <label class="field-label">Index ferm. électronique</label>
                     <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_closing_index">
                   </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
                     <label class="field-label">Delta électronique</label>
                     <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
                   </div>
                   <div class="col-12 xl:col-2 lg:col-3 md:col-6">
-                    <label class="field-label">Index ouv. mécanique</label>
+                    <label class="field-label">Index mécanique</label>
                     <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_opening_index">
                   </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
                     <label class="field-label">Index ferm. mécanique</label>
                     <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_closing_index">
                   </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
                     <label class="field-label">Delta mécanique</label>
                     <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
                   </div>
-                  <div class="col-12 xl:col-2 lg:col-3 md:col-6 flex align-items-end">
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6 pistol-action-cell">
                     <p-button
                       label="Retirer"
+                      styleClass="pistol-action-button"
                       severity="danger"
                       [outlined]="true"
                       [disabled]="getOutingsPistolIndexes().length <= 1"
@@ -271,38 +254,32 @@
                   </div>
                 </div>
 
-                <small class="field-error" *ngIf="hasPistolRowError(row, 'electronic_index_range_invalid')">
-                  L’index fermeture électronique doit être supérieur ou égal à l’index ouverture.
-                </small>
-                <small class="field-error ml-2" *ngIf="hasPistolRowError(row, 'mechanical_index_range_invalid')">
-                  L’index fermeture mécanique doit être supérieur ou égal à l’index ouverture.
-                </small>
               </div>
             </div>
           </div>
 
           <div class="grid mt-2">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index ouverture électronique (total)</label>
+              <label class="field-label">Index électronique (total)</label>
               <input type="number" class="form-control readonly-field" formControlName="electronic_opening_index" readonly>
             </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
               <label class="field-label">Index fermeture électronique (total)</label>
               <input type="number" class="form-control readonly-field" formControlName="electronic_closing_index" readonly>
             </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
               <label class="field-label">Delta index électronique (total)</label>
               <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index ouverture mécanique (total)</label>
+              <label class="field-label">Index mécanique (total)</label>
               <input type="number" class="form-control readonly-field" formControlName="mechanical_opening_index" readonly>
             </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
               <label class="field-label">Index fermeture mécanique (total)</label>
               <input type="number" class="form-control readonly-field" formControlName="mechanical_closing_index" readonly>
             </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
               <label class="field-label">Delta index mécanique (total)</label>
               <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
             </div>
@@ -356,14 +333,37 @@
         </div>
       </ng-template>
 
+        <div class="reading-actions mt-3" *ngIf="!isRecapMode">
+          <p-button
+            label="Ajouter cette lecture"
+            severity="secondary"
+            [outlined]="true"
+            [loading]="savingDraftReading"
+            [disabled]="launchingAnalysis || savingDraftReading || loadingDraftReadings"
+            (onClick)="addCurrentReading()">
+          </p-button>
+          <span class="reading-help">Ajoutez plusieurs lectures dans la journée pour générer un récapitulatif initial/final cohérent.</span>
+        </div>
+
+        <div class="reading-list mt-3" *ngIf="manualReadings.length > 0 && !isRecapMode">
+          <div class="reading-list-header">
+            <h4 class="pistol-title">Lectures ajoutées</h4>
+            <button type="button" class="reading-clear" [disabled]="clearingDraftReadings" (click)="clearManualReadings()">Vider</button>
+          </div>
+          <div class="reading-item" *ngFor="let reading of manualReadings; let i = index">
+            <span>{{ getReadingSummaryLabel(reading) }}</span>
+            <button type="button" class="reading-remove" [disabled]="clearingDraftReadings" (click)="removeManualReading(i)">Retirer</button>
+          </div>
+        </div>
+
       <div class="actions-row mt-4">
         <div class="left-actions">
           <p-button
-            [label]="isRecapMode ? 'Générer le tableau de rapprochement' : 'Lancer l’analyse unifiée'"
+            [label]="isRecapMode ? 'Générer le tableau de rapprochement' : 'Lancer l’analyse des lectures'"
             severity="primary"
             [raised]="true"
             [loading]="launchingAnalysis"
-            [disabled]="launchingAnalysis"
+            [disabled]="launchingAnalysis || savingDraftReading || loadingDraftReadings"
             (onClick)="launchAnalysis()">
           </p-button>
 

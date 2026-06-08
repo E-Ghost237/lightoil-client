@@ -77,6 +77,7 @@ export interface ComparativeAnalysisPistolRow {
 }
 
 export interface ComparativeAnalysisUserDataRow {
+  row_type?: 'SEGMENT' | 'READING' | 'RECAP' | string;
   segment_start: string;
   segment_end: string;
   reference_at?: string;
@@ -137,6 +138,38 @@ export interface ComparativeAnalysisResult {
   summaries?: any[];
 }
 
+export interface UnifiedComparativeManualReading {
+  reference_at?: string;
+  date?: string;
+  time?: string;
+  segment_label?: string;
+  liquid_height?: number;
+  liquid_volume?: number;
+  pistols?: ComparativeAnalysisPistolRow[];
+}
+
+export interface ComparativeAnalysisDraftContext {
+  company_id?: number;
+  station_id: number;
+  tank_id: number;
+  fuel_type_id: number;
+  analysis_date: string;
+}
+
+export interface ComparativeAnalysisDraftReadingPayload extends ComparativeAnalysisDraftContext {
+  reference_at: string;
+  segment_label?: string;
+  liquid_height?: number;
+  liquid_volume?: number;
+  pistols?: ComparativeAnalysisPistolRow[];
+}
+
+export interface ComparativeAnalysisDraftReading extends ComparativeAnalysisDraftReadingPayload {
+  id: number;
+  date?: string;
+  time?: string;
+}
+
 export interface UnifiedComparativeManualSection {
   initial_stock?: number;
   received_quantity?: number;
@@ -159,6 +192,8 @@ export interface UnifiedComparativeRunPayload {
   reference_at?: string | null;
   idempotency_key?: string;
   manual_data: {
+    common?: Partial<UnifiedComparativeManualSection>;
+    readings?: UnifiedComparativeManualReading[];
     outings: UnifiedComparativeManualSection;
     stock: UnifiedComparativeManualSection;
     sales: UnifiedComparativeManualSection;
@@ -260,6 +295,22 @@ export class FuelReportsService {
 
   exportComparativeAnalysisExcel(id: number): Observable<Blob> {
     return this.http.get(environment.apiUrl + `${this.comparativeBasePath}/${id}/export/excel`, { responseType: 'blob' });
+  }
+
+  getComparativeDraftReadings(context: ComparativeAnalysisDraftContext): Observable<any> {
+    return this.http.get<any>(environment.apiUrl + `${this.comparativeBasePath}/draft-readings`, { params: context as any });
+  }
+
+  storeComparativeDraftReading(payload: ComparativeAnalysisDraftReadingPayload): Observable<any> {
+    return this.http.post<any>(environment.apiUrl + `${this.comparativeBasePath}/draft-readings`, payload);
+  }
+
+  deleteComparativeDraftReading(id: number): Observable<any> {
+    return this.http.delete<any>(environment.apiUrl + `${this.comparativeBasePath}/draft-readings/${id}`);
+  }
+
+  clearComparativeDraftReadings(context: ComparativeAnalysisDraftContext): Observable<any> {
+    return this.http.delete<any>(environment.apiUrl + `${this.comparativeBasePath}/draft-readings`, { params: context as any });
   }
 
   getComparativeRollupReconciliation(payload: ComparativeRollupPayload): Observable<any> {
