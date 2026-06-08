@@ -283,7 +283,7 @@ export class TankImageComponent implements OnChanges {
     getLastIncomeDateRecord(){
         const latestRecord = this.getLatestRecord();
         if(latestRecord){
-            return ''+Utility.toLocalDateTime(latestRecord.station_local_updated_at || latestRecord.updated_at);
+            return ''+Utility.toLocalDateTime(latestRecord.updated_at);
         }else{
             return 'Pas de derniere donnee';
         }
@@ -395,7 +395,7 @@ export class TankImageComponent implements OnChanges {
     getLastIncomeDateRecordFlow(){
         const latestRecord = this.getLatestRecord();
         if(latestRecord){
-            return ''+Utility.toLocalDateTime(latestRecord.station_local_updated_at || latestRecord.updated_at);
+            return ''+Utility.toLocalDateTime(latestRecord.updated_at);
         }else{
             return 'Pas de derniere donnee';
         }
