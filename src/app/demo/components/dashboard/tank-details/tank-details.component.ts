@@ -190,7 +190,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
             for (let i = (listRecord.length-1); i >=0; i--) {
                 const record = listRecord[i];
-                time.push(this.getToLocalDateTime(record?.station_local_updated_at || record?.updated_at))
+                time.push(this.getToLocalDateTime(record?.updated_at))
                 d.push(this.getRoundValue(record?.density));
                 l.push(this.getRoundValue(record?.liquid_height));
                 v.push(this.getFuelVolume(record));
@@ -436,7 +436,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     getLastIncomeDateRecord(){
         const latestRecord = this.getLatestRecord();
         if(latestRecord){
-            return ''+Utility.toLocalDateTime(latestRecord.station_local_updated_at || latestRecord.updated_at);
+            return ''+Utility.toLocalDateTime(latestRecord.updated_at);
         }
         return '---';
     }
@@ -869,7 +869,6 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
                 output_volume: output_volume ? output_volume.volume : null,  // Get volume from output_volumes
                 created_at: record.created_at,
                 updated_at: record.updated_at,
-                station_local_updated_at: record.station_local_updated_at,
                 deleted_at: record.deleted_at
             };
         });
