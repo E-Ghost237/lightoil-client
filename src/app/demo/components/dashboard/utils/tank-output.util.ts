@@ -18,9 +18,12 @@ export function getTankFuelVolume(record: any): number | null {
 }
 
 export function getTankRecordMoment(record: any): number {
-    const createdAt = record?.created_at ? new Date(record.created_at).getTime() : 0;
     const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
-    return Math.max(createdAt, updatedAt);
+    if (updatedAt > 0) {
+        return updatedAt;
+    }
+
+    return record?.created_at ? new Date(record.created_at).getTime() : 0;
 }
 
 export function sortTankRecordsByMoment(records: any[] = []): any[] {

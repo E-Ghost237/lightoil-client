@@ -183,7 +183,7 @@
                             <ng-template pTemplate="body" let-record let-columns="columns" let-rowIndex="rowIndex">
                                 <tr>
                                     <td>{{rowIndex+1}}</td>
-                                    <td>{{getToLocalDateTime(record.updated_at)}}</td>
+                                    <td>{{getToLocalDateTime((record.station_local_updated_at || record.updated_at))}}</td>
                                     <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
                                     <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
                                     <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
@@ -249,7 +249,7 @@
                     <ng-template pTemplate="body" let-record let-rowData let-columns="columns" let-rowIndex="rowIndex">
                         <tr>
                             <td>{{rowIndex+1}}</td>
-                            <td>{{getToLocalDateTime(record.updated_at)}}</td>
+                            <td>{{getToLocalDateTime((record.station_local_updated_at || record.updated_at))}}</td>
                             <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
                             <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
                             <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeAtFiftValue(record)}}</td>
