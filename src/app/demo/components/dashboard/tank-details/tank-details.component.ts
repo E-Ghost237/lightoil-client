@@ -14,6 +14,19 @@ import { UIChart } from 'primeng/chart';
 import { PdfService } from 'src/app/demo/services/pdf.service';
 import { LocalStorageService } from '../../auth/services/local-storage.service';
 import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
+import {
+    buildTankOutputVolumeRows,
+    computeTankOutputSumFromRecords,
+    DEFAULT_TANK_TIMEZONE,
+    getStrictTankDayRecords,
+    getTankFuelVolume,
+    getTankLocalDateKey,
+    getTankRecordDateKey,
+    getTankRecordMoment,
+    parseTankMetric,
+    roundTankMetric,
+    sortTankRecordsByMoment
+} from '../utils/tank-output.util';
 
 @Component({
   selector: 'app-tank-details',
@@ -42,7 +55,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     dayNotifications: any[] = [];
     dayNotificationTotal = 0;
     dayOutputTotal = 0;
-    notificationTimezone = 'Africa/Douala';
+    notificationTimezone = DEFAULT_TANK_TIMEZONE;
     notificationDateKey = '';
     private silentRefreshSubscription: Subscription | null = null;
 
@@ -99,13 +112,11 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     private getRecordMoment(record: any): number {
-        const createdAt = record?.created_at ? new Date(record.created_at).getTime() : 0;
-        const updatedAt = record?.updated_at ? new Date(record.updated_at).getTime() : 0;
-        return Math.max(createdAt, updatedAt);
+        return getTankRecordMoment(record);
     }
 
     private getSortedRecords(records: any[] = []): any[] {
-        return [...records].sort((a, b) => this.getRecordMoment(b) - this.getRecordMoment(a));
+        return sortTankRecordsByMoment(records);
     }
 
     private getLatestRecord() {
@@ -117,16 +128,11 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     private parseMetric(value: any): number | null {
-        if (value === null || value === undefined || value === '') {
-            return null;
-        }
-
-        const parsed = Number(value);
-        return Number.isNaN(parsed) ? null : parsed;
+        return parseTankMetric(value);
     }
 
     private getFuelVolume(record: any): number | null {
-        return this.parseMetric(record?.fuel_volume ?? record?.volume);
+        return getTankFuelVolume(record);
     }
 
     private getFuelVolumeAtFift(record: any): number {
@@ -468,7 +474,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     private resolveStationTimezone(): string {
-        const fallback = 'Africa/Douala';
+        const fallback = DEFAULT_TANK_TIMEZONE;
         const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
         const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.stationId)) ?? null;
 
@@ -494,88 +500,15 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     private getLocalDateKey(date: Date = new Date(), timezone: string = this.notificationTimezone): string {
-        try {
-            const parts = new Intl.DateTimeFormat('en-CA', {
-                timeZone: timezone,
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).formatToParts(date);
-
-            const year = parts.find((part) => part.type === 'year')?.value;
-            const month = parts.find((part) => part.type === 'month')?.value;
-            const day = parts.find((part) => part.type === 'day')?.value;
-            if (year && month && day) {
-                return `${year}-${month}-${day}`;
-            }
-        } catch {
-            // Fallback to local timezone if Intl timezone formatting fails.
-        }
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return getTankLocalDateKey(date, timezone);
     }
 
     private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
-        const candidate = record?.updated_at ?? record?.created_at ?? null;
-        if (!candidate) {
-            return null;
-        }
-
-        const timestamp = new Date(candidate);
-        if (Number.isNaN(timestamp.getTime())) {
-            return null;
-        }
-
-        return this.getLocalDateKey(timestamp, timezone);
-    }
-
-    private getValidatedOutingStep(record: any, currentVolume: number | null, nextVolume: number | null): number {
-        const selected = this.parseMetric(record?.qte_sortie);
-        if (selected !== null) {
-            return Math.max(0, this.getRoundValue(selected));
-        }
-
-        const mode = String(record?.outputs_mode ?? '').toLowerCase();
-        const validated = this.parseMetric(record?.qte_sortie_validated);
-        const legacy = this.parseMetric(record?.qte_sortie_legacy);
-
-        if (mode === 'new') {
-            if (validated !== null) {
-                return Math.max(0, this.getRoundValue(validated));
-            }
-        } else {
-            if (legacy !== null) {
-                return Math.max(0, this.getRoundValue(legacy));
-            }
-        }
-
-        if (currentVolume === null || nextVolume === null || currentVolume > nextVolume) {
-            return 0;
-        }
-
-        // Fallback aligns with validated outing floor to avoid micro-jitter (e.g. 0.01L).
-        const rawDrop = nextVolume - currentVolume;
-        return rawDrop >= 20 ? this.getRoundValue(rawDrop) : 0;
+        return getTankRecordDateKey(record, timezone);
     }
 
     private computeOutputSumFromRecords(records: any[]): number {
-        if (!Array.isArray(records) || records.length < 2) {
-            return 0;
-        }
-
-        const sorted = this.getSortedRecords(records);
-        let total = 0;
-
-        for (let i = 0; i < sorted.length - 1; i++) {
-            const latestVolume = this.getFuelVolume(sorted[i]);
-            const previousVolume = this.getFuelVolume(sorted[i + 1]);
-            total += this.getValidatedOutingStep(sorted[i], latestVolume, previousVolume);
-        }
-
-        return this.getRoundValue(total);
+        return computeTankOutputSumFromRecords(records);
     }
 
     private computeDayOutputFromCurrentRecords(dayKey: string): number {
@@ -585,10 +518,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     private getStrictDayRecords(records: any[], dayKey: string): any[] {
-        const source = Array.isArray(records) ? records : [];
-        return source
-            .filter((record: any) => this.getRecordDateKey(record) === dayKey)
-            .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
+        return getStrictTankDayRecords(records, dayKey, this.notificationTimezone);
     }
 
     private refreshDayOutputTotal(): void {
@@ -910,24 +840,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     output_volume = { id: 0, volume: 0 };
     getOutputVolumes(records: Array<any>) {
-        const sourceRecords = this.getSortedRecords(Array.isArray(records) ? records : []);
-        this.output_volumes = [];
-
-        if (sourceRecords.length < 2) {
-            return;
-        }
-
-        for (let i = 0; i < sourceRecords.length - 1; i++) {
-            const record = sourceRecords[i];
-            const currentVolume = this.getFuelVolume(record);
-            const nextVolume = this.getFuelVolume(sourceRecords[i + 1]);
-            const outingVolume = this.getValidatedOutingStep(record, currentVolume, nextVolume);
-
-            this.output_volumes.push({
-                id: record.id,
-                volume: outingVolume
-            });
-        }
+        this.output_volumes = buildTankOutputVolumeRows(records);
     }
 
     ajustedRecords(records: Array<any> = []) {
@@ -1007,7 +920,7 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getRoundValue(num:number){
-        return Math.round(num*100)/100;
+        return roundTankMetric(num);
     }
 
     ngOnDestroy() {
