@@ -1691,7 +1691,7 @@ export class AnalyseReportsComponent implements OnInit {
       return;
     }
 
-    const headers = ['Métrique', 'Valeur utilisateur', 'Valeur système', 'Différence', 'Écart (%)', 'Statut'];
+    const headers = ['Métrique', 'Valeur utilisateur', 'Valeur système', 'Différence', 'Statut'];
     const rows = this.analysisResult.metrics.map((metric) => [
       metric.metric_label,
       metric.user_value ?? '',
