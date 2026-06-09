@@ -463,7 +463,6 @@
               <td class="text-right">{{ row.user_value ?? '--' }}</td>
               <td class="text-right">{{ row.system_value ?? '--' }}</td>
               <td class="text-right">{{ row.difference ?? '--' }}</td>
-              <td class="text-right">{{ row.gap_percentage ?? '--' }}</td>
               <td>
                 <span class="metric-status" [ngClass]="getGlobalStatusClass(row.status)">
                   {{ getGlobalStatusLabel(row.status) }}
