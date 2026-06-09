@@ -159,6 +159,14 @@
   color: #4b5563;
 }
 
+.field-helper {
+  display: block;
+  margin-top: 0.32rem;
+  color: var(--analysis-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .field-error {
   display: inline-block;
   margin-top: 0.32rem;

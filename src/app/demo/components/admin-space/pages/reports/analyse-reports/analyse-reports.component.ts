@@ -28,6 +28,11 @@ interface SelectOption {
   value: number;
 }
 
+interface TextSelectOption {
+  label: string;
+  value: string;
+}
+
 interface ManualReadingEntry {
   id?: number;
   reference_at: string;
@@ -123,6 +128,7 @@ export class AnalyseReportsComponent implements OnInit {
   stationOptions: SelectOption[] = [];
   tankOptions: SelectOption[] = [];
   fuelTypeOptions: SelectOption[] = [];
+  pistolOptions: TextSelectOption[] = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'].map((label) => ({ label, value: label }));
 
   analysisSessionId: number | null = null;
   analysisResult: ComparativeAnalysisResult | null = null;
@@ -177,7 +183,7 @@ export class AnalyseReportsComponent implements OnInit {
       liquid_height: [null, [Validators.min(0)]],
       liquid_volume: [null, [Validators.min(0)]],
       nozzle: [''],
-      pistol_indexes: this.fb.array([this.createPistolIndexGroup('Pistolet 1')]),
+      pistol_indexes: this.fb.array([this.createPistolIndexGroup(this.getDefaultPistolLabel(0))]),
       electronic_opening_index: [{ value: null, disabled: true }],
       electronic_closing_index: [{ value: null, disabled: true }],
       electronic_delta_index: [{ value: null, disabled: true }],
@@ -195,7 +201,7 @@ export class AnalyseReportsComponent implements OnInit {
       stock_gap: [{ value: null, disabled: true }],
       liquid_height: [null, [Validators.min(0)]],
       liquid_volume: [null, [Validators.min(0)]],
-      pistol_indexes: this.fb.array([this.createPistolIndexGroup('Pistolet 1')]),
+      pistol_indexes: this.fb.array([this.createPistolIndexGroup(this.getDefaultPistolLabel(0))]),
       electronic_opening_index: [{ value: null, disabled: true }],
       electronic_closing_index: [{ value: null, disabled: true }],
       electronic_delta_index: [{ value: null, disabled: true }],
@@ -208,7 +214,7 @@ export class AnalyseReportsComponent implements OnInit {
       initial_stock: [null, [Validators.min(0)]],
       received_quantity: [null, [Validators.min(0)]],
       final_stock: [null, [Validators.min(0)]],
-      pistol_indexes: this.fb.array([this.createPistolIndexGroup('Pistolet 1')]),
+      pistol_indexes: this.fb.array([this.createPistolIndexGroup(this.getDefaultPistolLabel(0))]),
       electronic_opening_index: [{ value: null, disabled: true }],
       electronic_closing_index: [{ value: null, disabled: true }],
       electronic_delta_index: [{ value: null, disabled: true }],
@@ -336,7 +342,7 @@ export class AnalyseReportsComponent implements OnInit {
   addPistolRow(target: 'outings' | 'stock' | 'sales'): void {
     const form = this.getFormByTarget(target);
     const indexes = this.getPistolIndexes(form);
-    indexes.push(this.createPistolIndexGroup(`Pistolet ${indexes.length + 1}`));
+    indexes.push(this.createPistolIndexGroup(this.getDefaultPistolLabel(indexes.length)));
     this.refreshComputedByTarget(target);
   }
 
@@ -1098,7 +1104,6 @@ export class AnalyseReportsComponent implements OnInit {
       user_value: this.toNullableNumber(metric?.user_value ?? metric?.manual_value),
       system_value: this.toNullableNumber(metric?.system_value ?? metric?.digital_value),
       difference: this.toNullableNumber(metric?.difference),
-      gap_percentage: this.toNullableNumber(metric?.gap_percentage),
       status: this.normalizeStatus(metric?.status),
       comment: this.localizeMetricComment(String(metric?.comment ?? '')),
     }));
@@ -1298,14 +1303,15 @@ export class AnalyseReportsComponent implements OnInit {
     }
 
     if (sourceRows.length === 0) {
-      targetIndexes.push(this.createPistolIndexGroup('Pistolet 1'));
+      targetIndexes.push(this.createPistolIndexGroup(this.getDefaultPistolLabel(0)));
       return;
     }
 
     sourceRows.forEach((row: any, index: number) => {
-      const group = this.createPistolIndexGroup(String(row?.nozzle_label ?? `Pistolet ${index + 1}`));
+      const fallbackLabel = this.getDefaultPistolLabel(index);
+      const group = this.createPistolIndexGroup(String(row?.nozzle_label ?? fallbackLabel));
       group.patchValue({
-        nozzle_label: row?.nozzle_label ?? `Pistolet ${index + 1}`,
+        nozzle_label: row?.nozzle_label ?? fallbackLabel,
         electronic_opening_index: row?.electronic_opening_index,
         electronic_closing_index: row?.electronic_closing_index,
         electronic_delta_index: row?.electronic_delta_index,
@@ -1486,6 +1492,10 @@ export class AnalyseReportsComponent implements OnInit {
     });
   }
 
+  private getDefaultPistolLabel(index: number): string {
+    return this.pistolOptions[index]?.value ?? `S${index + 1}`;
+  }
+
   private getFormByTarget(target: 'outings' | 'stock' | 'sales'): FormGroup {
     if (target === 'stock') {
       return this.stockForm;
@@ -1505,7 +1515,7 @@ export class AnalyseReportsComponent implements OnInit {
     while (indexes.length > 0) {
       indexes.removeAt(0);
     }
-    indexes.push(this.createPistolIndexGroup('Pistolet 1'));
+    indexes.push(this.createPistolIndexGroup(this.getDefaultPistolLabel(0)));
   }
 
   private refreshComputedByTarget(target: 'outings' | 'stock' | 'sales'): void {
@@ -1697,7 +1707,6 @@ export class AnalyseReportsComponent implements OnInit {
       metric.user_value ?? '',
       metric.system_value ?? '',
       metric.difference ?? '',
-      metric.gap_percentage ?? '',
       metric.status
     ]);
 
@@ -1722,7 +1731,6 @@ export class AnalyseReportsComponent implements OnInit {
       const userValue = this.toNullableNumber(metric?.user_value ?? metric?.manual_value);
       const systemValue = this.toNullableNumber(metric?.system_value ?? metric?.digital_value);
       const difference = this.toNullableNumber(metric?.difference);
-      const gapPct = this.toNullableNumber(metric?.gap_percentage);
       const status = this.normalizeStatus(metric?.status);
 
       return {
@@ -1731,7 +1739,6 @@ export class AnalyseReportsComponent implements OnInit {
         user_value: userValue,
         system_value: systemValue,
         difference,
-        gap_percentage: gapPct,
         status,
         comment: this.localizeMetricComment(String(metric?.comment ?? ''))
       };
@@ -1758,7 +1765,6 @@ export class AnalyseReportsComponent implements OnInit {
         user_value: this.toNullableNumber(metric?.user_value ?? metric?.manual_value),
         system_value: this.toNullableNumber(metric?.system_value ?? metric?.digital_value),
         difference: this.toNullableNumber(metric?.difference),
-        gap_percentage: this.toNullableNumber(metric?.gap_percentage),
         status: this.normalizeStatus(metric?.status),
         comment: this.localizeMetricComment(String(metric?.comment ?? ''))
       })),
@@ -1807,13 +1813,9 @@ export class AnalyseReportsComponent implements OnInit {
     const metrics: ComparativeMetric[] = Object.entries(userValues).map(([key, value]) => {
       const userValue = typeof value === 'number' ? this.roundTo2(value) : null;
       const systemValue = userValue === null ? null : this.roundTo2(userValue * 0.985);
-      const difference = (userValue !== null && systemValue !== null) ? this.roundTo2(userValue - systemValue) : null;
-      const gapPct = (difference !== null && userValue !== 0 && userValue !== null)
-        ? this.roundTo2((difference / userValue) * 100)
-        : null;
-
-      const absGap = Math.abs(gapPct ?? 0);
-      const status: 'NORMAL' | 'WARNING' | 'CRITICAL' = absGap >= 10 ? 'CRITICAL' : absGap >= 5 ? 'WARNING' : 'NORMAL';
+      const difference = (userValue !== null && systemValue !== null) ? this.roundTo2(Math.abs(userValue - systemValue)) : null;
+      const tolerance = systemValue !== null ? this.roundTo2((Math.abs(systemValue) * 3) / 1000) : null;
+      const status: 'NORMAL' | 'WARNING' | 'CRITICAL' = difference !== null && tolerance !== null && difference > tolerance ? 'WARNING' : 'NORMAL';
 
       return {
         metric_key: key,
@@ -1821,9 +1823,8 @@ export class AnalyseReportsComponent implements OnInit {
         user_value: userValue,
         system_value: systemValue,
         difference,
-        gap_percentage: gapPct,
         status,
-        comment: status === 'NORMAL' ? 'Conforme' : status === 'WARNING' ? 'Vérification recommandée' : 'Écart critique à auditer'
+        comment: status === 'NORMAL' ? 'Écart dans la tolérance 3:1000.' : 'Écart au-delà de la tolérance 3:1000.'
       };
     });
 
@@ -2002,9 +2003,6 @@ export class AnalyseReportsComponent implements OnInit {
 
   private normalizeStatus(status: any): 'NORMAL' | 'WARNING' | 'CRITICAL' {
     const resolved = String(status ?? '').toUpperCase();
-    if (resolved === 'CRITICAL') {
-      return 'CRITICAL';
-    }
     if (resolved === 'WARNING') {
       return 'WARNING';
     }

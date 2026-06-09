@@ -123,7 +123,6 @@ export interface ComparativeMetric {
   user_value: number | null;
   system_value: number | null;
   difference: number | null;
-  gap_percentage: number | null;
   status: 'NORMAL' | 'WARNING' | 'CRITICAL';
   comment?: string;
 }
