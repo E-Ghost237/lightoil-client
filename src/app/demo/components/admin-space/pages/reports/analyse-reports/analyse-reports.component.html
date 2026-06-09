@@ -190,8 +190,9 @@
           </p>
           <div class="grid">
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume dépoté</label>
-              <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
+              <label class="field-label">Volume dépoté (livré/reçu)</label>
+              <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity" placeholder="0 si aucun dépotage">
+              <small class="field-helper">Volume reçu pendant la période. Il sert au calcul stock initial + volume reçu - stock final.</small>
             </div>
             <div class="col-12 xl:col-3 lg:col-4 md:col-6">
               <label class="field-label">Hauteur liquide</label>
@@ -216,7 +217,14 @@
                 <div class="grid">
                   <div class="col-12 xl:col-2 lg:col-3 md:col-6">
                     <label class="field-label">Pistolet</label>
-                    <input type="text" class="form-control" formControlName="nozzle_label" placeholder="Ex: Pistolet 1">
+                    <p-dropdown
+                      formControlName="nozzle_label"
+                      [options]="pistolOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Sélectionnez"
+                      styleClass="w-full">
+                    </p-dropdown>
                   </div>
                   <div class="col-12 xl:col-2 lg:col-3 md:col-6">
                     <label class="field-label">Index électronique</label>
@@ -258,69 +266,6 @@
             </div>
           </div>
 
-          <div class="grid mt-2">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_opening_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
-              <label class="field-label">Index fermeture électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_closing_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
-              <label class="field-label">Delta index électronique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Index mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_opening_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
-              <label class="field-label">Index fermeture mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_closing_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6" style="display: none;">
-              <label class="field-label">Delta index mécanique (total)</label>
-              <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
-            </div>
-          </div>
-        </form>
-
-        <form [formGroup]="stockForm" novalidate>
-          <h3 class="section-title">Indicateurs stock (automatiques)</h3>
-          <div class="grid mt-1">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Stock théorique</label>
-              <input type="number" class="form-control readonly-field" formControlName="theoretical_stock" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Écart de stock</label>
-              <input type="number" class="form-control readonly-field" formControlName="stock_gap" readonly>
-            </div>
-          </div>
-        </form>
-
-        <form [formGroup]="salesForm" novalidate>
-          <h3 class="section-title">Données ventes</h3>
-
-          <div class="grid">
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume vendu par index électronique</label>
-              <input type="number" class="form-control readonly-field" formControlName="sold_by_electronic_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume vendu par index mécanique</label>
-              <input type="number" class="form-control readonly-field" formControlName="sold_by_mechanical_index" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Volume vendu déclaré</label>
-              <input type="number" class="form-control readonly-field" formControlName="declared_sales_quantity" readonly>
-            </div>
-            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
-              <label class="field-label">Vente basée sur stock</label>
-              <input type="number" class="form-control readonly-field" formControlName="stock_based_sale" readonly>
-            </div>
-          </div>
         </form>
       </ng-container>
 
