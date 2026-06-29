@@ -28,6 +28,8 @@ import {
     sortTankRecordsByMoment
 } from '../utils/tank-output.util';
 
+let tankDetailsInstanceCounter = 0;
+
 @Component({
   selector: 'app-tank-details',
   templateUrl: './tank-details.component.html',
@@ -58,6 +60,38 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     notificationTimezone = DEFAULT_TANK_TIMEZONE;
     notificationDateKey = '';
     private silentRefreshSubscription: Subscription | null = null;
+    readonly svgId = `tank-details-visual-${++tankDetailsInstanceCounter}`;
+    readonly tankLiquidTop = 82;
+    readonly tankLiquidBottom = 386;
+    readonly tankLiquidHeight = this.tankLiquidBottom - this.tankLiquidTop;
+
+    get liquidClipId(): string {
+        return `${this.svgId}-liquid-clip`;
+    }
+
+    get outerShellId(): string {
+        return `${this.svgId}-outer-shell`;
+    }
+
+    get innerEmptyId(): string {
+        return `${this.svgId}-inner-empty`;
+    }
+
+    get fuelGradientId(): string {
+        return `${this.svgId}-fuel-grad`;
+    }
+
+    get waterGradientId(): string {
+        return `${this.svgId}-water-grad`;
+    }
+
+    get liquidHighlightId(): string {
+        return `${this.svgId}-liquid-highlight`;
+    }
+
+    get glassFrontId(): string {
+        return `${this.svgId}-glass-front`;
+    }
 
     constructor(
         private messageService: MessageService,
@@ -164,6 +198,136 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
 
     private getWaterVolumeMetric(record: any): number | null {
         return this.parseMetric(record?.water_volume);
+    }
+
+    private getTotalVolume(record: any): number | null {
+        return this.parseMetric(
+            record?.total_volume
+            ?? record?.tank_total_volume
+            ?? record?.capacity
+            ?? this.tankDetailsData?.tank?.total_volume
+            ?? this.tankDetailsData?.tank?.tank_total_volume
+            ?? this.tankDetailsData?.tank?.tank_volume
+            ?? this.tankDetailsData?.tank?.capacity
+        );
+    }
+
+    private clampPercent(value: number): number {
+        if (!Number.isFinite(value)) {
+            return 0;
+        }
+
+        return Math.min(100, Math.max(0, value));
+    }
+
+    private getFuelPercentValue(): number {
+        const latestRecord = this.getLatestRecord();
+        const fuelVolume = this.getFuelVolume(latestRecord);
+        const totalVolume = this.getTotalVolume(latestRecord);
+
+        if (fuelVolume === null || !totalVolume || totalVolume <= 0) {
+            return 0;
+        }
+
+        return this.clampPercent((fuelVolume * 100) / totalVolume);
+    }
+
+    private getWaterPercentValue(): number {
+        const latestRecord = this.getLatestRecord();
+        const waterVolume = this.getWaterVolumeMetric(latestRecord);
+        const totalVolume = this.getTotalVolume(latestRecord);
+
+        if (waterVolume === null || !totalVolume || totalVolume <= 0) {
+            return 0;
+        }
+
+        return this.clampPercent((waterVolume * 100) / totalVolume);
+    }
+
+    get renderedWaterPercent(): number {
+        return this.getWaterPercentValue();
+    }
+
+    get renderedFuelPercent(): number {
+        return Math.min(this.getFuelPercentValue(), 100 - this.renderedWaterPercent);
+    }
+
+    get waterFillHeight(): number {
+        return (this.tankLiquidHeight * this.renderedWaterPercent) / 100;
+    }
+
+    get fuelFillHeight(): number {
+        return (this.tankLiquidHeight * this.renderedFuelPercent) / 100;
+    }
+
+    get waterFillY(): number {
+        return this.tankLiquidBottom - this.waterFillHeight;
+    }
+
+    get fuelFillY(): number {
+        return this.tankLiquidBottom - this.waterFillHeight - this.fuelFillHeight;
+    }
+
+    get fuelSurfaceOpacity(): number {
+        return this.fuelFillHeight > 0 ? 0.92 : 0;
+    }
+
+    get waterSurfaceOpacity(): number {
+        return this.waterFillHeight > 0 ? 0.82 : 0;
+    }
+
+    get fuelGradientTop(): string {
+        switch (this.getNameProduct()) {
+            case 'gasoil':
+                return '#4b5563';
+            case 'petrol':
+                return '#86efac';
+            case 'super':
+            default:
+                return '#ff9a9a';
+        }
+    }
+
+    get fuelGradientMiddle(): string {
+        switch (this.getNameProduct()) {
+            case 'gasoil':
+                return '#111827';
+            case 'petrol':
+                return '#22c55e';
+            case 'super':
+            default:
+                return '#ef4444';
+        }
+    }
+
+    get fuelGradientBottom(): string {
+        switch (this.getNameProduct()) {
+            case 'gasoil':
+                return '#020617';
+            case 'petrol':
+                return '#166534';
+            case 'super':
+            default:
+                return '#8f1d1d';
+        }
+    }
+
+    get fuelSurfaceColor(): string {
+        switch (this.getNameProduct()) {
+            case 'gasoil':
+                return '#9ca3af';
+            case 'petrol':
+                return '#bbf7d0';
+            case 'super':
+            default:
+                return '#fee2e2';
+        }
+    }
+
+    getTankVisualLabel(): string {
+        const fuelPercent = this.getRoundValue(this.getFuelPercentValue());
+        const waterPercent = this.getRoundValue(this.getWaterPercentValue());
+        return `Vue actuelle de la cuve: carburant ${fuelPercent}%, eau ${waterPercent}%`;
     }
 
     private getRoundedMetricOrNull(value: any): number | null {
@@ -706,22 +870,32 @@ export class TankDetailsComponent implements OnInit, OnDestroy {
     }
 
     getNameProduct(){
-        let nameProduct = "";
-        if(this.tankDetailsData?.product?.code){
-            let n = this.tankDetailsData?.product?.code;
+        let nameProduct = "super";
+        const productCode = String(
+            this.tankDetailsData?.product?.code
+            ?? this.tankDetailsData?.product?.name
+            ?? this.tankDetailsData?.tank?.product?.code
+            ?? this.tankDetailsData?.tank?.product?.name
+            ?? this.tankDetailsData?.tank?.liquid_type
+            ?? ''
+        ).trim().toUpperCase();
+        if(productCode){
+            let n = productCode;
             switch (n) {
                 case "ESSENCE":
+                case "SUPER":
                     nameProduct = "super";
                     break;
                 case "GASOIL":
                     nameProduct = "gasoil";
                     break;
                 case "PETROLE":
+                case "PETROL":
                     nameProduct = "petrol";
                     break;
 
                 default:
-                    nameProduct = "Pétrole";
+                    nameProduct = "super";
                     break;
             }
         }
