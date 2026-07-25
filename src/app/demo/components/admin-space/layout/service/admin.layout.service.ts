@@ -33,7 +33,7 @@ export class AdminLayoutService {
         inputStyle: 'outlined',
         menuMode: 'static',
         colorScheme: 'light',
-        theme: 'lara-light-indigo',
+        theme: 'lara-light-blue',
         scale: 14,
     };
 
@@ -194,20 +194,28 @@ export class AdminLayoutService {
     logout() {
       this.authService.logout().subscribe(
         (response: any) => {
-        //   ;
-          if (response.success === true) {
-            this.clearCurrentUser();
-            this.messageService.add({severity: 'success', summary: 'Success', detail: response.message, life: 3000});
-            // this.router.navigateByUrl('/auth/login');
-            this.router.navigateByUrl('/');
+          this.clearCurrentUser();
+          if (response?.success === true) {
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: response.message, life: 3000 });
+          } else {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Session fermée',
+              detail: response?.message || 'Déconnexion effectuée.',
+              life: 3000
+            });
           }
-          else {
-            this.messageService.add({severity: 'error', summary: 'Error', detail: response.message, life: 3000});
-          }
+          this.redirectToLogin();
         },
         (error) => {
-
-          this.messageService.add({severity: 'error', summary: 'Error', detail: error.message, life: 3000});
+          this.clearCurrentUser();
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Session fermée',
+            detail: error?.error?.message || error?.message || 'Déconnexion locale effectuée.',
+            life: 3000
+          });
+          this.redirectToLogin();
         }
       );
     }
@@ -216,5 +224,14 @@ export class AdminLayoutService {
     private clearCurrentUser(): void {
       localStorage.removeItem('user_details');
       localStorage.removeItem('token');
+      localStorage.removeItem('super_admin_company_context');
+    }
+
+    private redirectToLogin(): void {
+      this.router.navigateByUrl('/auth/login').finally(() => {
+        if (window.location.pathname.startsWith('/admin')) {
+          window.location.replace('/auth/login');
+        }
+      });
     }
 }

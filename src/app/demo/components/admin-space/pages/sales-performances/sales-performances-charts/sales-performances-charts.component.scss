@@ -1,0 +1,92 @@
+:host {
+  display: block;
+}
+
+.sales-perf-charts {
+  color: #0b1220;
+}
+
+.charts-title {
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 1.25rem;
+  color: #0b1f45;
+  margin-bottom: 1rem;
+}
+
+.chart-card,
+.summary-card {
+  border: 1px solid #d8e3f2;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.chart-title {
+  color: #1b335f;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  display: grid;
+  gap: 0.75rem;
+  background: linear-gradient(160deg, #f9fcff, #f2f7ff);
+}
+
+.summary-card p {
+  margin: 0;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.summary-card span {
+  margin-left: 0.5rem;
+}
+
+.perf-table {
+  margin-bottom: 0;
+}
+
+.perf-table thead th {
+  background: #0f3d92;
+  color: #fff;
+  border-color: #0f3d92;
+  text-transform: uppercase;
+  font-size: 0.77rem;
+  letter-spacing: 0.04em;
+}
+
+.perf-table tbody td {
+  border-color: #dde6f3;
+}
+
+.report-empty-state {
+  border: 1px dashed #c3d4ee;
+  border-radius: 12px;
+  background: #f6faff;
+  color: #475569;
+  text-align: center;
+  padding: 1.15rem;
+  font-weight: 600;
+}
+
+.report-loading-state {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.report-loading-state p {
+  margin: 0;
+  color: #334155;
+}
+
+@media (max-width: 991px) {
+  .charts-title {
+    font-size: 1rem;
+  }
+}

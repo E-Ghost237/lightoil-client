@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AdminLayoutService } from './service/admin.layout.service';
+import { LocalStorageService } from '../../auth/services/local-storage.service';
 
 @Component({
     selector: 'admin-menu',
@@ -8,10 +9,18 @@ import { AdminLayoutService } from './service/admin.layout.service';
 export class AdminMenuComponent implements OnInit {
 
     model: any[] = [];
+    roleType = '';
+    isPlatformSuperAdmin = false;
 
-    constructor(public layoutService: AdminLayoutService, ) { }
+    constructor(
+        public layoutService: AdminLayoutService,
+        private localStorageService: LocalStorageService
+    ) { }
 
     ngOnInit() {
+        this.roleType = this.localStorageService.getRoleType();
+        const userDetails = this.localStorageService.getUserDetails();
+        this.isPlatformSuperAdmin = this.resolveSuperAdminAccess(userDetails);
         this.model = [
             {
                 label: 'Accueil',
@@ -37,6 +46,21 @@ export class AdminMenuComponent implements OnInit {
                         icon: 'pi pi-fw pi-circle-on',
                         routerLink: ['/admin/network-config/products']
                     },
+                    ...(this.isPlatformSuperAdmin ? [{
+                        label: 'Onboarding reseau',
+                        icon: 'pi pi-fw pi-directions-alt',
+                        routerLink: ['/admin/onboarding']
+                    },
+                    {
+                        label: 'Souscriptions stations',
+                        icon: 'pi pi-fw pi-credit-card',
+                        routerLink: ['/admin/subscriptions']
+                    },
+                    {
+                        label: 'Corrections des données clients',
+                        icon: 'pi pi-fw pi-shield',
+                        routerLink: ['/admin/comparative-corrections']
+                    }] : []),
                     {
                         label: 'Rapports',
                         icon: 'pi pi-fw pi-chart-bar',
@@ -56,6 +80,16 @@ export class AdminMenuComponent implements OnInit {
                                 label: 'Dépôtages',
                                 icon: 'pi pi-fw pi-window-minimize',
                                 routerLink: ['/admin/reports/dumpings']
+                            },
+                            {
+                                label: 'Analyse',
+                                icon: 'pi pi-fw pi-chart-line',
+                                routerLink: ['/admin/reports/analyse']
+                            },
+                            {
+                                label: 'Corrections des données',
+                                icon: 'pi pi-fw pi-pencil',
+                                routerLink: ['/admin/comparative-corrections-editor']
                             },
                         ]
                     },
@@ -120,6 +154,27 @@ export class AdminMenuComponent implements OnInit {
                 ]
             }
         ];
+    }
+
+    private resolveSuperAdminAccess(userDetails: any): boolean {
+        const roleType = String(userDetails?.role_type ?? '').trim().toLowerCase();
+        const userFlag = userDetails?.user?.is_platform_super_admin;
+        const detailFlag = userDetails?.is_platform_super_admin;
+        const isPlatformSuperAdmin =
+            userFlag === true
+            || detailFlag === true
+            || userFlag === 1
+            || detailFlag === 1
+            || String(userFlag ?? '').trim() === '1'
+            || String(detailFlag ?? '').trim() === '1'
+            || String(userFlag ?? '').trim().toLowerCase() === 'true'
+            || String(detailFlag ?? '').trim().toLowerCase() === 'true';
+
+        if (isPlatformSuperAdmin) {
+            return true;
+        }
+
+        return roleType === 'super admin' || roleType === 'super administrateur';
     }
 
     /**

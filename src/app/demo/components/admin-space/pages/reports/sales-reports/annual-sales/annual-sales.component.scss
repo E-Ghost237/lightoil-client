@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.report-view {
+  --line: #d8e0ef;
+  --ink: #0b1220;
+  --brand: #0f3d92;
+  --muted: #4b5563;
+}
+
+.report-table-shell {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.enterprise-table {
+  margin-bottom: 0;
+}
+
+.enterprise-table > :not(caption) > * > * {
+  padding: 0.72rem 0.56rem;
+  border-color: #dbe3f0;
+  vertical-align: middle;
+}
+
+.enterprise-table thead th {
+  background: #0f3d92;
+  color: #fff;
+  border-color: #0f3d92;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.enterprise-table thead .month-head {
+  background: #e9f1ff;
+  color: #22324c;
+  border-color: #d4e1f6;
+  font-weight: 700;
+}
+
+.report-caption {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--ink);
+  caption-side: top;
+  background: linear-gradient(165deg, #f4f8ff, #fbfdff);
+  border-bottom: 1px solid var(--line);
+}
+
+.subtotal-row th,
+.subtotal-row td {
+  background: #f8fbff;
+}
+
+.grand-total {
+  background: #e8f0ff;
+  color: #0a2f73;
+}
+
+.report-empty-state {
+  border: 1px dashed #b9c8e4;
+  border-radius: 12px;
+  background: #f7faff;
+  padding: 1.3rem;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.report-loading-state {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.report-loading-state p {
+  margin: 0;
+  color: #334155;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 991px) {
+  .enterprise-table > :not(caption) > * > * {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 767px) {
+  .enterprise-table > :not(caption) > * > * {
+    padding: 0.54rem 0.44rem;
+    font-size: 0.8rem;
+  }
+}

@@ -7,6 +7,7 @@ import { RecordService } from '../../../dashboard/services/record.service';
 import * as Utility from '../../../../utilities/utility';
 import { MessageService } from 'primeng/api';
 import { PdfService } from 'src/app/demo/services/pdf.service';
+import { getTankRecordDateKey, getTankRecordMoment } from '../../../dashboard/utils/tank-output.util';
 
 
 @Component({
@@ -23,6 +24,7 @@ export class HbtTankComponent {
     Tableau: boolean = false;
     user_details!:any;
     period:string = "";
+    notificationTimezone = 'Africa/Douala';
 
     selectedTank:any;
     listTanks:any[]=[];
@@ -42,7 +44,83 @@ export class HbtTankComponent {
   ngOnInit(){
     this.maxDate = new Date();
     this.user_details = this.authService.getUserData();
+    this.notificationTimezone = this.resolveStationTimezone();
     this.getListTanks();
+  }
+
+  private resolveStationTimezone(): string {
+    const fallback = 'Africa/Douala';
+    const stationList = Array.isArray(this.user_details?.service_stations) ? this.user_details.service_stations : [];
+    const currentStation = stationList.find((station: any) => Number(station?.id) === Number(this.user_details?.service_station_id)) ?? null;
+
+    const candidates = [
+      this.user_details?.timezone,
+      this.user_details?.time_zone,
+      currentStation?.timezone,
+      currentStation?.time_zone
+    ].filter((value: any) => typeof value === 'string' && value.trim().length > 0);
+
+    for (const candidate of candidates) {
+      const timezone = String(candidate).trim();
+      try {
+        Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+        return timezone;
+      } catch {
+        // Ignore invalid timezone identifiers and continue.
+      }
+    }
+
+    return fallback;
+  }
+
+  private getLocalDateKey(date: Date, timezone: string = this.notificationTimezone): string {
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(date);
+
+      const year = parts.find((part) => part.type === 'year')?.value;
+      const month = parts.find((part) => part.type === 'month')?.value;
+      const day = parts.find((part) => part.type === 'day')?.value;
+      if (year && month && day) {
+        return `${year}-${month}-${day}`;
+      }
+    } catch {
+      // Fall back to local timezone if Intl formatting fails.
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private getRecordMoment(record: any): number {
+    return getTankRecordMoment(record);
+  }
+
+  private getRecordDateKey(record: any, timezone: string = this.notificationTimezone): string | null {
+    return getTankRecordDateKey(record, timezone);
+  }
+
+  private getStrictDayRecords(records: any[], dayKey: string): any[] {
+    const source = Array.isArray(records) ? records : [];
+    return source
+      .filter((record: any) => this.getRecordDateKey(record) === dayKey)
+      .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
+  }
+
+  private getStrictPeriodRecords(records: any[], startDayKey: string, endDayKey: string): any[] {
+    const source = Array.isArray(records) ? records : [];
+    return source
+      .filter((record: any) => {
+        const recordDayKey = this.getRecordDateKey(record);
+        return !!recordDayKey && recordDayKey >= startDayKey && recordDayKey <= endDayKey;
+      })
+      .sort((a: any, b: any) => this.getRecordMoment(b) - this.getRecordMoment(a));
   }
 
 
@@ -71,7 +149,10 @@ export class HbtTankComponent {
 
 
             this.recordService.getListRecordsForOneDay(usefullData).subscribe((res)=>{
-                this.listRecords = res;
+                this.listRecords = this.getStrictDayRecords(
+                  Array.isArray(res) ? res : [],
+                  usefullData.dateStart
+                );
                 if(this.listRecords?.length > 0){
                   this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
                 }else{
@@ -97,7 +178,11 @@ export class HbtTankComponent {
 
 
             this.recordService.getListRecordsForPeriod(usefullData).subscribe((res)=>{
-                this.listRecords = res;
+                this.listRecords = this.getStrictPeriodRecords(
+                  Array.isArray(res) ? res : [],
+                  usefullData.dateStart,
+                  usefullData.dateEnd
+                );
                 if(this.listRecords?.length > 0){
                   this.messageService.add({ severity: 'info', summary: "Informations", detail: "Données chargées" });
                 }else{

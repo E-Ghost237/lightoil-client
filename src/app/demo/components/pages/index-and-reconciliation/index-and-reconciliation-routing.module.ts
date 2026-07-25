@@ -6,30 +6,30 @@ import { PumpReconciliationComponent } from './pump-reconciliation/pump-reconcil
 import { IndicesTreatmentComponent } from './indices-treatment/indices-treatment.component';
 
 const routes: Routes = [
-  { 
-    path: '', 
+  {
+    path: '',
     component: IndexAndReconciliationComponent,
     children:[
       {
         path: 'reconciliation',
         component: PumpReconciliationComponent,
-        
+
       },
-      { 
-        path: 'pump-index', 
+      {
+        path: 'pump-index',
         component: PumpIndexComponent,
       },
-      { 
-        path: 'indices-treatment', 
+      {
+        path: 'indices-treatment',
         component: IndicesTreatmentComponent,
       },
-      
+
       /* {
         path: '',
         redirectTo: 'pump-index',
         pathMatch: 'full'
       } */
-      
+
     ]
   }
 ];

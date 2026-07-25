@@ -1,0 +1,292 @@
+<p-toast key="tst"></p-toast>
+
+<div class="super-dashboard">
+  <div class="card hero mb-1">
+    <div class="hero-content">
+      <h1>Tableau de bord</h1>
+      <p>Vue globale de la plateforme: entreprises, stations, cuves, alertes critiques et positions des stations.</p>
+      <div class="hero-meta">
+        <span>Dernière mise à jour :</span>
+        <strong *ngIf="lastUpdatedAt as updatedAt; else pendingUpdate">{{ updatedAt | date:'dd/MM/yyyy à HH:mm':'':'fr' }}</strong>
+        <ng-template #pendingUpdate><strong>--/--/---- --:--</strong></ng-template>
+        <i class="pi pi-refresh"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="card filters-card mb-1">
+    <div class="filters-head">
+      <h2>Filtres réseau</h2>
+    </div>
+    <div class="filters-grid">
+      <div class="field">
+        <label for="filter-region">Région</label>
+        <p-dropdown
+          inputId="filter-region"
+          [appendTo]="'body'"
+          [options]="regions"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedRegionId"
+          (ngModelChange)="onRegionChange($event)"
+          [showClear]="true"
+          placeholder="Toutes les regions">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-town">Ville</label>
+        <p-dropdown
+          inputId="filter-town"
+          [appendTo]="'body'"
+          [options]="filteredTowns"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedTownId"
+          (ngModelChange)="onTownChange($event)"
+          [showClear]="true"
+          placeholder="Toutes les villes">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-company">Entreprise</label>
+        <p-dropdown
+          inputId="filter-company"
+          [appendTo]="'body'"
+          [options]="companies"
+          optionLabel="name"
+          optionValue="id"
+          [ngModel]="selectedCompanyId"
+          (ngModelChange)="onCompanyChange($event)"
+          [showClear]="true"
+          placeholder="Toutes les entreprises">
+        </p-dropdown>
+      </div>
+
+      <div class="field">
+        <label for="filter-status">Statut (actif/inactif)</label>
+        <p-dropdown
+          inputId="filter-status"
+          [appendTo]="'body'"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          [ngModel]="selectedStatus"
+          (ngModelChange)="onStatusChange($event)"
+          placeholder="Tout">
+        </p-dropdown>
+      </div>
+
+      <div class="field action-field">
+        <label class="action-spacer" for="filter-reset">Action</label>
+        <p-button
+          id="filter-reset"
+          styleClass="reset-action"
+          label="Réinitialiser"
+          icon="pi pi-refresh"
+          severity="secondary"
+          [text]="true"
+          (onClick)="clearFilters()">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="card kpi-card">
+      <div class="kpi-icon is-blue"><i class="pi pi-building"></i></div>
+      <div class="kpi-content">
+        <span class="kpi-label">Stations</span>
+        <strong>{{ summary.stationsCount | number:'1.0-0':'fr' }}</strong>
+        <small>Total stations enregistrées</small>
+      </div>
+    </div>
+    <div class="card kpi-card">
+      <div class="kpi-icon is-blue"><i class="pi pi-database"></i></div>
+      <div class="kpi-content">
+        <span class="kpi-label">Cuves connectées</span>
+        <strong>{{ summary.connectedTanksCount | number:'1.0-0':'fr' }}</strong>
+        <small>Capteurs actifs</small>
+      </div>
+    </div>
+    <div class="card kpi-card online">
+      <div class="kpi-icon is-green"><i class="pi pi-wifi"></i></div>
+      <div class="kpi-content">
+        <span class="kpi-label">Stations online</span>
+        <strong>{{ summary.onlineStationsCount | number:'1.0-0':'fr' }}</strong>
+        <small>Connectées maintenant</small>
+      </div>
+    </div>
+    <div class="card kpi-card offline">
+      <div class="kpi-icon is-slate"><i class="pi pi-wifi"></i></div>
+      <div class="kpi-content">
+        <span class="kpi-label">Stations offline</span>
+        <strong>{{ summary.offlineStationsCount | number:'1.0-0':'fr' }}</strong>
+        <small>À vérifier</small>
+      </div>
+    </div>
+    <div class="card kpi-card kpi-alert">
+      <div class="kpi-icon is-red"><i class="pi pi-bell"></i></div>
+      <div class="kpi-content">
+        <span class="kpi-label">Alertes</span>
+        <strong>{{ summary.activeAlertsCount | number:'1.0-0':'fr' }}</strong>
+        <small>Alertes critiques</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="tables-grid">
+    <div class="card info-table-card">
+      <div class="table-head">
+        <h2>Entreprises et stations</h2>
+        <small>{{ companyStationsRows.length }} entreprise(s)</small>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>Entreprise</th>
+              <th>Stations</th>
+              <th>Cuves</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of pagedCompanyStationsRows">
+              <td class="company-cell">
+                <strong>{{ row.companyName }}</strong>
+                <small>{{ row.stationCount }} station(s)</small>
+              </td>
+              <td>
+                <div class="station-badges">
+                  <span class="station-badge" *ngFor="let station of row.stations">
+                    {{ station.name }} ({{ station.townName }})
+                  </span>
+                  <span class="text-muted" *ngIf="!row.stations.length">-</span>
+                </div>
+              </td>
+              <td>{{ row.connectedTanks | number:'1.0-0':'fr' }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="getActivityStatusClass(row.overallStatus)">
+                  {{ getActivityStatusLabel(row.overallStatus) }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="!companyStationsRows.length">
+              <td colspan="4" class="empty-cell">Aucune entreprise/station pour les filtres actifs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-pagination">
+        <p-paginator
+          [rows]="companyStationsRowsPerPage"
+          [first]="companyStationsFirst"
+          [totalRecords]="companyStationsRows.length"
+          [rowsPerPageOptions]="tableRowsPerPageOptions"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first} - {last} / {totalRecords}"
+          (onPageChange)="onCompanyStationsPageChange($event)">
+        </p-paginator>
+      </div>
+    </div>
+
+    <div class="card info-table-card">
+      <div class="table-head">
+        <h2>Liste d'utilisateurs</h2>
+        <small>{{ filteredUsersRows.length }} utilisateur(s)</small>
+      </div>
+      <div class="table-wrap">
+        <table class="info-table">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Entreprise</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of pagedUsersRows">
+              <td>{{ user.fullName }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.roleType }}</td>
+              <td>{{ user.companyName }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="getUserStatusClass(user.status)">
+                  {{ getUserStatusLabel(user.status) }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="!filteredUsersRows.length">
+              <td colspan="5" class="empty-cell">Aucun utilisateur pour les filtres actifs.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-pagination">
+        <p-paginator
+          [rows]="usersRowsPerPage"
+          [first]="usersFirst"
+          [totalRecords]="filteredUsersRows.length"
+          [rowsPerPageOptions]="tableRowsPerPageOptions"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="{first} - {last} / {totalRecords}"
+          (onPageChange)="onUsersPageChange($event)">
+        </p-paginator>
+      </div>
+    </div>
+  </div>
+
+  <div class="card map-section">
+    <div class="map-head">
+      <div>
+        <h2>Carte des stations</h2>
+      </div>
+      <div class="legend">
+        <span class="legend-item"><i class="dot dot-online"></i>Online</span>
+        <span class="legend-item"><i class="dot dot-offline"></i>Offline</span>
+        <span class="legend-item"><i class="dot dot-alert"></i>Alert</span>
+      </div>
+    </div>
+
+    <div class="map-viewport" #mapViewport>
+      <div class="map-toolbar">
+        <p-button
+          [text]="true"
+          [rounded]="true"
+          [severity]="isFullScreen ? 'danger' : 'secondary'"
+          [icon]="isFullScreen ? 'pi pi-times' : 'pi pi-window-maximize'"
+          [pTooltip]="isFullScreen ? 'Quitter le plein ecran' : 'Plein ecran'"
+          tooltipPosition="left"
+          (onClick)="toggleFullScreen()">
+        </p-button>
+      </div>
+
+      <div class="map-loading" *ngIf="loadingContext || loadingDashboard">
+        <div class="lightgroup-loader">
+          <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+        </div>
+      </div>
+
+      <div class="map-empty" *ngIf="!loadingContext && !loadingDashboard && !filteredStations.length">
+        <p>Aucune station ne correspond aux filtres actifs.</p>
+      </div>
+
+      <div
+        #mapCanvas
+        class="map-canvas"
+        leaflet
+        [leafletOptions]="mapOptions"
+        [leafletLayers]="mapLayers"
+        (leafletMapReady)="onMapReady($event)">
+      </div>
+    </div>
+
+    <div class="map-foot">
+      <small>{{ filteredStations.length }} station(s) affichee(s), dont {{ emittingStations.length }} emettrice(s).</small>
+    </div>
+  </div>
+</div>

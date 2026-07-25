@@ -71,7 +71,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -129,8 +129,8 @@ export class PdfService {
                   colSpan: 8,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+usefullData.dateStart+
-                        " au "+usefullData.dateEnd+
+                  text: "Du "+Utility.toLocalDate(usefullData.dateStart)+
+                        " au "+Utility.toLocalDate(usefullData.dateEnd)+
                         " quart "+usefullData.quartWorking.time_start+
                         " -- "+usefullData.quartWorking.time_close,
                   alignment: 'left',
@@ -347,7 +347,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -405,8 +405,8 @@ export class PdfService {
                   colSpan: 9,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+usefullData.dateStart+
-                        " au "+usefullData.dateEnd,
+                  text: "Du "+Utility.toLocalDate(usefullData.dateStart)+
+                        " au "+Utility.toLocalDate(usefullData.dateEnd),
                   alignment: 'left',
                 },
                 "",
@@ -592,6 +592,8 @@ export class PdfService {
     let today = new Date();
     let listOutputs = usefullData.dataOuptuts;
     let service_station = this.getTheCorrectGasStationData(usefullData.user_details);
+    const timezone = this.resolvePdfTimezone(usefullData);
+    const outputPeriodRecords = this.getOutputPeriodRecords(listOutputs);
 
     return {
       header: [
@@ -606,7 +608,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -666,10 +668,7 @@ export class PdfService {
                   colSpan: 7,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+this.getToLocalDate(listOutputs?.dateStart)+
-                        " au "+this.getToLocalDate(listOutputs?.dateEnd)+
-                        " entre "+this.getToLocalTime(listOutputs?.dateStart)+
-                        " et "+this.getToLocalTime(listOutputs?.dateEnd),
+                  text: this.getPeriodHeaderLabel(listOutputs, timezone),
                   alignment: 'left',
                 },
                 "",
@@ -709,7 +708,7 @@ export class PdfService {
                   style: "tableHeader"
                 }
               ],
-              ...this.lineTableTankOutup(listOutputs.periodRecord)
+              ...this.lineTableTankOutup(outputPeriodRecords, timezone)
             ]
           },
           layout: {
@@ -776,72 +775,76 @@ export class PdfService {
   }
 
   // OK
-  lineTableTankOutup(periodRecords:any[]){
+  lineTableTankOutup(periodRecords:any[], timezone: string){
     let lines:any[]=[];
-    for (let i = 0; i < periodRecords.length; i++) {
-      let output = periodRecords[i];
-      if(! output?.isTheLast){
-        lines.push([
-          {
-            text: (i+1)+"",
-            style: "tableLine"
-          },
-          {
-            text: this.getToLocalDate(output.start)+"\n"+"de "+
-                  this.getToLocalTime(output.start)+' à '+this.getToLocalTime(output.end),
-            style: "tableLine"
-          },
-          {
-            text: output.firstPeriodRecord ?
-                  this.getRoundValue(output?.firstPeriodRecord?.volume)+"\n"+
-                  this.getToLocalDateTime(output?.firstPeriodRecord?.updated_at):"--",
-            style: "tableLine"
-          },
-          {
-            text: output.firstPeriodRecord ?
-                  this.getRoundValue(output?.firstPeriodRecord?.liquid_temperature): "--",
-            style: "tableLine"
-          },
-          {
-            text: output.outputs ? this.getRoundValue(output?.outputs): "0",
-            style: "tableLine",
-            fillColor: '#87CEFA'
-          },
-          {
-            text: output?.lastPeriodRecord ?
-                  this.getRoundValue(output?.lastPeriodRecord?.volume)+"\n"+
-                  this.getToLocalDateTime(output?.lastPeriodRecord?.updated_at) : "--",
-            style: "tableLine"
-          },
-          {
-            text: output?.lastPeriodRecord ?
-                  this.getRoundValue(output?.lastPeriodRecord?.liquid_temperature) : "--",
-            style: "tableLine"
-          },
+    const rows = this.getOutputDataRows(periodRecords);
+    const summary = this.getOutputSummaryRow(periodRecords);
 
-        ]);
-      }else if(output?.isTheLast){
-        lines.push([
-          {
-            text: "Total sur la période",
-            style: "tableLine",
-            colSpan: 4,
-            fillColor: '#ffffff',
-          },
-          "",
-          "",
-          "",
-          {
-            text: this.getRoundValue(output?.outputs)+" litres",
-            style: "tableLine",
-            colSpan: 3,
-            fillColor: '#87CEFA',
-          },
-          "",
-          ""
-        ]);
-      }
+    for (let i = 0; i < rows.length; i++) {
+      const output = rows[i];
+      const dateLabel = this.getRowDateLabel(output, output?.start, timezone);
+      const timeRangeLabel = this.getRowTimeRangeLabel(output, output?.start, output?.end, timezone);
+      const startVolume = this.getOutputVolumeDisplay(output?.firstPeriodRecord);
+      const startTemperature = this.formatRoundedValue(output?.firstPeriodRecord?.liquid_temperature);
+      const totalOutput = this.formatRoundedValue(output?.outputs ?? output?.output);
+      const endVolume = this.getOutputVolumeDisplay(output?.lastPeriodRecord);
+      const endTemperature = this.formatRoundedValue(output?.lastPeriodRecord?.liquid_temperature);
 
+      lines.push([
+        {
+          text: (i+1)+"",
+          style: "tableLine"
+        },
+        {
+          text: this.composeDateAndRange(dateLabel, timeRangeLabel),
+          style: "tableLine"
+        },
+        {
+          text: startVolume,
+          style: "tableLine"
+        },
+        {
+          text: startTemperature,
+          style: "tableLine"
+        },
+        {
+          text: totalOutput,
+          style: "tableLine",
+          fillColor: '#87CEFA'
+        },
+        {
+          text: endVolume,
+          style: "tableLine"
+        },
+        {
+          text: endTemperature,
+          style: "tableLine"
+        },
+
+      ]);
+    }
+
+    if(summary){
+      const summaryValue = this.formatRoundedValue(summary?.outputs ?? summary?.output);
+      lines.push([
+        {
+          text: "Total sur la période",
+          style: "tableLine",
+          colSpan: 4,
+          fillColor: '#ffffff',
+        },
+        "",
+        "",
+        "",
+        {
+          text: summaryValue,
+          style: "tableLine",
+          colSpan: 3,
+          fillColor: '#87CEFA',
+        },
+        "",
+        ""
+      ]);
     }
     return lines;
   }
@@ -881,7 +884,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -941,10 +944,7 @@ export class PdfService {
                   colSpan: 7,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+this.getToLocalDate(listInputs?.dateStart)+
-                        " au "+this.getToLocalDate(listInputs?.dateEnd)+
-                        " entre "+this.getToLocalTime(listInputs?.dateStart)+
-                        " et "+this.getToLocalTime(listInputs?.dateEnd),
+                  text: this.getPeriodHeaderLabel(listInputs),
                   alignment: 'left',
                 },
                 "",
@@ -1062,8 +1062,10 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: this.getToLocalDate(income?.takedDay)+"\n"+"de "+
-                  this.getToLocalTime(income?.takedDay)+' à '+this.getToLocalTime(income?.endedDay),
+            text: this.composeDateAndRange(
+                  this.getRowDateLabel(income, income?.takedDay),
+                  this.getRowTimeRangeLabel(income, income?.takedDay, income?.endedDay)
+            ),
             style: "tableLine"
           },
           {
@@ -1154,7 +1156,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1213,10 +1215,7 @@ export class PdfService {
                   colSpan: 8,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+this.getToLocalDate(listReports?.dateStart)+
-                        " au "+this.getToLocalDate(listReports?.dateEnd)+
-                        " entre "+this.getToLocalTime(listReports?.dateStart)+
-                        " et "+this.getToLocalTime(listReports?.dateEnd),
+                  text: this.getPeriodHeaderLabel(listReports),
                   alignment: 'left',
                 },
                 "",
@@ -1339,14 +1338,15 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: this.getToLocalDate(report.start)+"\n"+"de "+
-                  this.getToLocalTime(report.start)+' à '+this.getToLocalTime(report.end),
+            text: this.composeDateAndRange(
+                  this.getRowDateLabel(report, report.start),
+                  this.getRowTimeRangeLabel(report, report.start, report.end)
+            ),
             style: "tableLine"
           },
           {
             text: report?.firstPeriodRecord?.id ?
-                  this.getRoundValue(report?.firstPeriodRecord?.volume)+"\n"+
-                  this.getToLocalDateTime(report?.firstPeriodRecord?.updated_at):"--",
+                  this.getRoundValue(report?.firstPeriodRecord?.volume):"--",
             style: "tableLine"
           },
           {
@@ -1366,8 +1366,7 @@ export class PdfService {
           },
           {
             text: report?.lastPeriodRecord?.id ?
-                  this.getRoundValue(report?.lastPeriodRecord?.volume)+"\n"+
-                  this.getToLocalDateTime(report?.lastPeriodRecord?.updated_at) : "--",
+                  this.getRoundValue(report?.lastPeriodRecord?.volume) : "--",
             style: "tableLine"
           },
           {
@@ -1446,7 +1445,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1530,7 +1529,7 @@ export class PdfService {
                   style: "tableHeader"
                 },
                 {
-                  text: "Volume à T ambiant",
+                  text: "Volume carburant à T ambiant",
                   style: "tableHeader"
                 },
                 {
@@ -1619,12 +1618,26 @@ export class PdfService {
 
   // OK
   lineTableTankRecord(listRecords :any[]){
-    let lines:any[]=[];
-    for (let i = (listRecords.length-1); i >= 0; i--) {
-      let record = listRecords[i];
+    const lines:any[] = [];
+    const orderedRecords = [...listRecords].reverse();
+
+    for (let i = 0; i < orderedRecords.length; i++) {
+      const record = orderedRecords[i];
+      const previousRecord = orderedRecords[i - 1];
+      const fuelVolume = record?.fuel_volume ?? record?.volume;
+      const fuelVolumeAtFift = this.getFuelVolumeAtFift(record);
+      const storedOutputVolume = this.parseMetric(record?.output_volume);
+      const previousFuelVolume = this.parseMetric(previousRecord?.fuel_volume ?? previousRecord?.volume);
+      const currentFuelVolume = this.parseMetric(record?.fuel_volume ?? record?.volume);
+
+      let outputVolume = storedOutputVolume;
+      if (outputVolume === null && previousFuelVolume !== null && currentFuelVolume !== null) {
+        outputVolume = Math.max(previousFuelVolume - currentFuelVolume, 0);
+      }
+
       lines.push([
         {
-          text: (listRecords.length-i)+"",
+          text: (i + 1) + "",
           style: "tableLine"
         },
         {
@@ -1636,16 +1649,16 @@ export class PdfService {
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(record.volume),
+          text: this.getFuelVolumeDisplay(fuelVolume),
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(record.volume_at_fift),
+          text: this.getRoundValue(fuelVolumeAtFift),
           style: "tableLine",
           fillColor: '#87CEFA'
         },
         {
-          text: this.getRoundValue(record.output_volume),
+          text: this.getRoundValue(outputVolume ?? 0),
           style: "tableLine",
           fillColor: '#A7CEFB'
         },
@@ -1687,6 +1700,7 @@ export class PdfService {
     let period = usefullData.period;
     let stationProduct = usefullData.stationProduct;
     let service_station = this.getTheCorrectGasStationData(usefullData.user_details);
+    const timezone = this.resolvePdfTimezone(usefullData);
 
     return {
       header: [
@@ -1701,7 +1715,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1760,11 +1774,7 @@ export class PdfService {
                   colSpan: 3,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Recapitulatif des sorties "+
-                        "Du "+this.getToLocalDate(listOutputs?.dateStart)+
-                        " au "+this.getToLocalDate(listOutputs?.dateEnd)+
-                        " entre "+this.getToLocalTime(listOutputs?.dateStart)+
-                        " et "+this.getToLocalTime(listOutputs?.dateEnd),
+                  text: "Recapitulatif des sorties "+this.getPeriodHeaderLabel(listOutputs, timezone),
                   alignment: 'left',
                 },
                 "",
@@ -1856,6 +1866,7 @@ export class PdfService {
     for (let i = 0; i < totalOnPeriod.length; i++) {
       let output = totalOnPeriod[i];
       if( output?.tank != 'total'){
+        const outputValue = this.formatRoundedValue(output?.outputs);
         lines.push([
           {
             text: (i+1)+"",
@@ -1866,12 +1877,13 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: this.getRoundValue(output?.outputs),
+            text: outputValue,
             style: "tableLine",
             fillColor: '#87CEFA'
           }
         ]);
       }else if( output?.tank == 'total'){
+        const totalValue = this.formatRoundedValue(output?.outputs);
         lines.push([
           {
             text: "Totaux",
@@ -1881,7 +1893,7 @@ export class PdfService {
           },
           "",
           {
-            text: this.getRoundValue(output?.outputs)+" litres",
+            text: totalValue,
             style: "tableLine",
             colSpan: 1,
             fillColor: '#87CEFA',
@@ -1929,7 +1941,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -1988,10 +2000,7 @@ export class PdfService {
                   colSpan: 8,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+this.getToLocalDate(listInputs?.dateStart)+
-                        " au "+this.getToLocalDate(listInputs?.dateEnd)+
-                        " entre "+this.getToLocalTime(listInputs?.dateStart)+
-                        " et "+this.getToLocalTime(listInputs?.dateEnd),
+                  text: this.getPeriodHeaderLabel(listInputs),
                   alignment: 'left',
                 },
                 "",
@@ -2114,8 +2123,10 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: this.getToLocalDate(income?.takedDay)+"\n"+"de "+
-                  this.getToLocalTime(income?.takedDay)+' à '+this.getToLocalTime(income?.endedDay),
+            text: this.composeDateAndRange(
+                  this.getRowDateLabel(income, income?.takedDay),
+                  this.getRowTimeRangeLabel(income, income?.takedDay, income?.endedDay)
+            ),
             style: "tableLine"
           },
           {
@@ -2213,7 +2224,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -2271,10 +2282,7 @@ export class PdfService {
                   colSpan: 8,
                   border: [false, true, false, true],
                   fillColor: '#ffffff',
-                  text: "Du "+this.getToLocalDate(listReports?.dateStart)+
-                        " au "+this.getToLocalDate(listReports?.dateEnd)+
-                        " entre "+this.getToLocalTime(listReports?.dateStart)+
-                        " et "+this.getToLocalTime(listReports?.dateEnd),
+                  text: this.getPeriodHeaderLabel(listReports),
                   alignment: 'left',
                 },
                 "",
@@ -2395,14 +2403,15 @@ export class PdfService {
             style: "tableLine"
           },
           {
-            text: this.getToLocalDate(report.start)+"\n"+"de "+
-                  this.getToLocalTime(report.start)+' à '+this.getToLocalTime(report.end),
+            text: this.composeDateAndRange(
+                  this.getRowDateLabel(report, report.start),
+                  this.getRowTimeRangeLabel(report, report.start, report.end)
+            ),
             style: "tableLine"
           },
           {
             text: report?.firstPeriodRecord?.id ?
-                  this.getRoundValue(report?.firstPeriodRecord?.volume)+"\n"+
-                  this.getToLocalDateTime(report?.firstPeriodRecord?.updated_at):"--",
+                  this.getRoundValue(report?.firstPeriodRecord?.volume):"--",
             style: "tableLine"
           },
           {
@@ -2422,8 +2431,7 @@ export class PdfService {
           },
           {
             text: report?.lastPeriodRecord?.id ?
-                  this.getRoundValue(report?.lastPeriodRecord?.volume)+"\n"+
-                  this.getToLocalDateTime(report?.lastPeriodRecord?.updated_at) : "--",
+                  this.getRoundValue(report?.lastPeriodRecord?.volume) : "--",
             style: "tableLine"
           },
           {
@@ -2503,7 +2511,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -2590,7 +2598,7 @@ export class PdfService {
                   style: "tableHeader"
                 },
                 {
-                  text: "Volume à T ambiant",
+                  text: "Volume carburant à T ambiant",
                   style: "tableHeader"
                 },
                 {
@@ -2678,6 +2686,8 @@ export class PdfService {
     let lines:any[]=[];
     for (let i = (listRecords.length-1); i >= 0; i--) {
       let record = listRecords[i];
+      const fuelVolume = record?.fuel_volume ?? record?.volume;
+      const fuelVolumeAtFift = this.getFuelVolumeAtFift(record);
       lines.push([
         {
           text: (listRecords.length-i)+"",
@@ -2696,11 +2706,11 @@ export class PdfService {
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(record.volume),
+          text: this.getFuelVolumeDisplay(fuelVolume),
           style: "tableLine"
         },
         {
-          text: this.getRoundValue(record.volume_at_fift),
+          text: this.getRoundValue(fuelVolumeAtFift),
           style: "tableLine",
           fillColor: '#87CEFA'
         },
@@ -2753,7 +2763,7 @@ export class PdfService {
             },
             {
               width: '75%',
-              text: today.toLocaleDateString()+" "+today.toLocaleTimeString(),
+              text: Utility.toLocalDateTime(today),
               alignment: 'right',
               fontSize: 8,
               margin: [0, 10, 10, 10]
@@ -2970,6 +2980,179 @@ export class PdfService {
 
   getToLocalTime(date1:string){
       return Utility.toLocalTime(date1)??"";
+  }
+
+  private parseMetric(value: any): number | null {
+      if (value === null || value === undefined || value === '') {
+          return null;
+      }
+
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  private isValidTimezone(timezone: string): boolean {
+      try {
+          Intl.DateTimeFormat('en-US', { timeZone: timezone }).format(new Date());
+          return true;
+      } catch {
+          return false;
+      }
+  }
+
+  private resolvePdfTimezone(usefullData: any): string {
+      const fallback = 'Africa/Douala';
+      const station = this.getTheCorrectGasStationData(usefullData?.user_details) ?? null;
+      const candidates = [
+          usefullData?.timezone,
+          usefullData?.user_details?.timezone,
+          usefullData?.user_details?.time_zone,
+          station?.timezone,
+          station?.time_zone
+      ];
+
+      for (const candidate of candidates) {
+          if (typeof candidate !== 'string') {
+              continue;
+          }
+
+          const timezone = candidate.trim();
+          if (!timezone) {
+              continue;
+          }
+
+          if (this.isValidTimezone(timezone)) {
+              return timezone;
+          }
+      }
+
+      return fallback;
+  }
+
+  private getPeriodHeaderLabel(periodData: any, timezone: string = 'Africa/Douala'): string {
+      const explicit = typeof periodData?.periodLabel === 'string' ? periodData.periodLabel.trim() : '';
+      if (explicit) {
+          return Utility.normalizeDateTokens(explicit);
+      }
+
+      const startDate = this.formatDateWithTimezone(periodData?.dateStart, timezone);
+      const endDate = this.formatDateWithTimezone(periodData?.dateEnd, timezone);
+      const startTime = this.formatTimeWithTimezone(periodData?.dateStart, timezone);
+      const endTime = this.formatTimeWithTimezone(periodData?.dateEnd, timezone);
+
+      return `Du ${startDate} au ${endDate} entre ${startTime} et ${endTime}`;
+  }
+
+  private getRowDateLabel(row: any, fallbackDateValue: any, timezone: string = 'Africa/Douala'): string {
+      const explicit = typeof row?.dateLabel === 'string' ? row.dateLabel.trim() : '';
+      if (explicit) {
+          return this.formatDateWithTimezone(explicit, timezone);
+      }
+
+      return this.formatDateWithTimezone(fallbackDateValue, timezone);
+  }
+
+  private getRowTimeRangeLabel(row: any, fallbackStart: any, fallbackEnd: any, timezone: string = 'Africa/Douala'): string {
+      const explicit = typeof row?.timeRangeLabel === 'string' ? row.timeRangeLabel.trim() : '';
+      if (explicit) {
+          return Utility.normalizeDateTokens(explicit);
+      }
+
+      return this.formatOutputPeriodRange(fallbackStart, fallbackEnd, timezone);
+  }
+
+  private formatDateWithTimezone(value: any, timezone: string): string {
+      void timezone;
+      if (value === null || value === undefined || value === '') {
+          return '-';
+      }
+
+      return Utility.toLocalDate(String(value)) || '-';
+  }
+
+  private formatTimeWithTimezone(value: any, timezone: string): string {
+      void timezone;
+      if (value === null || value === undefined || value === '') {
+          return '-';
+      }
+
+      return Utility.toLocalTime(String(value)) || '-';
+  }
+
+  private formatDateTimeWithTimezone(value: any, timezone: string): string {
+      void timezone;
+      if (value === null || value === undefined || value === '') {
+          return '-';
+      }
+
+      return Utility.toLocalDateTime(String(value)) || '-';
+  }
+
+  private formatRoundedValue(value: any): string {
+      const parsed = this.parseMetric(value);
+      return parsed === null ? '-' : `${this.getRoundValue(parsed)}`;
+  }
+
+  private formatOutputPeriodRange(start: any, end: any, timezone: string): string {
+      const startTime = this.formatTimeWithTimezone(start, timezone);
+      const endTime = this.formatTimeWithTimezone(end, timezone);
+
+      if (startTime === '-' || endTime === '-') {
+          return '-';
+      }
+
+      return `de ${startTime} à ${endTime}`;
+  }
+
+  private composeDateAndRange(dateLabel: string, rangeLabel: string): string {
+      if (dateLabel === '-' && rangeLabel === '-') {
+          return '-';
+      }
+
+      return `${dateLabel}\n${rangeLabel}`;
+  }
+
+  private getOutputPeriodRecords(listOutputs: any): any[] {
+      if (Array.isArray(listOutputs?.listDayRecord)) {
+          return listOutputs.listDayRecord;
+      }
+
+      if (Array.isArray(listOutputs?.periodRecord)) {
+          return listOutputs.periodRecord;
+      }
+
+      return [];
+  }
+
+  private getOutputSummaryRow(periodRecords: any[] = []): any | null {
+      return periodRecords.find((record: any) => record?.isTheLast) ?? null;
+  }
+
+  private getOutputDataRows(periodRecords: any[] = []): any[] {
+      return periodRecords.filter((record: any) => !record?.isTheLast);
+  }
+
+  private getOutputVolumeDisplay(record: any): string {
+      if (!record) {
+          return '-';
+      }
+
+      return this.formatRoundedValue(this.getFuelVolumeAtFift(record));
+  }
+
+  private getFuelVolumeAtFift(record: any): number {
+      const normalizedVolumeAtFift = this.parseMetric(record?.fuel_volume_at_fift);
+      if (normalizedVolumeAtFift !== null) {
+          return normalizedVolumeAtFift;
+      }
+
+      const legacyVolumeAtFift = this.parseMetric(record?.volume_at_fift);
+      return legacyVolumeAtFift ?? 0;
+  }
+
+  private getFuelVolumeDisplay(value: any): string {
+      const parsed = this.parseMetric(value);
+      return parsed === null ? '---' : parsed.toFixed(5);
   }
 
   getRoundValue(num:number){

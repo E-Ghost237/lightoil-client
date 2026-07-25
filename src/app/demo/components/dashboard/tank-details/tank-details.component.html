@@ -39,7 +39,11 @@
                         </p-badge>
                     </span>
                 </div>
-                <div class="col pr-0 text-end" pTooltip="Nombre de notifications de la journee" >
+                <div
+                    class="col pr-0 text-end"
+                    pTooltip="Nombre de notifications de la journee"
+                    style="cursor: pointer;"
+                    (click)="notiPanel.toggle($event, targetEl)">
                     <span class="mr-4"> Notifications: </span>
                     <span><p-badge value="{{getTotalNotification()}}" size="large" severity="{{getSeverityNoti()}}"></p-badge></span>
                 </div>
@@ -56,9 +60,100 @@
 
             <div class="row d-flex flex-row justify-content-center">
                 <div class="col-10 ">
-                    <img width="100%" src="{{getTheCorrectImage()}}"
-                        alt="une vue actuelle de la cuve"
+                    <div class="tank-visual-wrapper"
                         pTooltip="Niveau actuel de produit dans la cuve">
+                        <svg class="tank-visual"
+                            viewBox="0 0 920 470"
+                            role="img"
+                            [attr.aria-label]="getTankVisualLabel()">
+                            <defs>
+                                <clipPath [attr.id]="liquidClipId">
+                                    <path d="M105 158 C154 105,260 82,460 82 C660 82,766 105,815 158 L815 314 C766 363,660 386,460 386 C260 386,154 363,105 314 Z"/>
+                                </clipPath>
+                                <linearGradient [attr.id]="outerShellId" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#f4ead8"/>
+                                    <stop offset="22%" stop-color="#d8c9b2"/>
+                                    <stop offset="52%" stop-color="#8b7e6b"/>
+                                    <stop offset="100%" stop-color="#3e382f"/>
+                                </linearGradient>
+                                <linearGradient [attr.id]="innerEmptyId" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#8f9a9d"/>
+                                    <stop offset="45%" stop-color="#b9c0bd"/>
+                                    <stop offset="100%" stop-color="#f6eddc"/>
+                                </linearGradient>
+                                <linearGradient [attr.id]="fuelGradientId" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" [attr.stop-color]="fuelGradientTop"/>
+                                    <stop offset="36%" [attr.stop-color]="fuelGradientMiddle"/>
+                                    <stop offset="100%" [attr.stop-color]="fuelGradientBottom"/>
+                                </linearGradient>
+                                <linearGradient [attr.id]="waterGradientId" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#bfdbfe"/>
+                                    <stop offset="55%" stop-color="#3b82f6"/>
+                                    <stop offset="100%" stop-color="#1d4ed8"/>
+                                </linearGradient>
+                                <radialGradient [attr.id]="liquidHighlightId" cx="50%" cy="10%" r="72%">
+                                    <stop offset="0%" stop-color="#ffffff" stop-opacity=".45"/>
+                                    <stop offset="48%" stop-color="#ffffff" stop-opacity=".09"/>
+                                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                                </radialGradient>
+                                <linearGradient [attr.id]="glassFrontId" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
+                                    <stop offset="44%" stop-color="#ffffff" stop-opacity=".06"/>
+                                    <stop offset="100%" stop-color="#000000" stop-opacity=".13"/>
+                                </linearGradient>
+                            </defs>
+
+                            <g class="tank-root">
+                                <path d="M74 92 C153 70,257 62,460 62 C663 62,767 70,846 92 C873 171,873 303,846 382 C767 404,663 412,460 412 C257 412,153 404,74 382 C47 303,47 171,74 92 Z" [attr.fill]="'url(#' + outerShellId + ')'"/>
+                                <path d="M74 92 C153 70,257 62,460 62 C663 62,767 70,846 92 C856 121,862 150,867 180 C775 145,660 128,460 128 C260 128,145 145,53 180 C58 150,64 121,74 92 Z" fill="#f7ecd9" opacity=".42"/>
+                                <path d="M92 132 C151 94,258 76,460 76 C662 76,769 94,828 132 L828 342 C769 382,662 400,460 400 C258 400,151 382,92 342 Z" fill="#403931" opacity=".72"/>
+                                <path d="M105 158 C154 105,260 82,460 82 C660 82,766 105,815 158 L815 314 C766 363,660 386,460 386 C260 386,154 363,105 314 Z" [attr.fill]="'url(#' + innerEmptyId + ')'" stroke="rgba(255,255,255,.68)" stroke-width="5"/>
+
+                                <g [attr.clip-path]="'url(#' + liquidClipId + ')'">
+                                    <rect x="90" y="82" width="740" height="304" [attr.fill]="'url(#' + innerEmptyId + ')'"/>
+                                    <rect class="fuel-fill"
+                                        x="90"
+                                        [attr.y]="fuelFillY"
+                                        width="740"
+                                        [attr.height]="fuelFillHeight"
+                                        [attr.fill]="'url(#' + fuelGradientId + ')'"
+                                        opacity=".94"/>
+                                    <rect class="water-fill"
+                                        x="90"
+                                        [attr.y]="waterFillY"
+                                        width="740"
+                                        [attr.height]="waterFillHeight"
+                                        [attr.fill]="'url(#' + waterGradientId + ')'"
+                                        opacity=".98"/>
+                                    <ellipse class="fuel-surface"
+                                        cx="460"
+                                        [attr.cy]="fuelFillY"
+                                        rx="356"
+                                        ry="13"
+                                        [attr.fill]="fuelSurfaceColor"
+                                        [attr.opacity]="fuelSurfaceOpacity"/>
+                                    <ellipse class="water-surface"
+                                        cx="460"
+                                        [attr.cy]="waterFillY"
+                                        rx="352"
+                                        ry="9"
+                                        fill="#bfdbfe"
+                                        [attr.opacity]="waterSurfaceOpacity"/>
+                                    <rect x="90" y="82" width="740" height="304" [attr.fill]="'url(#' + liquidHighlightId + ')'" opacity=".72"/>
+                                    <rect x="90" y="82" width="740" height="304" [attr.fill]="'url(#' + glassFrontId + ')'" opacity=".55"/>
+                                </g>
+
+                                <path d="M126 155 C191 116,302 98,460 98 C618 98,729 116,794 155" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".36"/>
+                                <path d="M130 334 C212 362,328 372,460 372 C592 372,708 362,790 334" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".35"/>
+                                <path d="M105 160 C83 220,84 285,105 316" fill="none" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" opacity=".25"/>
+                                <path d="M815 160 C837 220,836 285,815 316" fill="none" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" opacity=".22"/>
+                                <path d="M138 386 C245 420,675 420,782 386" fill="none" stroke="#313a43" stroke-width="8" stroke-linecap="round" opacity=".76"/>
+                                <path d="M160 382 C270 404,650 404,760 382" fill="none" stroke="#dbeafe" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+                                <path d="M74 92 C47 171,47 303,74 382 C90 386,107 390,126 393 C96 300,96 174,126 82 C107 85,90 88,74 92 Z" fill="#2f2a24" opacity=".18"/>
+                                <path d="M846 92 C873 171,873 303,846 382 C830 386,813 390,794 393 C824 300,824 174,794 82 C813 85,830 88,846 92 Z" fill="#2f2a24" opacity=".18"/>
+                            </g>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
@@ -90,7 +185,7 @@
             <div class="row justify-content-end ">
 
                 <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Niveau(cm): </span>
+                    <span class=""> Hauteur carburant(cm): </span>
                     <span><p-badge value="{{getLevel()}}" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
                 </div>
                 <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
@@ -103,7 +198,7 @@
             <div class="row justify-content-end ">
 
                 <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Volume à {{getLiquidTemp()+ 'C(l)'}}: </span>
+                    <span class=""> Volume carburant à {{getLiquidTemp()+ 'C(l)'}}: </span>
                     <span><p-badge value="{{getVolumeAtT()}}" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
                 </div>
                 <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
@@ -114,24 +209,27 @@
 
             </div>
             <div class="row justify-content-end ">
-                <div class="col-10 card mx-4 d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Quantité Sortie : </span>
+                <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Quantité Sortie (aujourd'hui) : </span>
                     <span><p-badge value="{{getOutputVolume()}} litre(s)" size="large" severity="{{getSeverityPercent()}}"></p-badge></span>
                 </div>
+                <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Volume d'eau(l): </span>
+                    <span><p-badge value="{{getWaterVolume()}}" size="large" severity="info"></p-badge></span>
+                </div>
                 <span></span>
+
             </div>
             <div class="row justify-content-end ">
-
-                <!-- <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Temp. ambiante(Celsius): </span>
-                    <span><p-badge value="{{getEnvTemp()}}" size="large" severity="info"></p-badge></span>
-                </div> -->
+                <div class="col-5 card d-flex flex-row justify-content-between anim-fade">
+                    <span class=""> Hauteur d'eau(cm): </span>
+                    <span><p-badge value="{{getWaterLevel()}}" size="large" severity="info"></p-badge></span>
+                </div>
                 <div class="col-5 card mx-4 d-flex flex-row justify-content-between anim-fade">
                     <span class=""> Temp. liquide(Celsius): </span>
                     <span><p-badge value="{{getLiquidTemp()}}" size="large" severity="info"></p-badge></span>
                 </div>
                 <span></span>
-
             </div>
             <div class="row card justify-content-center mx-1 p-0">
                 <div class="col p-0 pl-1 pr-1">
@@ -164,9 +262,11 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Relevé à</th>
-                                    <th pTooltip="en centimetres" tooltipPosition="bottom">Niveau(cm)</th>
-                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume a T(litres)</th>
+                                    <th pTooltip="en centimetres" tooltipPosition="bottom">Hauteur carburant(cm)</th>
+                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume carburant a T(litres)</th>
                                     <th pTooltip="en litres" tooltipPosition="bottom">Qté. Sortie(litre)</th>
+                                    <th>Hauteur d'eau(cm)</th>
+                                    <th pTooltip="en litres" tooltipPosition="bottom">Volume d'eau(l)</th>
                                     <th pTooltip="en degres celsius" tooltipPosition="bottom">T(C) liquide</th>
                                     <th pTooltip="rapport des masses volumiques" tooltipPosition="bottom">Densite</th>
                                 </tr>
@@ -176,8 +276,10 @@
                                     <td>{{rowIndex+1}}</td>
                                     <td>{{getToLocalDateTime(record.updated_at)}}</td>
                                     <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
-                                    <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
+                                    <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
                                     <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
+                                    <td>{{getWaterLevelValue(record)}}</td>
+                                    <td>{{getWaterVolumeValue(record)}}</td>
                                     <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
                                     <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
                                 </tr>
@@ -225,10 +327,12 @@
                         <tr>
                             <th>#</th>
                             <th>Releve a</th>
-                            <th pTooltip="en centimetres">Niveau(cm)</th>
-                            <th pTooltip="en litres">Volume a T</th>
+                            <th pTooltip="en centimetres">Hauteur carburant(cm)</th>
+                            <th pTooltip="en litres">Volume carburant a T</th>
                             <th pTooltip="en litres">Volume a 15C</th>
                             <th pTooltip="en litres" tooltipPosition="bottom">Qté. Sortie (en litre)</th>
+                            <th>Hauteur d'eau(cm)</th>
+                            <th pTooltip="en litres">Volume d'eau(l)</th>
                             <th pTooltip="en degres celsius">T(C) liquide</th>
                             <th pTooltip="rapport des masses volumiques">Densite</th>
                         </tr>
@@ -238,14 +342,63 @@
                             <td>{{rowIndex+1}}</td>
                             <td>{{getToLocalDateTime(record.updated_at)}}</td>
                             <td pTooltip="en centimetres" tooltipPosition="bottom">{{getRoundValue(record.liquid_height)}}</td>
-                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume)}}</td>
-                            <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.volume_at_fift)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeDisplay(record)}}</td>
+                            <td pTooltip="en litres" tooltipPosition="bottom">{{getFuelVolumeAtFiftValue(record)}}</td>
                             <td pTooltip="en litres" tooltipPosition="bottom">{{getRoundValue(record.output_volume)}}</td>
+                            <td>{{getWaterLevelValue(record)}}</td>
+                            <td>{{getWaterVolumeValue(record)}}</td>
                             <td pTooltip="en degres celsius" tooltipPosition="bottom">{{getRoundValue(record.liquid_temperature)}}</td>
                             <td pTooltip="rapport des masses volumiques" tooltipPosition="bottom">{{getRoundValue(record.density)}}</td>
                         </tr>
                     </ng-template>
                 </p-table>
+            </div>
+        </ng-template>
+    </p-overlayPanel>
+
+    <!-- notifications -->
+    <p-overlayPanel #notiPanel [style]="{'width': '60rem'}" [showCloseIcon]="true">
+        <ng-template pTemplate="content">
+            <div class="row">
+                <div class="col text-center h5">
+                    Notifications de la journee
+                </div>
+            </div>
+            <div class="row mt-2">
+                <ng-container *ngIf="dayNotifications.length > 0; else noTodayNotifications">
+                    <p-table
+                        [value]="dayNotifications"
+                        styleClass="p-datatable-striped"
+                        [paginator]="true"
+                        [rows]="10"
+                        [rowsPerPageOptions]="[10, 20, 50]"
+                        [showCurrentPageReport]="true"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>#</th>
+                                <th>Heure</th>
+                                <th>Type</th>
+                                <th>Details</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-notification let-rowIndex="rowIndex">
+                            <tr>
+                                <td>{{rowIndex + 1}}</td>
+                                <td>{{getToLocalDateTime(getNotificationEventTime(notification))}}</td>
+                                <td>
+                                    <p-tag [value]="getNotificationType(notification)" [severity]="getNotificationSeverity(notification)"></p-tag>
+                                </td>
+                                <td>{{getNotificationDescription(notification)}}</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </ng-container>
+                <ng-template #noTodayNotifications>
+                    <div class="col text-center text-secondary py-4">
+                        Aucune notification pour la journee en cours.
+                    </div>
+                </ng-template>
             </div>
         </ng-template>
     </p-overlayPanel>
@@ -289,4 +442,3 @@
         <img width="150rem" src="../../../../../assets/layout/images/logo.gif" alt="Loading" srcset="">
     </div>
 </ng-template>
-

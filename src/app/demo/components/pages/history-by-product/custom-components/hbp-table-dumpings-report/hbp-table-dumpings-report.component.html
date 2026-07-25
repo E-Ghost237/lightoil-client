@@ -15,12 +15,7 @@
         >
         <ng-template pTemplate="caption">
             <div class="flex">
-                {{
-                    "Du "+getToLocalDate(listReport?.dateStart)+
-                    " au "+getToLocalDate(listReport?.dateEnd)+
-                    " entre "+getToLocalTime(listReport?.dateStart)+
-                    " et "+getToLocalTime(listReport?.dateEnd)
-                }}
+                {{ getPeriodLabel() }}
             </div>
         </ng-template>
        <ng-template pTemplate="header" let-columns>
@@ -38,12 +33,6 @@
                 </th>
                 <th id="ventes" class="text-center" pTooltip="en litres">
                     Ventes
-                </th>
-                <th id="remises" class="text-center" pTooltip="en litres">
-                    Remises en cuves
-                </th>
-                <th id="cumul_ventes" class="text-center" pTooltip="en litres">
-                    Cumul ventes
                 </th>
                 <th id="stock" class="text-center" pTooltip="en litres">
                     Stock Théoriques
@@ -70,15 +59,10 @@
                 <td>{{ rowIndex + 1 }}</td>
                 <td>
                     <div class="row">
-                        <span class="">{{ getToLocalDate(report.start) }}</span>
+                        <span class="">{{ getRowDateLabel(report) }}</span>
                     </div>
                     <div class="row">
-                        {{
-                            "de " +
-                                getToLocalTime(report.start) +
-                                " à " +
-                                getToLocalTime(report.end)
-                        }}
+                        {{ getRowTimeRangeLabel(report) }}
                     </div>
                 </td>
 
@@ -103,18 +87,6 @@
                             }}
                         </span>
                     </div>
-                    <div
-                        class="row justify-content-center"
-                        *ngIf="report?.firstPeriodRecord?.id"
-                    >
-                        <span class="text-center">
-                            {{
-                                getToLocalDateTime(
-                                    report?.firstPeriodRecord?.updated_at
-                                )
-                            }}
-                        </span>
-                    </div>
                 </td>
 
 
@@ -134,24 +106,6 @@
                 </td>
 
 
-                <td pTooltip="en litres remises en cuves" tooltipPosition="bottom" class="text-center">
-                    <div *ngIf="report?.lastPeriodRecord?.id">
-                        <span class="text-center">
-                            {{
-                                getRoundValue(
-                                    report?.lastPeriodRecord?.liquid_temperature
-                                )
-                            }}
-                        </span>
-                    </div>
-                </td>
-                <td pTooltip="en litres cumul ventes" tooltipPosition="bottom" class="text-center">
-                    <div>
-                        <span class="text-center">
-                            {{ getRoundValue(report?.cumulVentes) }}
-                        </span>
-                    </div>
-                </td>
                 <td
                     pTooltip="en litres stock theorique"
                     tooltipPosition="bottom"
@@ -173,7 +127,7 @@
                     tooltipPosition="bottom"
                     class="text-center"
                 >
-                    {{ getEcart(report) }}
+                    {{ formatTwoDecimals(getEcart(report)) }}
                 </td>
 
                 <td
@@ -181,7 +135,7 @@
                     tooltipPosition="bottom"
                     class="text-center"
                 >
-                    {{ getRoundValue(report?.cumulEcarts) }}
+                    {{ formatTwoDecimals(report?.cumulEcarts) }}
                 </td>
             </tr>
             <tr *ngIf="report?.isTheLast">

@@ -15,12 +15,7 @@
         >
         <ng-template pTemplate="caption">
             <div class="flex">
-                {{
-                    "Du "+getToLocalDate(listInputs?.dateStart)+
-                    " au "+getToLocalDate(listInputs?.dateEnd)+
-                    " entre "+getToLocalTime(listInputs?.dateStart)+
-                    " et "+getToLocalTime(listInputs?.dateEnd)
-                }}
+                {{ getPeriodLabel() }}
             </div>
         </ng-template>
         <ng-template pTemplate="header" let-columns>
@@ -39,12 +34,12 @@
 
             <tr *ngIf="! income?.isTheLast" >
                 <td>{{(rowIndex+1)}}</td>
-                <td>
+                <td class="text-center">
                     <div class="row justify-content-center">
-                        <span class="text-center ">{{getToLocalDate(income?.takedDay)}}</span>
+                        <span class="text-center ">{{getInputDateLabel(income)}}</span>
                     </div>
-                    <div class="row">
-                        {{"de "+getToLocalTime(income?.takedDay)+' à '+getToLocalTime(income?.endedDay)}}
+                    <div class="row justify-content-center">
+                        {{ getInputTimeRangeLabel(income) }}
                     </div>
                 </td>
                 <td>
@@ -68,7 +63,7 @@
                 </td>
 
                 <td class="text-center" pTooltip="en degres celsius" tooltipPosition="bottom">
-                    {{getRoundValue(output?.lastPeriodRecord?.end_liquid_temperature)}}
+                    {{getRoundValue(income?.end_liquid_temperature)}}
                 </td>
             </tr>
 

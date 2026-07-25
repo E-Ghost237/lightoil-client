@@ -16,6 +16,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { TooltipModule } from 'primeng/tooltip';
 import { AdminMenuComponent } from './admin.menu.component';
 import { AdminMenuitemComponent } from './admin.menuitem.component';
 import { RouterModule } from '@angular/router';
@@ -52,6 +54,8 @@ import { AdminLayoutComponent } from "./admin.layout.component";
         ToastModule,
         ConfirmDialogModule,
         ConfirmPopupModule,
+        OverlayPanelModule,
+        TooltipModule,
         RouterModule,
         AdminConfigModule
     ],

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../auth/services/auth.service';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -6,12 +6,16 @@ import { LocalStorageService } from '../../../auth/services/local-storage.servic
 import { PointsOfSaleService } from '../../services/sale-points.service';
 import { CompaniesService } from '../../services/companies.service';
 import { CommonService } from '../../services/common-services.service';
+import { Subscription } from 'rxjs';
+import { RealtimeRecordUpdatesService } from 'src/app/demo/services/realtime-record-updates.service';
+import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
 
 @Component({
   selector: 'app-admin-dashboard',
-  templateUrl: './dashboard.component.html'
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   position: string = 'center';
   updatePasswordForm!: FormGroup;
   is_user_first_conn!: boolean;
@@ -37,6 +41,11 @@ export class DashboardComponent implements OnInit {
   last_ten_days_sales_of_sale_points_of_company!: Array<any>;
   stock_of_products!: Array<any>;
   weekly_dumping_of_products!: Array<any>;
+  private initialLoadTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private refreshSubscription: Subscription | null = null;
+  private realtimeStationUnsubscribe: (() => void) | null = null;
+  private realtimeStationKey = '';
+  private realtimeRefreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private commonService: CommonService,
@@ -44,7 +53,9 @@ export class DashboardComponent implements OnInit {
     private messageService: MessageService,
     private localStorageService: LocalStorageService,
     private pointsOfSaleService: PointsOfSaleService,
-    private companiesService: CompaniesService
+    private companiesService: CompaniesService,
+    private silentRefreshService: SilentRefreshService,
+    private realtimeRecordUpdatesService: RealtimeRecordUpdatesService
   ) {
     this.updatePasswordForm = new FormGroup({
       current_password: new FormControl<string>('', Validators.required),
@@ -66,16 +77,35 @@ export class DashboardComponent implements OnInit {
     if (this.selected_sale_point_type !== undefined && this.daily_date !== undefined) {
       this.loadData(this.getGoodDate(this.daily_date));
     } else {
-      setTimeout(() => {
+      this.initialLoadTimeoutId = setTimeout(() => {
         this.loadData(this.getGoodDate(this.daily_date));
       }, 9000);
     }
 
-    setInterval(() => {
-      this.daily_date = new Date(this.daily_date.setMinutes(this.daily_date.getMinutes() + 5));
-      this.loadData(this.getGoodDate(this.daily_date));
-      // this.changeDetector.detectChanges();        // Call detectChanges() to trigger change detection
-    }, 300000);
+    this.refreshSubscription = this.silentRefreshService.create(300000).subscribe(() => {
+      const referenceDate = this.daily_date ?? new Date();
+      this.loadData(this.getGoodDate(referenceDate));
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.initialLoadTimeoutId !== null) {
+      clearTimeout(this.initialLoadTimeoutId);
+      this.initialLoadTimeoutId = null;
+    }
+
+    if (this.refreshSubscription !== null) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = null;
+    }
+    if (this.realtimeStationUnsubscribe) {
+      this.realtimeStationUnsubscribe();
+      this.realtimeStationUnsubscribe = null;
+    }
+    if (this.realtimeRefreshTimeoutId !== null) {
+      clearTimeout(this.realtimeRefreshTimeoutId);
+      this.realtimeRefreshTimeoutId = null;
+    }
   }
 
   stopLoadingLogo() {
@@ -124,6 +154,9 @@ export class DashboardComponent implements OnInit {
         (response) => {
           if (response.success == true) {
             this.sale_points = response.data;
+            this.bindRealtimeStationUpdates(
+              this.sale_points.map((salePoint: any) => salePoint?.id)
+            );
             this.getPointsOfSaleMatchingType(response.data);
             this.stopLoadingLogo();
           }
@@ -286,6 +319,47 @@ export class DashboardComponent implements OnInit {
     }
 
     return sale_point_ids;
+  }
+
+  private bindRealtimeStationUpdates(stationIds: Array<number | null | undefined>): void {
+    const normalizedIds = [...new Set(
+      stationIds
+        .map((id) => Number(id))
+        .filter((id) => Number.isFinite(id) && id > 0)
+    )];
+    const key = normalizedIds.slice().sort((a, b) => a - b).join(',');
+
+    if (key === this.realtimeStationKey) {
+      return;
+    }
+
+    if (this.realtimeStationUnsubscribe) {
+      this.realtimeStationUnsubscribe();
+      this.realtimeStationUnsubscribe = null;
+    }
+
+    this.realtimeStationKey = key;
+    if (!normalizedIds.length) {
+      return;
+    }
+
+    this.realtimeStationUnsubscribe = this.realtimeRecordUpdatesService.subscribeToStationRecorded(
+      normalizedIds,
+      () => this.scheduleRealtimeRefresh()
+    );
+  }
+
+  private scheduleRealtimeRefresh(delayMs = 350): void {
+    if (this.realtimeRefreshTimeoutId !== null) {
+      clearTimeout(this.realtimeRefreshTimeoutId);
+      this.realtimeRefreshTimeoutId = null;
+    }
+
+    this.realtimeRefreshTimeoutId = setTimeout(() => {
+      this.realtimeRefreshTimeoutId = null;
+      const referenceDate = this.daily_date ?? new Date();
+      this.loadData(this.getGoodDate(referenceDate));
+    }, delayMs);
   }
 
   onUpdatePasswordFormSubmit() {

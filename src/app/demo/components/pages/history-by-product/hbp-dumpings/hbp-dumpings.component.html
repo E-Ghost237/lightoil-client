@@ -98,11 +98,11 @@
                 </div>
             </div>
 
-            <div class="row" *ngIf="dataOutputs && this.dataOutputs?.periodRecord?.length > 0">
-                <app-hbp-table-dumpings-output [listOutputs] = "dataOutputs" [stationProduct]="selectedStationProduct">
+            <div class="row" *ngIf="dataOutputs && hasOutputRows()">
+                <app-hbp-table-dumpings-output [listOutputs] = "dataOutputs" [stationProduct]="selectedStationProduct" [timezone]="stationTimezone">
                 </app-hbp-table-dumpings-output>
             </div>
-            <div class="row justify-content-center" *ngIf="dataOutputs && this.dataOutputs?.periodRecord?.length <= 0">
+            <div class="row justify-content-center" *ngIf="dataOutputs && !hasOutputRows()">
                 <div class="col text-center">
                     Aucune données disponible dans la période
                 </div>

@@ -1,3 +1,106 @@
-// .pdf-icon {
-//     width: 1.5rem;
-// }
+:host {
+  display: block;
+}
+
+.sales-perf-page {
+  color: #0b1220;
+}
+
+.perf-header-card,
+.perf-filter-card {
+  border: 1px solid #d8e3f2;
+  border-radius: 14px;
+}
+
+.perf-header-card {
+  background: linear-gradient(150deg, #ffffff, #f7fbff);
+}
+
+.perf-title {
+  margin-bottom: 0.35rem;
+  color: #0f3d92;
+}
+
+.perf-subtitle {
+  margin: 0;
+  color: #5b6472;
+  text-transform: none;
+  font-size: 0.92rem;
+}
+
+.perf-label {
+  color: #2c3851;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.82rem;
+}
+
+.perf-tabs {
+  gap: 0.35rem;
+  border-bottom: 0;
+}
+
+.perf-tabs .nav-link {
+  border: 1px solid #d2ddef;
+  border-radius: 10px;
+  background: #f7faff;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.perf-tabs .nav-link.active {
+  color: #fff;
+  border-color: #0f3d92;
+  background: linear-gradient(120deg, #0f3d92, #1f5fc0);
+}
+
+.perf-toolbar {
+  border: 1px solid #dce6f5;
+  border-radius: 12px;
+  padding: 0.72rem 0.42rem;
+  background: #fbfdff;
+}
+
+.perf-export-btn {
+  min-height: 2.8rem;
+}
+
+.pdf-icon {
+  width: 1.15rem;
+}
+
+.perf-coming-soon {
+  border: 1px dashed #c3d4ee;
+  border-radius: 12px;
+  background: #f6faff;
+  color: #475569;
+  text-align: center;
+  padding: 1.1rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep .perf-control .p-inputtext,
+:host ::ng-deep .perf-control.p-dropdown,
+:host ::ng-deep .perf-control .p-calendar,
+:host ::ng-deep .perf-control .p-calendar .p-inputtext {
+  border-radius: 10px;
+}
+
+:host ::ng-deep .perf-control.p-dropdown,
+:host ::ng-deep .perf-control .p-calendar .p-inputtext {
+  border: 1px solid #c9d8ef;
+  min-height: 2.7rem;
+}
+
+:host ::ng-deep .perf-control.p-dropdown.p-focus,
+:host ::ng-deep .perf-control .p-calendar .p-inputtext:focus {
+  box-shadow: 0 0 0 0.15rem rgba(15, 61, 146, 0.15);
+  border-color: #0f3d92;
+}
+
+@media (max-width: 991px) {
+  .perf-subtitle {
+    font-size: 0.85rem;
+  }
+}

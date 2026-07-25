@@ -3,8 +3,8 @@
         Historiques des sorties du {{stationProduct?.product?.name}}
     </span>
 </div> 
-<div class="row mt-1 mb-8" *ngFor="let periodRecord of listOutputs?.periodRecord">
-    <p-table [value]="periodRecord?.data"
+<div class="row mt-1 mb-8" *ngFor="let periodRecord of getGroupedPeriodRecords()">
+    <p-table [value]="getOutputRows(periodRecord)"
         [scrollable]="true"
         styleClass="p-datatable-striped"
         scrollHeight="30rem"
@@ -16,12 +16,7 @@
         <ng-template pTemplate="caption">
             <div class=" flex flex-row justify-content-evenly">
                 <span>
-                    {{
-                        "Du "+getToLocalDate(listOutputs?.dateStart)+
-                        " au "+getToLocalDate(listOutputs?.dateEnd)+
-                        " entre "+getToLocalTime(listOutputs?.dateStart)+
-                        " et "+getToLocalTime(listOutputs?.dateEnd)
-                    }}
+                    {{ getPeriodLabel() }}
                 </span>
                 <span>
                     {{
@@ -43,60 +38,52 @@
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-output let-rowData let-columns="columns" let-rowIndex="rowIndex">
-            <tr *ngIf="! output?.isTheLast">
+            <tr>
                 <td>{{(rowIndex+1)}}</td>
-                <td>
+                <td class="text-center">
                     <div class="row justify-content-center">
-                        <span class="text-center ">{{getToLocalDate(output.start)}}</span>
+                        <span class="text-center ">{{getRowDateLabel(output)}}</span>
 
                     </div>
-                    <div class="row">
-                        {{"de "+getToLocalTime(output.start)+' à '+getToLocalTime(output.end)}}
+                    <div class="row justify-content-center">
+                        {{getRowTimeRangeLabel(output)}}
                     </div>
                 </td>
                 <td pTooltip="en litres" tooltipPosition="bottom">
-                    <div class="row justify-content-center" *ngIf="output?.firstPeriodRecord">
+                    <div class="row justify-content-center">
                         <span class="text-center ">
-                            {{getRoundValue(output?.firstPeriodRecord?.volume)}}
-                        </span>
-                    </div>
-                    <div class="row justify-content-center" *ngIf="output?.firstPeriodRecord">
-                        <span class="text-center">
-                            {{getToLocalDateTime(output?.firstPeriodRecord?.updated_at)}}
+                            {{getStartVolumeDisplay(output)}}
                         </span>
                     </div>
                 </td>
                 <td pTooltip="en degres celsius" tooltipPosition="bottom">
-                    <div *ngIf="output?.firstPeriodRecord">
+                    <div>
                         <span>
-                            {{getRoundValue(output?.firstPeriodRecord?.liquid_temperature)}}
+                            {{getStartTemperatureDisplay(output)}}
                         </span>
                     </div>
                 </td>
                 <td pTooltip="en litres" tooltipPosition="bottom">
-                    {{getRoundValue(output?.outputs)}}
+                    {{getOutputQuantityDisplay(output)}}
                 </td>
                 <td pTooltip="en litres" tooltipPosition="bottom">
-                    <div class="row justify-content-center" *ngIf="output?.lastPeriodRecord">
+                    <div class="row justify-content-center">
                         <span class="text-center ">
-                            {{getRoundValue(output?.lastPeriodRecord?.volume)}}
-                        </span>
-                    </div>
-                    <div class="row justify-content-center" *ngIf="output?.lastPeriodRecord">
-                        <span class="text-center ">
-                            {{getToLocalDateTime(output?.lastPeriodRecord?.updated_at)}}
+                            {{getEndVolumeDisplay(output)}}
                         </span>
                     </div>
                 </td>
                 <td pTooltip="en degres celsius" tooltipPosition="bottom">
-                    <div *ngIf="output?.lastPeriodRecord">
+                    <div>
                         <span >
-                            {{getRoundValue(output?.lastPeriodRecord?.liquid_temperature)}}
+                            {{getEndTemperatureDisplay(output)}}
                         </span>
                     </div>
                 </td>
             </tr>
-            <tr *ngIf=" output?.isTheLast">
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <tr *ngIf="getSummaryRow(periodRecord) as summary">
                 <td colspan="4">
                     <div class="row justify-content-center ">
                         <span class="text-center ">Total sur la periode</span>
@@ -105,10 +92,9 @@
                 <td colspan="3" pTooltip="en litres" tooltipPosition="bottom">
                     <div class="row justify-content-center">
                         <span class="">
-                            <p-tag severity="info" [value]="getRoundValue(output?.outputs)"></p-tag>
+                            <p-tag severity="info" [value]="getOutputQuantityDisplay(summary)"></p-tag>
                         </span>
                     </div>
-
                 </td>
             </tr>
         </ng-template>
@@ -129,11 +115,7 @@
             <div class=" flex flex-row justify-content-evenly">
                 <span>
                     {{
-                        "Recapitulatif des sorties "+
-                        "Du "+getToLocalDate(listOutputs?.dateStart)+
-                        " au "+getToLocalDate(listOutputs?.dateEnd)+
-                        " entre "+getToLocalTime(listOutputs?.dateStart)+
-                        " et "+getToLocalTime(listOutputs?.dateEnd)
+                        "Recapitulatif des sorties "+getPeriodLabel()
                     }}
                 </span>
             </div>

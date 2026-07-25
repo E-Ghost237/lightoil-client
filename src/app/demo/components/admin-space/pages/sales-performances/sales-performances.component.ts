@@ -1,16 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { SalesPerformancesService } from '../../services/sales-performances.service';
 import { LocalStorageService } from '../../../auth/services/local-storage.service';
 import { PointsOfSaleService } from '../../services/sale-points.service';
+import { CompaniesService } from '../../services/companies.service';
 import { CommonService } from '../../services/common-services.service';
+import { Subscription } from 'rxjs';
+import { RealtimeRecordUpdatesService } from 'src/app/demo/services/realtime-record-updates.service';
+import { SilentRefreshService } from 'src/app/demo/services/silent-refresh.service';
 
 @Component({
   selector: 'app-sales-performance',
   templateUrl: './sales-performances.component.html',
   styleUrls: ['./sales-performances.component.scss']
 })
-export class SalesPerformancesComponent implements OnInit {
+export class SalesPerformancesComponent implements OnInit, OnDestroy {
   company_id!: number;
   point_of_sale_types!: Array<any>;
   selected_point_of_sale_type!: any;
@@ -40,13 +44,20 @@ export class SalesPerformancesComponent implements OnInit {
   is_annual_performances: boolean = false;
 
   calendar_type: string = 'daily';
+  private refreshSubscription: Subscription | null = null;
+  private realtimeStationUnsubscribe: (() => void) | null = null;
+  private realtimeStationKey = '';
+  private realtimeRefreshTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private commonService: CommonService,
     private messageService: MessageService,
     private salesPerformancesService: SalesPerformancesService,
     private localStorageService: LocalStorageService,
-    private pointsOfSaleService: PointsOfSaleService
+    private pointsOfSaleService: PointsOfSaleService,
+    private companiesService: CompaniesService,
+    private silentRefreshService: SilentRefreshService,
+    private realtimeRecordUpdatesService: RealtimeRecordUpdatesService
   ) {}
 
   ngOnInit(): void {
@@ -57,16 +68,44 @@ export class SalesPerformancesComponent implements OnInit {
 
     this.initFilters();
 
-    setInterval(() => {
-      this.daily_date = new Date(this.daily_date.setMinutes(this.daily_date.getMinutes() + 5));
-      this.loadData(this.calendar_type);
-    }, 300000);
+    this.refreshSubscription = this.silentRefreshService.create(300000).subscribe(() => {
+      this.loadData(this.calendar_type, false);
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshSubscription !== null) {
+      this.refreshSubscription.unsubscribe();
+      this.refreshSubscription = null;
+    }
+    if (this.realtimeStationUnsubscribe) {
+      this.realtimeStationUnsubscribe();
+      this.realtimeStationUnsubscribe = null;
+    }
+    if (this.realtimeRefreshTimeoutId !== null) {
+      clearTimeout(this.realtimeRefreshTimeoutId);
+      this.realtimeRefreshTimeoutId = null;
+    }
   }
 
   initFilters() {
     this.daily_date = new Date();
 
+    if (!this.hasCompanyContext(true)) {
+      this.lightoil_loading = false;
+      return;
+    }
+
     if (this.company_id !== undefined && this.company_id !== null) {
+      this.companiesService.getAllPointsOfSaleOfCompany(this.company_id).subscribe(
+        (response) => {
+          if (response?.success === true) {
+            const stations = Array.isArray(response?.data) ? response.data : [];
+            this.bindRealtimeStationUpdates(stations.map((station: any) => station?.id));
+          }
+        }
+      );
+
       this.pointsOfSaleService.getAllPointsOfSaleType().subscribe(
         (response) => {
           if (response.success == true) {
@@ -85,16 +124,22 @@ export class SalesPerformancesComponent implements OnInit {
     }
   }
 
-  loadData(calendar_type: string) {
+  loadData(calendar_type: string, notify = true) {
+    if (!this.hasCompanyContext(true)) {
+      this.loading_icon = false;
+      this.lightoil_loading = false;
+      return;
+    }
+
     if (this.company_id !== undefined && this.company_id !== null) {
       this.resetData();
 
       switch (calendar_type) {
         case 'daily':
-          this. getDailySalesPerformancesOfPointsOfSale();
+          this. getDailySalesPerformancesOfPointsOfSale(notify);
           break;
         case 'weekly':
-          this. getWeeklySalesPerformancesOfPointsOfSale();
+          this. getWeeklySalesPerformancesOfPointsOfSale(notify);
           break;
         case 'monthly':
           // TODO: Monthly logic
@@ -115,7 +160,7 @@ export class SalesPerformancesComponent implements OnInit {
     this.loadData(this.calendar_type);
   }
 
-  getDailySalesPerformancesOfPointsOfSale() {
+  getDailySalesPerformancesOfPointsOfSale(notify = true) {
     this.loading_icon = true;
     this.lightoil_loading = true;
 
@@ -128,22 +173,51 @@ export class SalesPerformancesComponent implements OnInit {
             this.loading_icon = false;
             this.lightoil_loading = false;
             this.can_export_performances = true;
-            this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+            if (notify) {
+              this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+            }
+            return;
           }
-        },
-        (err) => {
 
           this.loading_icon = false;
           this.lightoil_loading = false;
-          this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error Message',
-            detail: 'An error occure while generatting daily sales performances. Please try again later.', life: 10000
-          });
+          if (notify) {
+            this.messageService.add({
+              key: 'tst',
+              severity: 'warn',
+              summary: 'Chargement incomplet',
+              detail: response?.message || 'Les performances journalieres n ont pas pu etre chargees.',
+              life: 7000
+            });
+          }
+        },
+        (err) => {
+          this.loading_icon = false;
+          this.lightoil_loading = false;
+          if (notify) {
+            this.messageService.add({ key: 'tst', severity: 'error', summary: 'Error Message',
+              detail: 'An error occure while generatting daily sales performances. Please try again later.', life: 10000
+            });
+          }
         }
       );
+      return;
+    }
+
+    this.loading_icon = false;
+    this.lightoil_loading = false;
+    if (notify) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Filtres incomplets',
+        detail: 'Selectionnez un reseau et une date pour afficher les performances journalieres.',
+        life: 7000
+      });
     }
   }
 
-  getWeeklySalesPerformancesOfPointsOfSale() {
+  getWeeklySalesPerformancesOfPointsOfSale(notify = true) {
     this.loading_icon = true;
     this.lightoil_loading = true;
 
@@ -156,22 +230,51 @@ export class SalesPerformancesComponent implements OnInit {
             this.loading_icon = false;
             this.lightoil_loading = false;
             this.can_export_performances = true;
-            this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+            if (notify) {
+              this.messageService.add({ key: 'tst', severity: 'success', summary: 'Success', detail: response.message, life: 5000 });
+            }
+            return;
           }
-        },
-        (err) => {
 
           this.loading_icon = false;
           this.lightoil_loading = false;
-          this.messageService.add(
-            {
-              key: 'tst', severity: 'error', summary: 'Error Message',
-              detail: 'An error occure while generatting weekly sales performances. Please try again later.',
-              life: 10000
-            }
-          );
+          if (notify) {
+            this.messageService.add({
+              key: 'tst',
+              severity: 'warn',
+              summary: 'Chargement incomplet',
+              detail: response?.message || 'Les performances hebdomadaires n ont pas pu etre chargees.',
+              life: 7000
+            });
+          }
+        },
+        (err) => {
+          this.loading_icon = false;
+          this.lightoil_loading = false;
+          if (notify) {
+            this.messageService.add(
+              {
+                key: 'tst', severity: 'error', summary: 'Error Message',
+                detail: 'An error occure while generatting weekly sales performances. Please try again later.',
+                life: 10000
+              }
+            );
+          }
         }
       );
+      return;
+    }
+
+    this.loading_icon = false;
+    this.lightoil_loading = false;
+    if (notify) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Filtres incomplets',
+        detail: 'Selectionnez un reseau et une plage de dates pour afficher les performances hebdomadaires.',
+        life: 7000
+      });
     }
   }
 
@@ -251,6 +354,61 @@ export class SalesPerformancesComponent implements OnInit {
 
         break;
     }
+  }
+
+  private hasCompanyContext(notify = false): boolean {
+    const hasContext = this.company_id !== undefined && this.company_id !== null;
+    if (!hasContext && notify) {
+      this.messageService.add({
+        key: 'tst',
+        severity: 'warn',
+        summary: 'Entreprise requise',
+        detail: 'Selectionnez une entreprise depuis le dashboard super admin puis reessayez.',
+        life: 7000
+      });
+    }
+
+    return hasContext;
+  }
+
+  private bindRealtimeStationUpdates(stationIds: Array<number | null | undefined>): void {
+    const normalizedIds = [...new Set(
+      stationIds
+        .map((id) => Number(id))
+        .filter((id) => Number.isFinite(id) && id > 0)
+    )];
+    const key = normalizedIds.slice().sort((a, b) => a - b).join(',');
+
+    if (key === this.realtimeStationKey) {
+      return;
+    }
+
+    if (this.realtimeStationUnsubscribe) {
+      this.realtimeStationUnsubscribe();
+      this.realtimeStationUnsubscribe = null;
+    }
+
+    this.realtimeStationKey = key;
+    if (!normalizedIds.length) {
+      return;
+    }
+
+    this.realtimeStationUnsubscribe = this.realtimeRecordUpdatesService.subscribeToStationRecorded(
+      normalizedIds,
+      () => this.scheduleRealtimeRefresh()
+    );
+  }
+
+  private scheduleRealtimeRefresh(delayMs = 350): void {
+    if (this.realtimeRefreshTimeoutId !== null) {
+      clearTimeout(this.realtimeRefreshTimeoutId);
+      this.realtimeRefreshTimeoutId = null;
+    }
+
+    this.realtimeRefreshTimeoutId = setTimeout(() => {
+      this.realtimeRefreshTimeoutId = null;
+      this.loadData(this.calendar_type, false);
+    }, delayMs);
   }
 
   getProductColor(fuel_name: string): string {

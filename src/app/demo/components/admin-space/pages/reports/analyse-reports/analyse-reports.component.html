@@ -1,0 +1,464 @@
+<div class="analysis-page">
+  <div class="card analysis-header-card mb-3">
+    <div class="card-body">
+      <h1 class="analysis-title">Rapport d’analyse</h1>
+      <p class="analysis-subtitle">Analyse comparative entre les données déclarées par l’utilisateur et les données enregistrées par LightOil.</p>
+    </div>
+  </div>
+
+  <p-messages></p-messages>
+
+  <div class="card analysis-filter-card mb-3">
+    <div class="card-body">
+      <div class="analysis-mode-tabs mb-3">
+        <button type="button" class="mode-tab" [class.active]="!isRecapMode" (click)="setRecapMode(false)">Analyse journalière</button>
+        <button type="button" class="mode-tab" [class.active]="isRecapMode" (click)="setRecapMode(true)">Récapitulatif</button>
+      </div>
+
+      <form [formGroup]="filtersForm" novalidate>
+        <div class="grid">
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isPlatformSuperAdmin">
+            <label class="field-label" for="filter-company">Compagnie</label>
+            <p-dropdown
+              id="filter-company"
+              [options]="companyOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner"
+              formControlName="company_id"
+              styleClass="w-full filter-control"
+              [showClear]="true"
+              [filter]="true"
+              [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="!isRecapMode">
+            <label class="field-label" for="filter-start-date">Date d’analyse</label>
+            <p-calendar
+              inputId="filter-start-date"
+              formControlName="date_start"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-calendar>
+            <small class="field-error" *ngIf="hasFiltersError('date_start')">Date requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-start-date-recap">Date début</label>
+            <p-calendar
+              inputId="filter-start-date-recap"
+              formControlName="date_start"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-calendar>
+            <small class="field-error" *ngIf="hasFiltersError('date_start')">Date début requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-end-date">Date fin</label>
+            <p-calendar
+              inputId="filter-end-date"
+              formControlName="date_end"
+              dateFormat="dd/mm/yy"
+              [showIcon]="true"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-calendar>
+            <small class="field-error" *ngIf="hasFiltersError('date_end')">Date fin requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="!isRecapMode">
+            <label class="field-label" for="filter-reference-time">Heure de lecture</label>
+            <input id="filter-reference-time" type="time" class="form-control" formControlName="reference_time">
+            <small class="field-error" *ngIf="hasFiltersError('reference_time')">Heure requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4">
+            <label class="field-label" for="filter-station">Station</label>
+            <p-dropdown
+              id="filter-station"
+              [options]="stationOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner"
+              formControlName="station_id"
+              styleClass="w-full filter-control"
+              [filter]="true"
+              [appendTo]="'body'">
+            </p-dropdown>
+            <small class="field-error" *ngIf="hasFiltersError('station_id')">Station requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4">
+            <label class="field-label" for="filter-tank">Cuve</label>
+            <p-dropdown
+              id="filter-tank"
+              [options]="tankOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner"
+              formControlName="tank_id"
+              styleClass="w-full filter-control"
+              [filter]="true"
+              [appendTo]="'body'">
+            </p-dropdown>
+            <small class="field-error" *ngIf="hasFiltersError('tank_id')">Cuve requise.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4">
+            <label class="field-label" for="filter-fuel">Produit</label>
+            <p-dropdown
+              id="filter-fuel"
+              [options]="fuelTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner"
+              formControlName="fuel_type_id"
+              styleClass="w-full filter-control"
+              [filter]="true"
+              [appendTo]="'body'">
+            </p-dropdown>
+            <small class="field-error" *ngIf="hasFiltersError('fuel_type_id')">Produit requis.</small>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-rollup-analysis-type">Type d’analyse (récap)</label>
+            <p-dropdown
+              id="filter-rollup-analysis-type"
+              [options]="[
+                { label: 'Analyse de sortie', value: 'OUTINGS' },
+                { label: 'Analyse de stock', value: 'STOCK' },
+                { label: 'Analyse de ventes', value: 'SALES' }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              formControlName="rollup_analysis_type"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+
+          <div class="col-12 xl:col-2 lg:col-3 md:col-4" *ngIf="isRecapMode">
+            <label class="field-label" for="filter-rollup-bucket">Regroupement période</label>
+            <p-dropdown
+              id="filter-rollup-bucket"
+              [options]="[
+                { label: 'Aucun regroupement', value: 'NONE' },
+                { label: 'Journalier', value: 'DAILY' },
+                { label: 'Hebdomadaire', value: 'WEEKLY' },
+                { label: 'Mensuel', value: 'MONTHLY' }
+              ]"
+              optionLabel="label"
+              optionValue="value"
+              formControlName="rollup_bucket"
+              styleClass="w-full filter-control"
+              [appendTo]="'body'">
+            </p-dropdown>
+          </div>
+        </div>
+
+        <div class="grid" *ngIf="isRecapMode && hasDateRangeError()">
+          <div class="col-12">
+            <small class="field-error">La date fin doit être supérieure ou égale à la date début.</small>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card analysis-form-card mb-3">
+    <div class="card-header font-bold text-xl pt-0">
+      <h3 class="section-title mt-2">{{ isRecapMode ? 'Récapitulatif historique' : 'Saisie utilisateur' }}</h3>
+    </div>
+
+    <div class="card-body">
+      <ng-container *ngIf="!isRecapMode; else recapInfoPanel">
+        <form
+          [formGroup]="outingsForm"
+          novalidate
+          (keydown)="preventNonNumericInput($event)"
+          (paste)="preventNonNumericPaste($event)"
+          (input)="sanitizeNumericInput($event)">
+          <h3 class="section-title">Données de lecture</h3>
+          <p class="analysis-subtitle mb-3">
+            Saisissez une lecture à l’heure indiquée. La première lecture du jour servira d’état initial et la dernière d’état final dans le récapitulatif.
+          </p>
+          <div class="grid">
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+              <label class="field-label">Volume dépoté (livré/reçu)</label>
+              <input type="number" min="0" step="0.01" class="form-control" formControlName="received_quantity">
+            </div>
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+              <label class="field-label">Hauteur liquide</label>
+              <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_height">
+            </div>
+            <div class="col-12 xl:col-3 lg:col-4 md:col-6">
+              <label class="field-label">Volume liquide (à l'instant T)</label>
+              <input type="number" min="0" step="0.01" class="form-control" formControlName="liquid_volume">
+            </div>
+          </div>
+
+          <p-divider></p-divider>
+
+          <div class="pistol-section">
+            <div class="pistol-section-header">
+              <h4 class="pistol-title">Index par pistolet</h4>
+              <p-button label="Ajouter un pistolet" severity="secondary" [outlined]="true" (onClick)="addPistolRow('outings')"></p-button>
+            </div>
+
+            <div formArrayName="pistol_indexes">
+              <div class="pistol-row" *ngFor="let row of getOutingsPistolIndexes().controls; let i = index" [formGroupName]="i">
+                <div class="grid">
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                    <label class="field-label">Pistolet</label>
+                    <p-dropdown
+                      formControlName="nozzle_label"
+                      [options]="pistolOptions"
+                      optionLabel="label"
+                      optionValue="value"
+                      placeholder="Sélectionnez"
+                      styleClass="w-full">
+                    </p-dropdown>
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                    <label class="field-label">Index électronique</label>
+                    <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_opening_index">
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
+                    <label class="field-label">Index ferm. électronique</label>
+                    <input type="number" min="0" step="0.01" class="form-control" formControlName="electronic_closing_index">
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
+                    <label class="field-label">Delta électronique</label>
+                    <input type="number" class="form-control readonly-field" formControlName="electronic_delta_index" readonly>
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6">
+                    <label class="field-label">Index mécanique</label>
+                    <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_opening_index">
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
+                    <label class="field-label">Index ferm. mécanique</label>
+                    <input type="number" min="0" step="0.01" class="form-control" formControlName="mechanical_closing_index">
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6" style="display: none;">
+                    <label class="field-label">Delta mécanique</label>
+                    <input type="number" class="form-control readonly-field" formControlName="mechanical_delta_index" readonly>
+                  </div>
+                  <div class="col-12 xl:col-2 lg:col-3 md:col-6 pistol-action-cell">
+                    <p-button
+                      label="Retirer"
+                      styleClass="pistol-action-button"
+                      severity="danger"
+                      [outlined]="true"
+                      [disabled]="getOutingsPistolIndexes().length <= 1"
+                      (onClick)="removePistolRow('outings', i)">
+                    </p-button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </ng-container>
+
+      <ng-template #recapInfoPanel>
+        <div class="recap-tab-panel">
+          <h3 class="section-title">Récapitulatif historique</h3>
+          <p class="analysis-subtitle mb-0">
+            Sélectionnez une période et cliquez sur "Générer le tableau de rapprochement".
+          </p>
+        </div>
+      </ng-template>
+
+        <div class="reading-actions mt-3" *ngIf="!isRecapMode">
+          <p-button
+            label="Ajouter cette lecture"
+            severity="secondary"
+            [outlined]="true"
+            [loading]="savingDraftReading"
+            [disabled]="launchingAnalysis || savingDraftReading || loadingDraftReadings"
+            (onClick)="addCurrentReading()">
+          </p-button>
+          <span class="reading-help">Ajoutez plusieurs lectures dans la journée pour générer un récapitulatif initial/final cohérent.</span>
+        </div>
+
+        <div class="reading-list mt-3" *ngIf="manualReadings.length > 0 && !isRecapMode">
+          <div class="reading-list-header">
+            <h4 class="pistol-title">Lectures ajoutées</h4>
+            <button type="button" class="reading-clear" [disabled]="clearingDraftReadings" (click)="clearManualReadings()">Vider</button>
+          </div>
+          <div class="reading-item" *ngFor="let reading of manualReadings; let i = index">
+            <span>{{ getReadingSummaryLabel(reading) }}</span>
+            <button type="button" class="reading-remove" [disabled]="clearingDraftReadings" (click)="removeManualReading(i)">Retirer</button>
+          </div>
+        </div>
+
+      <div class="actions-row mt-4">
+        <div class="left-actions">
+          <p-button
+            [label]="isRecapMode ? 'Générer le tableau de rapprochement' : 'Lancer l’analyse des lectures'"
+            severity="primary"
+            [raised]="true"
+            [loading]="launchingAnalysis"
+            [disabled]="launchingAnalysis || savingDraftReading || loadingDraftReadings"
+            (onClick)="launchAnalysis()">
+          </p-button>
+
+          <p-button
+            label="Réinitialiser"
+            severity="secondary"
+            [outlined]="true"
+            [disabled]="launchingAnalysis"
+            (onClick)="resetActiveForm()">
+          </p-button>
+        </div>
+
+        <div class="actions-zone">
+          <span class="block font-bold mb-1 section-label">Exporter au format</span>
+          <div class="grid">
+            <div class="col-6">
+              <p-button
+                (onClick)="exportPdf()"
+                styleClass="w-full align-content-center text-lg action-button btn-export-pdf"
+                label="PDF"
+                [raised]="true"
+                severity="danger"
+                [disabled]="!canExport() || exporting"
+                [loading]="exporting && exportingFormat === 'pdf'">
+                <img src="assets/img/pdf.png" class="mr-2 report-icon" alt="PDF" />
+              </p-button>
+            </div>
+            <div class="col-6">
+              <p-button
+                (onClick)="exportExcel()"
+                styleClass="w-full align-content-center text-lg action-button btn-export-excel"
+                label="Excel"
+                [raised]="true"
+                severity="success"
+                [disabled]="!canExport() || exporting"
+                [loading]="exporting && exportingFormat === 'excel'">
+                <img src="assets/img/excel.png" class="mr-2 report-icon" alt="Excel" />
+              </p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card analysis-result-card" *ngIf="analysisResult">
+    <div class="card-body">
+      <div class="result-header mb-3">
+        <h3 class="result-title">Résultats comparatifs</h3>
+        <span class="status-pill" [ngClass]="getGlobalStatusClass(analysisGlobalStatus)">
+          {{ getGlobalStatusLabel(analysisGlobalStatus) }}
+        </span>
+      </div>
+
+      <div class="grid mb-2">
+        <div class="col-12 md:col-3">
+          <div class="kpi-card">
+            <div class="kpi-label">Statut global</div>
+            <div class="kpi-value">{{ getGlobalStatusLabel(analysisGlobalStatus) }}</div>
+          </div>
+        </div>
+        <div class="col-12 md:col-3">
+          <div class="kpi-card">
+            <div class="kpi-label">Nombre de métriques</div>
+            <div class="kpi-value">{{ analysisResult.metrics.length }}</div>
+          </div>
+        </div>
+        <div class="col-12 md:col-3">
+          <div class="kpi-card">
+            <div class="kpi-label">Avertissements</div>
+            <div class="kpi-value">{{ analysisResult.summary?.warning_count ?? 0 }}</div>
+          </div>
+        </div>
+        <div class="col-12 md:col-3">
+          <div class="kpi-card">
+            <div class="kpi-label">Critiques</div>
+            <div class="kpi-value">{{ analysisResult.summary?.critical_count ?? 0 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="!isRollupEnabled(); else rollupResultTable">
+        <p-table [value]="analysisResult.metrics" responsiveLayout="scroll" styleClass="p-datatable-striped p-datatable-gridlines" [rowHover]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Métrique</th>
+              <th class="text-right">Valeur utilisateur</th>
+              <th class="text-right">Valeur système</th>
+              <th class="text-right">Différence</th>
+              <th>Statut</th>
+              <th>Commentaire</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.metric_label }}</td>
+              <td class="text-right">{{ row.user_value ?? '--' }}</td>
+              <td class="text-right">{{ row.system_value ?? '--' }}</td>
+              <td class="text-right">{{ row.difference ?? '--' }}</td>
+              <td>
+                <span class="metric-status" [ngClass]="getGlobalStatusClass(row.status)">
+                  {{ getGlobalStatusLabel(row.status) }}
+                </span>
+              </td>
+              <td>{{ row.comment || '--' }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+
+      <ng-template #rollupResultTable>
+        <div class="mb-2 text-sm">
+          <strong>Sessions source:</strong> {{ analysisResult.summary?.source_sessions_count ?? 0 }}
+          <span class="mx-2">|</span>
+          <strong>Lignes:</strong> {{ analysisResult.summary?.rows_count ?? 0 }}
+        </div>
+
+        <p-table [value]="rollupRows" responsiveLayout="scroll" styleClass="p-datatable-striped p-datatable-gridlines" [rowHover]="true">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Segment</th>
+              <th>Date</th>
+              <th>Heure</th>
+              <th class="text-right">Hauteur manuelle</th>
+              <th class="text-right">Volume manuel</th>
+              <th>Pistolets</th>
+              <th class="text-right">Qte sortie manuelle</th>
+              <th>Heure LightOil</th>
+              <th class="text-right">Hauteur LightOil</th>
+              <th class="text-right">Volume LightOil</th>
+              <th class="text-right">Qte sortie LightOil</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-row>
+            <tr>
+              <td>{{ row.segment_label ?? '--' }}</td>
+              <td>{{ row.manual_date ?? '--' }}</td>
+              <td>{{ row.manual_hour ?? '--' }}</td>
+              <td class="text-right">{{ row.manual_height ?? 0 }}</td>
+              <td class="text-right">{{ row.manual_volume ?? 0 }}</td>
+              <td>{{ row.manual_pistols ?? '--' }}</td>
+              <td class="text-right">{{ row.manual_outing ?? 0 }}</td>
+              <td>{{ row.digital_hour ?? '--' }}</td>
+              <td class="text-right">{{ row.digital_height ?? 0 }}</td>
+              <td class="text-right">{{ row.digital_volume ?? 0 }}</td>
+              <td class="text-right">{{ row.digital_outing ?? 0 }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-template>
+
+    </div>
+  </div>
+</div>
