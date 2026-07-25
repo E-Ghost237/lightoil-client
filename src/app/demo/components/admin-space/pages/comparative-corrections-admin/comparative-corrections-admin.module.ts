@@ -8,6 +8,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { TableModule } from 'primeng/table';
 import { TabViewModule } from 'primeng/tabview';
 import { ToastModule } from 'primeng/toast';
+import { TooltipModule } from 'primeng/tooltip';
 import { ComparativeCorrectionsAdminRoutingModule } from './comparative-corrections-admin-routing.module';
 import { ComparativeCorrectionsAdminComponent } from './comparative-corrections-admin.component';
 
@@ -25,6 +26,7 @@ import { ComparativeCorrectionsAdminComponent } from './comparative-corrections-
     TableModule,
     TabViewModule,
     ToastModule,
+    TooltipModule,
     ComparativeCorrectionsAdminRoutingModule
   ]
 })

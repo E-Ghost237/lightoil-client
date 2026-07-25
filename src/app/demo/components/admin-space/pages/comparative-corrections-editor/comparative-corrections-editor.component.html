@@ -54,7 +54,8 @@
                 pButton
                 type="button"
                 label="Rafraîchir le statut"
-                class="p-button-outlined p-button-sm mr-2"
+                icon="pi pi-refresh"
+                class="p-button-outlined p-button-secondary p-button-sm mr-2"
                 (click)="refreshAccessStatus()"
                 [disabled]="accessLoading"
             ></button>
@@ -106,7 +107,8 @@
                         pButton
                         type="button"
                         label="Ouvrir"
-                        class="p-button-sm p-button-outlined"
+                        icon="pi pi-folder-open"
+                        class="p-button-sm p-button-outlined p-button-secondary"
                         (click)="selectSession(session.id)"
                     ></button>
                 </td>
@@ -121,22 +123,26 @@
 
     <div class="flex align-items-center justify-content-between mt-3" *ngIf="total > 0">
         <span class="text-500 text-sm">{{ total }} rapport(s) — page {{ currentPage }} / {{ lastPage }}</span>
-        <div>
+        <div class="flex align-items-center gap-2">
             <button
                 pButton
                 type="button"
                 icon="pi pi-chevron-left"
-                class="p-button-sm p-button-outlined mr-2"
+                class="p-button-rounded p-button-outlined p-button-secondary"
                 [disabled]="currentPage <= 1"
                 (click)="goToSessionsPage(currentPage - 1)"
+                pTooltip="Page précédente"
+                tooltipPosition="top"
             ></button>
             <button
                 pButton
                 type="button"
                 icon="pi pi-chevron-right"
-                class="p-button-sm p-button-outlined"
+                class="p-button-rounded p-button-outlined p-button-secondary"
                 [disabled]="currentPage >= lastPage"
                 (click)="goToSessionsPage(currentPage + 1)"
+                pTooltip="Page suivante"
+                tooltipPosition="top"
             ></button>
         </div>
     </div>
@@ -162,7 +168,7 @@
                 type="button"
                 label="Régénérer et exporter (PDF)"
                 icon="pi pi-file-pdf"
-                class="p-button-sm p-button-outlined"
+                class="p-button-sm p-button-outlined p-button-secondary"
                 (click)="regenerateAndExport('pdf')"
                 [loading]="regenerating || exporting"
             ></button>
@@ -171,7 +177,7 @@
                 type="button"
                 label="Régénérer et exporter (Excel)"
                 icon="pi pi-file-excel"
-                class="p-button-sm p-button-outlined"
+                class="p-button-sm p-button-outlined p-button-secondary"
                 (click)="regenerateAndExport('excel')"
                 [loading]="regenerating || exporting"
             ></button>
@@ -255,7 +261,7 @@
                 type="button"
                 label="Prévisualiser le récapitulatif"
                 icon="pi pi-eye"
-                class="p-button-sm p-button-outlined"
+                class="p-button-sm p-button-outlined p-button-secondary"
                 [disabled]="!isAccessOpen"
                 [loading]="previewing"
                 (click)="showRecapPreview()"
@@ -511,7 +517,7 @@
     </div>
 
     <ng-template pTemplate="footer">
-        <button pButton type="button" label="Fermer" class="p-button-sm p-button-text" (click)="previewDialogVisible = false"></button>
+        <button pButton type="button" label="Fermer" class="p-button-sm p-button-text p-button-secondary" (click)="previewDialogVisible = false"></button>
         <button
             pButton
             type="button"

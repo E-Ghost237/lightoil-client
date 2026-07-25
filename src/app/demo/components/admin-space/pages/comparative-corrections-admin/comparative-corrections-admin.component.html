@@ -186,22 +186,26 @@
 
             <div class="flex align-items-center justify-content-between mt-3" *ngIf="total > 0">
                 <span class="text-500 text-sm">{{ total }} entrée(s) — page {{ currentPage }} / {{ lastPage }}</span>
-                <div>
+                <div class="flex align-items-center gap-2">
                     <button
                         pButton
                         type="button"
                         icon="pi pi-chevron-left"
-                        class="p-button-sm p-button-outlined mr-2"
+                        class="p-button-rounded p-button-outlined p-button-secondary"
                         [disabled]="currentPage <= 1"
                         (click)="goToPage(currentPage - 1)"
+                        pTooltip="Page précédente"
+                        tooltipPosition="top"
                     ></button>
                     <button
                         pButton
                         type="button"
                         icon="pi pi-chevron-right"
-                        class="p-button-sm p-button-outlined"
+                        class="p-button-rounded p-button-outlined p-button-secondary"
                         [disabled]="currentPage >= lastPage"
                         (click)="goToPage(currentPage + 1)"
+                        pTooltip="Page suivante"
+                        tooltipPosition="top"
                     ></button>
                 </div>
             </div>
