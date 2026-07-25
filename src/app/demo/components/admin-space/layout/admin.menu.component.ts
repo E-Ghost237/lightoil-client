@@ -55,6 +55,11 @@ export class AdminMenuComponent implements OnInit {
                         label: 'Souscriptions stations',
                         icon: 'pi pi-fw pi-credit-card',
                         routerLink: ['/admin/subscriptions']
+                    },
+                    {
+                        label: 'Corrections des données clients',
+                        icon: 'pi pi-fw pi-shield',
+                        routerLink: ['/admin/comparative-corrections']
                     }] : []),
                     {
                         label: 'Rapports',
@@ -80,6 +85,11 @@ export class AdminMenuComponent implements OnInit {
                                 label: 'Analyse',
                                 icon: 'pi pi-fw pi-chart-line',
                                 routerLink: ['/admin/reports/analyse']
+                            },
+                            {
+                                label: 'Corrections des données',
+                                icon: 'pi pi-fw pi-pencil',
+                                routerLink: ['/admin/comparative-corrections-editor']
                             },
                         ]
                     },

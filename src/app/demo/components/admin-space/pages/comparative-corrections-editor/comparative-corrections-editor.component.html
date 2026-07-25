@@ -1,0 +1,526 @@
+<p-toast></p-toast>
+
+<div class="card">
+    <h4>Corrections des données d'analyse comparative</h4>
+    <p class="text-500">
+        Sélectionnez une station pour corriger les données saisies par le client. La modification n'est possible que
+        lorsque l'accès a été accordé par le Super Admin.
+    </p>
+
+    <form [formGroup]="filtersForm" class="grid">
+        <div class="col-12 md:col-4" *ngIf="isPlatformSuperAdmin">
+            <label class="block text-sm mb-1">Compagnie</label>
+            <p-dropdown
+                [options]="companyOptions"
+                formControlName="company_id"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                placeholder="Sélectionnez une compagnie"
+                styleClass="w-100"
+                (onChange)="onCompanyChange($event.value)"
+            ></p-dropdown>
+        </div>
+        <div class="col-12 md:col-4">
+            <label class="block text-sm mb-1">Station service</label>
+            <p-dropdown
+                [options]="stationOptions"
+                formControlName="station_id"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="true"
+                placeholder="Sélectionnez une station"
+                styleClass="w-100"
+                (onChange)="onStationChange($event.value)"
+            ></p-dropdown>
+        </div>
+    </form>
+</div>
+
+<!-- Access status banner -->
+<div class="card mt-3" *ngIf="selectedStationId">
+    <div class="flex align-items-center justify-content-between flex-wrap">
+        <div>
+            <span *ngIf="accessLoading">Vérification de l'accès...</span>
+            <span *ngIf="!accessLoading && isAccessOpen" class="text-green-600 font-bold">
+                <i class="pi pi-lock-open"></i> Accès à la modification ouvert pour cette station.
+            </span>
+            <span *ngIf="!accessLoading && !isAccessOpen" class="text-red-500 font-bold">
+                <i class="pi pi-lock"></i> Accès à la modification fermé pour cette station.
+            </span>
+        </div>
+        <div>
+            <button
+                pButton
+                type="button"
+                label="Rafraîchir le statut"
+                class="p-button-outlined p-button-sm mr-2"
+                (click)="refreshAccessStatus()"
+                [disabled]="accessLoading"
+            ></button>
+            <button
+                *ngIf="!isAccessOpen"
+                pButton
+                type="button"
+                label="Demander l'accès au Super Admin"
+                icon="pi pi-send"
+                class="p-button-sm"
+                (click)="requestAccess()"
+                [loading]="requestingAccess"
+            ></button>
+        </div>
+    </div>
+    <p class="text-sm text-500 mt-2 mb-0" *ngIf="!isAccessOpen">
+        L'accès doit être accordé par un Super Admin (onglet "Corrections des données clients" &gt; "Gestion de
+        l'accès") avant de pouvoir corriger les données de cette station.
+    </p>
+</div>
+
+<!-- Sessions list (paginated) -->
+<div class="card mt-3" *ngIf="selectedStationId">
+    <h5>Rapports de la station</h5>
+
+    <p-table [value]="sessions" [loading]="sessionsLoading" styleClass="mt-3" responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Session</th>
+                <th>Période</th>
+                <th>Statut</th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-session>
+            <tr [class.p-highlight]="session.id === selectedSessionId">
+                <td>#{{ session.id }}</td>
+                <td>{{ formatPeriodLabel(session) }}</td>
+                <td>
+                    <p-tag
+                        [value]="resolveInputDataStatusLabel(session.input_data_status)"
+                        [severity]="resolveValidationStatusSeverity(session.input_data_status)"
+                        pTooltip="Basé sur les données saisies (lectures/index), pas sur l'écart avec la jauge électronique"
+                        tooltipPosition="top"
+                    ></p-tag>
+                </td>
+                <td>
+                    <button
+                        pButton
+                        type="button"
+                        label="Ouvrir"
+                        class="p-button-sm p-button-outlined"
+                        (click)="selectSession(session.id)"
+                    ></button>
+                </td>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="4" class="text-center text-500">Aucun rapport disponible pour cette station.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <div class="flex align-items-center justify-content-between mt-3" *ngIf="total > 0">
+        <span class="text-500 text-sm">{{ total }} rapport(s) — page {{ currentPage }} / {{ lastPage }}</span>
+        <div>
+            <button
+                pButton
+                type="button"
+                icon="pi pi-chevron-left"
+                class="p-button-sm p-button-outlined mr-2"
+                [disabled]="currentPage <= 1"
+                (click)="goToSessionsPage(currentPage - 1)"
+            ></button>
+            <button
+                pButton
+                type="button"
+                icon="pi pi-chevron-right"
+                class="p-button-sm p-button-outlined"
+                [disabled]="currentPage >= lastPage"
+                (click)="goToSessionsPage(currentPage + 1)"
+            ></button>
+        </div>
+    </div>
+</div>
+
+<!-- Selected session -->
+<div class="card mt-3" *ngIf="selectedSessionId">
+    <div class="flex align-items-center justify-content-between flex-wrap mb-3 gap-2">
+        <h5 class="m-0">Rapport #{{ selectedSessionId }}</h5>
+        <div class="flex flex-wrap gap-2">
+            <button
+                pButton
+                type="button"
+                label="Enregistrer toutes les modifications"
+                icon="pi pi-save"
+                class="p-button-sm"
+                [disabled]="!isAccessOpen || !hasUnsavedChanges"
+                [loading]="savingAll"
+                (click)="saveAllChanges()"
+            ></button>
+            <button
+                pButton
+                type="button"
+                label="Régénérer et exporter (PDF)"
+                icon="pi pi-file-pdf"
+                class="p-button-sm p-button-outlined"
+                (click)="regenerateAndExport('pdf')"
+                [loading]="regenerating || exporting"
+            ></button>
+            <button
+                pButton
+                type="button"
+                label="Régénérer et exporter (Excel)"
+                icon="pi pi-file-excel"
+                class="p-button-sm p-button-outlined"
+                (click)="regenerateAndExport('excel')"
+                [loading]="regenerating || exporting"
+            ></button>
+        </div>
+    </div>
+
+    <div *ngIf="sessionLoading">Chargement des données...</div>
+
+    <!-- ============ Lectures horaires (source data — this is what gets corrected) ============ -->
+    <ng-container *ngIf="!sessionLoading && readingEntries.length > 0">
+        <h6 class="text-500 mb-2">
+            <i class="pi pi-clock"></i> Lectures horaires
+        </h6>
+        <p class="text-500 text-sm mt-0 mb-3">
+            Chaque lecture correspond à une saisie faite par le client à une heure donnée. La première lecture du jour
+            sert d'état initial et la dernière d'état final dans le récapitulatif — corrigez les valeurs saisies par
+            erreur, "Enregistrer toutes les modifications" ci-dessus, puis prévisualisez ou générez le récapitulatif.
+        </p>
+
+        <div *ngFor="let entry of readingEntries" class="card border-1 surface-border mb-3">
+            <div class="flex align-items-center justify-content-between flex-wrap">
+                <h6 class="m-0">
+                    <i class="pi pi-clock"></i>
+                    {{ entry.row.segment_label || (entry.row.segment_start | date:'dd/MM/yyyy HH:mm') }}
+                </h6>
+                <p-tag
+                    *ngIf="entry.row.validation_status"
+                    [value]="entry.row.validation_status"
+                    [severity]="resolveValidationStatusSeverity(entry.row.validation_status)"
+                ></p-tag>
+            </div>
+
+            <div *ngIf="hasFlags(entry.row)" class="p-2 mt-2 mb-2 border-round" style="background:#fff7ed;">
+                <div *ngFor="let message of flagMessages(entry.row)" class="text-orange-700 text-sm">
+                    <i class="pi pi-exclamation-triangle"></i> {{ message }}
+                </div>
+            </div>
+
+            <form [formGroup]="entry.form" class="grid mt-2">
+                <div class="col-12 md:col-6">
+                    <label class="block text-sm mb-1">Hauteur liquide</label>
+                    <p-inputNumber formControlName="liquid_height" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-12 md:col-6">
+                    <label class="block text-sm mb-1">Volume liquide (à l'instant T)</label>
+                    <p-inputNumber formControlName="liquid_volume" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+            </form>
+
+            <!-- Index par pistolet -->
+            <div class="mt-3" *ngIf="entry.pistolEntries.length > 0">
+                <label class="block text-sm text-500 mb-1">Index par pistolet</label>
+                <p-table [value]="entry.pistolEntries" styleClass="mt-1" responsiveLayout="scroll">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Pistolet</th>
+                            <th>Index électronique</th>
+                            <th>Index mécanique</th>
+                            <th>Statut</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-pistolEntry>
+                        <tr [formGroup]="pistolEntry.form">
+                            <td>
+                                <p-dropdown formControlName="pistol_label" [options]="pistolEntry.labelOptions" optionLabel="label" optionValue="value" placeholder="Sélectionnez" styleClass="w-full"></p-dropdown>
+                            </td>
+                            <td><p-inputNumber formControlName="electronic_opening_index" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td><p-inputNumber formControlName="mechanical_opening_index" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td class="align-middle">
+                                <p-tag *ngIf="pistolEntry.pistol.status" [value]="pistolEntry.pistol.status" [severity]="resolveValidationStatusSeverity(pistolEntry.pistol.status)"></p-tag>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+
+        <div class="flex justify-content-end gap-2 mb-3">
+            <button
+                pButton
+                type="button"
+                label="Prévisualiser le récapitulatif"
+                icon="pi pi-eye"
+                class="p-button-sm p-button-outlined"
+                [disabled]="!isAccessOpen"
+                [loading]="previewing"
+                (click)="showRecapPreview()"
+                pTooltip="Affiche ce que donnerait le récapitulatif, sans rien enregistrer"
+            ></button>
+            <button
+                pButton
+                type="button"
+                label="Générer et enregistrer le récapitulatif"
+                icon="pi pi-refresh"
+                class="p-button-sm"
+                [disabled]="!isAccessOpen"
+                [loading]="regeneratingRecap"
+                (click)="generateRecap()"
+                pTooltip="Recalcule et enregistre le récapitulatif ci-dessous à partir des lectures corrigées"
+            ></button>
+        </div>
+    </ng-container>
+
+    <!-- ============ Récapitulatif (derived from readings — regenerated, not hand-edited) ============ -->
+    <ng-container *ngIf="!sessionLoading && recapEntry as entry">
+        <h6 class="text-500 mb-2">
+            <i class="pi pi-file"></i> Récapitulatif journalier
+        </h6>
+        <div class="card border-1 surface-border mb-3">
+            <div class="flex align-items-center justify-content-between flex-wrap">
+                <h6 class="m-0">{{ entry.row.segment_label || 'Récapitulatif journalier' }}</h6>
+                <p-tag
+                    *ngIf="entry.row.validation_status"
+                    [value]="entry.row.validation_status"
+                    [severity]="resolveValidationStatusSeverity(entry.row.validation_status)"
+                ></p-tag>
+            </div>
+
+            <div *ngIf="hasFlags(entry.row)" class="p-2 mt-2 mb-2 border-round" style="background:#fff7ed;">
+                <div *ngFor="let message of flagMessages(entry.row)" class="text-orange-700 text-sm">
+                    <i class="pi pi-exclamation-triangle"></i> {{ message }}
+                </div>
+            </div>
+
+            <p class="text-500 text-sm" *ngIf="readingEntries.length > 0">
+                Ces valeurs sont calculées à partir des lectures horaires ci-dessus ("Prévisualiser" ou "Générer et
+                enregistrer le récapitulatif" après une correction). Seul le champ "Reçu" est une saisie
+                indépendante, corrigible directement ici puis via "Enregistrer toutes les modifications".
+            </p>
+
+            <form [formGroup]="entry.form" class="grid mt-2">
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Stock initial</label>
+                    <p-inputNumber [ngModel]="entry.row.initial_stock" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Reçu</label>
+                    <p-inputNumber formControlName="received_quantity" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Stock final</label>
+                    <p-inputNumber [ngModel]="entry.row.final_stock" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Hauteur liquide</label>
+                    <p-inputNumber [ngModel]="entry.row.liquid_height" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Volume liquide</label>
+                    <p-inputNumber [ngModel]="entry.row.liquid_volume" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Qte sortie déclarée</label>
+                    <p-inputNumber [ngModel]="entry.row.declared_outing_quantity" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+            </form>
+
+            <div class="mt-3" *ngIf="entry.pistolEntries.length > 0">
+                <p-table [value]="entry.pistolEntries" styleClass="mt-1" responsiveLayout="scroll">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Pistolet</th>
+                            <th>Élec. ouv.</th>
+                            <th>Élec. ferm.</th>
+                            <th>Delta élec.</th>
+                            <th>Méca. ouv.</th>
+                            <th>Méca. ferm.</th>
+                            <th>Delta méca.</th>
+                            <th>Statut</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-pistolEntry>
+                        <tr>
+                            <td class="align-middle">{{ pistolEntry.pistol.pistol_label ?? ('#' + pistolEntry.pistol.pistol_id) }}</td>
+                            <td>{{ pistolEntry.pistol.electronic_opening_index ?? '---' }}</td>
+                            <td>{{ pistolEntry.pistol.electronic_closing_index ?? '---' }}</td>
+                            <td>{{ pistolEntry.pistol.electronic_delta_index ?? '---' }}</td>
+                            <td>{{ pistolEntry.pistol.mechanical_opening_index ?? '---' }}</td>
+                            <td>{{ pistolEntry.pistol.mechanical_closing_index ?? '---' }}</td>
+                            <td>{{ pistolEntry.pistol.mechanical_delta_index ?? '---' }}</td>
+                            <td class="align-middle">
+                                <p-tag *ngIf="pistolEntry.pistol.status" [value]="pistolEntry.pistol.status" [severity]="resolveValidationStatusSeverity(pistolEntry.pistol.status)"></p-tag>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </ng-container>
+
+    <!-- ============ Segments (sessions with no hourly breakdown — directly editable) ============ -->
+    <ng-container *ngIf="!sessionLoading && segmentEntries.length > 0">
+        <div *ngFor="let entry of segmentEntries" class="card border-1 surface-border mb-3">
+            <div class="flex align-items-center justify-content-between flex-wrap">
+                <h6 class="m-0">
+                    {{ entry.row.segment_label || (entry.row.segment_start | date:'dd/MM/yyyy HH:mm') }}
+                    <span class="text-500 text-sm">({{ entry.row.row_type }})</span>
+                </h6>
+                <p-tag
+                    *ngIf="entry.row.validation_status"
+                    [value]="entry.row.validation_status"
+                    [severity]="resolveValidationStatusSeverity(entry.row.validation_status)"
+                ></p-tag>
+            </div>
+
+            <div *ngIf="hasFlags(entry.row)" class="p-2 mt-2 mb-2 border-round" style="background:#fff7ed;">
+                <div *ngFor="let message of flagMessages(entry.row)" class="text-orange-700 text-sm">
+                    <i class="pi pi-exclamation-triangle"></i> {{ message }}
+                </div>
+            </div>
+
+            <form [formGroup]="entry.form" class="grid mt-2">
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Stock initial</label>
+                    <p-inputNumber formControlName="initial_stock" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Reçu</label>
+                    <p-inputNumber formControlName="received_quantity" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Stock final</label>
+                    <p-inputNumber formControlName="final_stock" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Hauteur liquide</label>
+                    <p-inputNumber formControlName="liquid_height" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Volume liquide</label>
+                    <p-inputNumber formControlName="liquid_volume" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+                <div class="col-6 md:col-2">
+                    <label class="block text-sm mb-1">Qte sortie déclarée</label>
+                    <p-inputNumber formControlName="declared_outing_quantity" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
+                </div>
+            </form>
+
+            <div class="mt-3" *ngIf="entry.pistolEntries.length > 0">
+                <p-table [value]="entry.pistolEntries" styleClass="mt-1" responsiveLayout="scroll">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Pistolet</th>
+                            <th>Élec. ouv.</th>
+                            <th>Élec. ferm.</th>
+                            <th>Delta élec.</th>
+                            <th>Méca. ouv.</th>
+                            <th>Méca. ferm.</th>
+                            <th>Delta méca.</th>
+                            <th>Statut</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-pistolEntry>
+                        <tr [formGroup]="pistolEntry.form">
+                            <td>
+                                <p-dropdown formControlName="pistol_label" [options]="pistolEntry.labelOptions" optionLabel="label" optionValue="value" placeholder="Sélectionnez" styleClass="w-full"></p-dropdown>
+                            </td>
+                            <td><p-inputNumber formControlName="electronic_opening_index" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td><p-inputNumber formControlName="electronic_closing_index" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td><p-inputNumber formControlName="electronic_delta_preview" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td><p-inputNumber formControlName="mechanical_opening_index" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td><p-inputNumber formControlName="mechanical_closing_index" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td><p-inputNumber formControlName="mechanical_delta_preview" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber></td>
+                            <td class="align-middle">
+                                <p-tag *ngIf="pistolEntry.pistol.status" [value]="pistolEntry.pistol.status" [severity]="resolveValidationStatusSeverity(pistolEntry.pistol.status)"></p-tag>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </ng-container>
+
+    <div *ngIf="!sessionLoading && readingEntries.length === 0 && !recapEntry && segmentEntries.length === 0" class="text-center text-500">
+        Aucune donnée à afficher pour ce rapport.
+    </div>
+</div>
+
+<!-- Recap preview dialog -->
+<p-dialog header="Prévisualisation du récapitulatif" [(visible)]="previewDialogVisible" [modal]="true" [style]="{ width: '700px' }" [dismissableMask]="true">
+    <div *ngIf="!previewData?.has_readings" class="text-500">
+        Aucune lecture horaire disponible pour calculer un récapitulatif.
+    </div>
+
+    <div *ngIf="previewData?.preview as preview">
+        <p class="text-500 text-sm mt-0">
+            Aperçu calculé à partir des lectures actuellement enregistrées -- rien n'a été modifié ni sauvegardé.
+        </p>
+
+        <div class="grid">
+            <div class="col-6 md:col-3">
+                <label class="block text-sm text-500 mb-1">Stock initial</label>
+                <div class="font-semibold">{{ preview.initial_stock ?? '---' }}</div>
+            </div>
+            <div class="col-6 md:col-3">
+                <label class="block text-sm text-500 mb-1">Stock final</label>
+                <div class="font-semibold">{{ preview.final_stock ?? '---' }}</div>
+            </div>
+            <div class="col-6 md:col-3">
+                <label class="block text-sm text-500 mb-1">Hauteur liquide</label>
+                <div class="font-semibold">{{ preview.liquid_height ?? '---' }}</div>
+            </div>
+            <div class="col-6 md:col-3">
+                <label class="block text-sm text-500 mb-1">Qte sortie déclarée</label>
+                <div class="font-semibold">{{ preview.declared_outing_quantity ?? '---' }}</div>
+            </div>
+        </div>
+
+        <p-table [value]="preview.pistols" styleClass="mt-3" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Pistolet</th>
+                    <th>Élec. ouv.</th>
+                    <th>Élec. ferm.</th>
+                    <th>Delta élec.</th>
+                    <th>Méca. ouv.</th>
+                    <th>Méca. ferm.</th>
+                    <th>Delta méca.</th>
+                    <th>Source retenue</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-pistol>
+                <tr>
+                    <td>{{ pistol.pistol_label ?? '---' }}</td>
+                    <td>{{ pistol.electronic_opening_index ?? '---' }}</td>
+                    <td>{{ pistol.electronic_closing_index ?? '---' }}</td>
+                    <td>{{ pistol.electronic_delta_index ?? '---' }}</td>
+                    <td>{{ pistol.mechanical_opening_index ?? '---' }}</td>
+                    <td>{{ pistol.mechanical_closing_index ?? '---' }}</td>
+                    <td>{{ pistol.mechanical_delta_index ?? '---' }}</td>
+                    <td>
+                        <p-tag [value]="resolvedSourceLabel(pistol.resolved_source)" [severity]="pistol.resolved_source === 'excluded' ? 'warning' : 'info'"></p-tag>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton type="button" label="Fermer" class="p-button-sm p-button-text" (click)="previewDialogVisible = false"></button>
+        <button
+            pButton
+            type="button"
+            label="Générer et enregistrer le récapitulatif"
+            icon="pi pi-refresh"
+            class="p-button-sm"
+            [disabled]="!isAccessOpen || !previewData?.has_readings"
+            [loading]="regeneratingRecap"
+            (click)="previewDialogVisible = false; generateRecap()"
+        ></button>
+    </ng-template>
+</p-dialog>

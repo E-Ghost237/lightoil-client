@@ -33,6 +33,15 @@ import { nonSuperAdminRouteMatchGuard } from 'src/app/demo/guards/non-super-admi
           { path: 'onboarding', canActivate: [superAdminGuard], loadChildren: () => import('./onboarding/onboarding.module').then((m) => m.OnboardingModule) },
           { path: 'subscriptions', canActivate: [superAdminGuard], loadChildren: () => import('./subscriptions/subscriptions.module').then((m) => m.SubscriptionsModule) },
           {
+            path: 'comparative-corrections',
+            canActivate: [superAdminGuard],
+            loadChildren: () => import('./comparative-corrections-admin/comparative-corrections-admin.module').then((m) => m.ComparativeCorrectionsAdminModule)
+          },
+          {
+            path: 'comparative-corrections-editor',
+            loadChildren: () => import('./comparative-corrections-editor/comparative-corrections-editor.module').then((m) => m.ComparativeCorrectionsEditorModule)
+          },
+          {
             path: 'reports',
             loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule)
           },

@@ -1,5 +1,7 @@
+<p-toast></p-toast>
+
 <div class="layout-topbar">
-    <button type="button" #menubutton class="p-link layout-menu-button layout-topbar-button mt-2 mr-3" 
+    <button type="button" #menubutton class="p-link layout-menu-button layout-topbar-button mt-2 mr-3"
         (click)="layoutService.onMenuToggle()" title="Toggle Menu">
         <i class="pi pi-bars"></i>
     </button>
@@ -10,14 +12,14 @@
         <span class="mt-1 font-bold">Administrateur</span>
     </a>
 
-    <button type="button" #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button" 
+    <button type="button" #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button"
         (click)="layoutService.showProfileSidebar()" title="Show Profile Sidebar">
         <i class="pi pi-ellipsis-v"></i>
     </button>
 
     <div #topbarmenu class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
-        <button class="p-link layout-topbar-button">
-            <i class="pi pi-bell"></i>
+        <button *ngIf="isPlatformSuperAdmin" class="p-link layout-topbar-button" (click)="notificationsPanel.toggle($event)">
+            <i class="pi pi-bell" [pBadge]="pendingCountLabel" severity="danger"></i>
             <span>Notifications</span>
         </button>
         <button class="p-link layout-topbar-button border-none bg-gray-200 xl:border-circle lg:border-circle">
@@ -30,3 +32,32 @@
         </button>
     </div>
 </div>
+
+<p-overlayPanel #notificationsPanel [style]="{ width: '380px' }" appendTo="body">
+    <div class="flex align-items-center justify-content-between mb-2">
+        <h6 class="m-0">Demandes de correction</h6>
+        <button pButton type="button" icon="pi pi-refresh" class="p-button-sm p-button-text" (click)="loadPendingAccessRequests()" pTooltip="Actualiser"></button>
+    </div>
+
+    <div *ngIf="pendingAccessRequests.length === 0" class="text-500 text-sm p-2">
+        Aucune demande d'accès en attente.
+    </div>
+
+    <div *ngFor="let request of pendingAccessRequests" class="border-bottom-1 surface-border py-2">
+        <div class="text-sm font-semibold">{{ stationLabel(request) }}</div>
+        <div class="text-500 text-sm">
+            Demandé par {{ requesterLabel(request) }} le {{ request.created_at | date:'dd/MM/yyyy HH:mm' }}
+        </div>
+        <div class="flex justify-content-end mt-1">
+            <button
+                pButton
+                type="button"
+                label="Accorder l'accès"
+                icon="pi pi-lock-open"
+                class="p-button-sm"
+                [loading]="grantingStationId === request.service_station_id"
+                (click)="grantFromNotification(request)"
+            ></button>
+        </div>
+    </div>
+</p-overlayPanel>
