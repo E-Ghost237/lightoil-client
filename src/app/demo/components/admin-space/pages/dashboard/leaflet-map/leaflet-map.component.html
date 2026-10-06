@@ -1,29 +1,25 @@
 <div class="grid">
-    <!-- Stock of Products -->
     <div class="col-12 xl:col-5 lg:col-5">
-        <div class="card p-4 pt-3 pb-3">
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered caption-top">
-                    <caption class="font-semibold text-900 text-xl text-dark mb-3">
-                       Stock de produits par point de vente  <!-- {{ sale_point_type ?? 'point de vente' }} --> au {{ product_stock_date ?? '...' }}
-                    </caption>
-                    <thead class="table-dark">
-                        <tr class="font-bold">
-                            <th scope="col">Points de vente  <!-- {{ sale_point_type ?? 'Points de vente' }} --></th>
-                            <th scope="col">Produits</th>
-                            <th scope="col">Volumes</th>
-                            <!-- <th scope="col">Mesuré le</th> -->
-                        </tr>
-                    </thead>
-                    <ng-container
-                        *ngIf="stock_per_tank_of_sale_points !== undefined && stock_per_tank_of_sale_points.length > 0; else elseTemplate">
-                        <tbody class="table-group-divider align-middle" *ngFor="let sale_point of stock_per_tank_of_sale_points">
+        <div class="lo-card table-card">
+            <h3 class="lo-card-title">Stock de produits par point de vente au {{ product_stock_date ?? '...' }}</h3>
+            <ng-container
+                *ngIf="stock_per_tank_of_sale_points !== undefined && stock_per_tank_of_sale_points.length > 0; else elseTemplate">
+                <div class="lo-table-scroll">
+                    <table class="lo-admin-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Points de vente</th>
+                                <th scope="col">Produits</th>
+                                <th scope="col">Volumes</th>
+                            </tr>
+                        </thead>
+                        <tbody *ngFor="let sale_point of stock_per_tank_of_sale_points">
                             <tr>
                                 <td>
-                                    <b>{{ sale_point.name }}</b> <br><i>{{ sale_point.town }}</i>
+                                    <b>{{ sale_point.name }}</b><br><i>{{ sale_point.town }}</i>
                                 </td>
                                 <td>
-                                    <table *ngFor="let tank of sale_point?.tanks">
+                                    <table *ngFor="let tank of sale_point?.tanks" class="lo-admin-nested">
                                         <tr>
                                             <td [ngStyle]="{'color': getProductColor(tank?.product?.name)}">
                                                 <strong>{{ tank?.product?.name }} :</strong>
@@ -32,7 +28,7 @@
                                     </table>
                                 </td>
                                 <td>
-                                    <table *ngFor="let tank of sale_point?.tanks" class="flex justify-content-start"> <!-- flex justify-content-end -->
+                                    <table *ngFor="let tank of sale_point?.tanks" class="lo-admin-nested">
                                         <tr>
                                             <ng-container
                                                 *ngIf="(tank?.product?.volume != undefined && tank?.volume != undefined) && (tank?.product?.volume != 0 && tank?.volume != 0); else noVolume">
@@ -47,39 +43,27 @@
                                         </tr>
                                     </table>
                                 </td>
-                                <!-- <td>
-                                    <table *ngFor="let product of sale_point.products" class="">
-                                        <tr>
-                                            <td class="font-medium">{{ product.measured_at ?? '...' }}</td>
-                                        </tr>
-                                    </table>
-                                </td> -->
                             </tr>
                         </tbody>
-                        <tfoot class="table-group-divider align-middle">
-                            <tr></tr>
-                        </tfoot>
-                    </ng-container>
-                    <ng-template #elseTemplate>
-                        <div class="flex flex-column align-items-center justify-content-center mt-4">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </ng-template>
-                </table>
-            </div>
+                    </table>
+                </div>
+            </ng-container>
+            <ng-template #elseTemplate>
+                <div class="lo-state compact">
+                    <p-progressSpinner strokeWidth="4" [style]="{ width: '2.25rem', height: '2.25rem' }"></p-progressSpinner>
+                    <p>Chargement des stocks par point de vente…</p>
+                </div>
+            </ng-template>
         </div>
     </div>
 
-    <!-- Map -->
     <div class="col-12 xl:col-7 lg:col-7">
-        <div class="card relative" id="leaflet-map" #mapContainer>
-            <div class="z-1 absolute top-0 right-0 p-0 mt-2 mr-2 font-bold">
-                <p-button [raised]="true" severity="secondary" pTooltip="Basculer en plein écran" tooltipPosition="left"
-                    styleClass="p-2 bg-light text-dark border-500 surface-overlay border-2 border-round" (onClick)="toggleFullScreen()">
-                    <i [ngClass]="isFullScreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'" style="font-size: 1.7rem"></i>
-                </p-button>
-            </div>
-            <div class="z-0 static" leaflet [leafletOptions]="options" [leafletBaseLayers]="baseLayers"
+        <div class="lo-card lo-map-card" id="leaflet-map" #mapContainer>
+            <button type="button" class="lo-icon-action map-fullscreen" pTooltip="Basculer en plein écran"
+                tooltipPosition="left" (click)="toggleFullScreen()">
+                <i [ngClass]="isFullScreen ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"></i>
+            </button>
+            <div leaflet [leafletOptions]="options" [leafletBaseLayers]="baseLayers"
                 [leafletLayersControlOptions]="layersControlOptions">
                 <div *ngFor="let layer of layers" [leafletLayer]="layer"></div>
             </div>

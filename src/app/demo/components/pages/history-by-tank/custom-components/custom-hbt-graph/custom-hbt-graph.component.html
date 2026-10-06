@@ -1,20 +1,14 @@
-
 <div *ngIf="listRecord && listRecord?.level?.length > 0">
-    <div class="row">
-        <span class="text-center h4">
-            Graphe des donnees de la cuve {{tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name}}
-        </span>
+    <div class="lo-section-head">
+        <h3>Graphe des données de la cuve {{tank?.sensor_reference + '-' + tank?.product_service_station?.product?.name}}</h3>
+        <span class="lo-section-rule"></span>
     </div>
-    
-    <div class="card">
-        <p-chart #graph1 type="line" [data]="data" [options]="options"></p-chart>
-    </div>
+    <p-chart #graph1 type="line" [data]="data" [options]="options"></p-chart>
 </div>
 <div *ngIf="listRecord && listRecord?.level?.length <= 0">
-    <div class="row justify-content-center">
-        <span class="col text-center">
-            Aucune données disponible dans la période
-        </span>
+    <div class="lo-state">
+        <div class="lo-state-icon"><i class="pi pi-chart-line"></i></div>
+        <h4>Aucune donnée</h4>
+        <p>Aucune donnée disponible dans la période sélectionnée.</p>
     </div>
 </div>
-

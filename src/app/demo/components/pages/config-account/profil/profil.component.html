@@ -1,183 +1,149 @@
-
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Gestion des donnees de l'utilisateur</h4>
-        <span class="bg-danger rounded" *ngIf="statusIsFirstConn">
-            C'est votre premiere connexion. Veuillez changer votre mot de passe avant de continuer.
-        </span>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/product/icon.jpg" alt="icon">
-    </div>
-</div>
 
-<div class="card my-4">
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around">
-        <div class="col text-center">
-            Noms et prenoms
-        </div>
-        <div class="col text-center">
-            {{userDetails?.first_name+' ' ?? '--' }} {{userDetails?.last_name+' ' ?? '--'}}
-        </div>
-    </div>
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around">
-        <div class="col text-center">
-            Email et contact
-        </div>
-        <div class="col text-center">
-            {{userDetails?.email+' ' ?? '--' }} {{userDetails?.phone+' ' ?? '--'}}
-        </div>
-    </div>
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around">
-        <div class="col text-center">
-            Adresse
-        </div>
-        <div class="col text-center">
-            {{userDetails?.address+' ' ?? '--' }}
-        </div>
-    </div>
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around">
-        <div class="col text-center">
-            Role
-        </div>
-        <div class="col text-center">
-            <div class="row justify-content-center " *ngFor="let role of roles">
-                <div class="col border-bottom-2 border-info text-center">
-                    {{role?.name+' ' ?? '--' }}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around">
-        <div class="col text-center">
-            Notification
-        </div>
-        <div class="col text-center">
-            <div class="row justify-content-center " *ngFor="let alertUser of userDetails?.alert_user">
-                <div class="col border-bottom-2 border-info text-center">
-                    {{alertUser?.type_notification?.wording+' ' ?? '--' }}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around">
-        <div class="col text-center">
-            Mot de passe
-        </div>
-        <div class="col text-center">
-            <div class="row" *ngIf="!editPasswordBool">
-                <div class="col">
-                    {{'********'}} 
-                </div>
-            </div>
-            <div class="row" *ngIf="editPasswordBool">
-                <div class="flex flex-row justify-content-evenly align-items-center ">
-                    <span class="p-float-label mx-1">
-                        <p-password 
-                            [(ngModel)]="oldPassword"
-                            [toggleMask]="true"
-                            [showClear]="true"
-                            [weakLabel]="'Faible'"
-                            [mediumLabel]="'Moyennement complexe'"
-                            [strongLabel]="'Complexe'"
-                        >
-                            <ng-template pTemplate="header">
-                                <h6>Choisir un mot de passe</h6>
-                            </ng-template>
-                            <ng-template pTemplate="footer">
-                                <p-divider></p-divider>
-                                <p class="mt-2">Suggestions</p>
-                                <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
-                                    <li>Au moins une majuscule</li>
-                                    <li>Au moins une minuscule</li>
-                                    <li>Au moins un nombre</li>
-                                    <li>Minimum 8 caracteres</li>
-                                </ul>
-                            </ng-template>
-                        </p-password>
-                        
-                        <label for="password">Ancien mot de passe</label>
-                    </span>
-
-                    <span class="p-float-label mx-1">
-                        <p-password 
-                            [(ngModel)]="password"
-                            [toggleMask]="true"
-                            [showClear]="true"
-                            [weakLabel]="'Faible'"
-                            [mediumLabel]="'Moyennement complexe'"
-                            [strongLabel]="'Complexe'"
-                        >
-                            <ng-template pTemplate="header">
-                                <h6>Choisir un mot de passe</h6>
-                            </ng-template>
-                            <ng-template pTemplate="footer">
-                                <p-divider></p-divider>
-                                <p class="mt-2">Suggestions</p>
-                                <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
-                                    <li>Au moins une majuscule</li>
-                                    <li>Au moins une minuscule</li>
-                                    <li>Au moins un nombre</li>
-                                    <li>Minimum 8 caracteres</li>
-                                </ul>
-                            </ng-template>
-                        </p-password>
-                        
-                        <label for="password">Nouveau mot de passe</label>
-                    </span>
-
-                    <span class="p-float-label mx-1">
-                        <p-password 
-                            [(ngModel)]="password_confirmation"
-                            [toggleMask]="true"
-                            [showClear]="true"
-                            [weakLabel]="'Faible'"
-                            [mediumLabel]="'Moyennement complexe'"
-                            [strongLabel]="'Complexe'"
-                        >
-                            <ng-template pTemplate="header">
-                                <h6>Choisir un mot de passe</h6>
-                            </ng-template>
-                            <ng-template pTemplate="footer">
-                                <p-divider></p-divider>
-                                <p class="mt-2">Suggestions</p>
-                                <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
-                                    <li>Au moins une majuscule</li>
-                                    <li>Au moins une minuscule</li>
-                                    <li>Au moins un nombre</li>
-                                    <li>Minimum 8 caracteres</li>
-                                </ul>
-                            </ng-template>
-                        </p-password>
-                        
-                        <label for="password">Confirmation mot de passe</label>
-                    </span>
-                    <button pButton pRipple 
-                        icon="pi pi-check" 
-                        class="p-button-rounded p-button-success mr-2" 
-                        (click)="savePassword()">
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="col text-center" *ngIf="!editPasswordBool">
-            <button pButton pRipple 
-                icon="pi pi-pencil" 
-                class="p-button-rounded p-button-infor mr-2" 
-                pTooltip="Cliquez pour changer le mot de passe"
-                (click)="editPassword()">
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
             </button>
+            <div>
+                <span class="lo-eyebrow">Configuration · Compte</span>
+                <h1 class="lo-page-title">Mon profil</h1>
+                <p class="lo-page-subtitle">Informations de votre compte utilisateur</p>
+            </div>
         </div>
     </div>
-    <div class="row justify-content-center">
-        <div class="col text-center">
-            modifié le : {{getToLocalDateTime(userDetails?.updated_at)}}
+
+    <div class="lo-banner warn" *ngIf="statusIsFirstConn">
+        <i class="pi pi-exclamation-circle"></i>
+        <span>C'est votre première connexion. Veuillez changer votre mot de passe avant de continuer.</span>
+    </div>
+
+    <div class="lo-card">
+        <div class="lo-spec">
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Noms et prénoms</span>
+                <span class="lo-spec-value">{{userDetails?.first_name + ' ' ?? '--'}}{{userDetails?.last_name + ' ' ?? '--'}}</span>
+            </div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Email et contact</span>
+                <span class="lo-spec-value">{{userDetails?.email + ' ' ?? '--'}}{{userDetails?.phone + ' ' ?? '--'}}</span>
+            </div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Adresse</span>
+                <span class="lo-spec-value">{{userDetails?.address + ' ' ?? '--'}}</span>
+            </div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Rôles</span>
+                <span class="flex flex-wrap justify-content-end gap-1">
+                    <span class="lo-chip navy" *ngFor="let role of roles">{{role?.name + ' ' ?? '--'}}</span>
+                </span>
+            </div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Notifications suivies</span>
+                <span class="flex flex-wrap justify-content-end gap-1">
+                    <span class="lo-chip info" *ngFor="let alertUser of userDetails?.alert_user">{{alertUser?.type_notification?.wording + ' ' ?? '--'}}</span>
+                </span>
+            </div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Mot de passe</span>
+                <span class="lo-spec-value" *ngIf="!editPasswordBool">********</span>
+                <button *ngIf="!editPasswordBool" pButton pRipple icon="pi pi-pencil"
+                    class="p-button-rounded p-button-info p-button-text"
+                    pTooltip="Cliquez pour changer le mot de passe"
+                    (click)="editPassword()"></button>
+            </div>
         </div>
+
+        <div class="lo-filterbar mt-3 mb-0" *ngIf="editPasswordBool">
+            <div class="lo-field">
+                <label for="profil-old-pass">Ancien mot de passe</label>
+                <p-password
+                    inputId="profil-old-pass"
+                    [(ngModel)]="oldPassword"
+                    [toggleMask]="true"
+                    [showClear]="true"
+                    [weakLabel]="'Faible'"
+                    [mediumLabel]="'Moyennement complexe'"
+                    [strongLabel]="'Complexe'"
+                    styleClass="w-full" inputStyleClass="w-full">
+                    <ng-template pTemplate="header">
+                        <h6>Choisir un mot de passe</h6>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <p-divider></p-divider>
+                        <p class="mt-2">Suggestions</p>
+                        <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
+                            <li>Au moins une majuscule</li>
+                            <li>Au moins une minuscule</li>
+                            <li>Au moins un nombre</li>
+                            <li>Minimum 8 caractères</li>
+                        </ul>
+                    </ng-template>
+                </p-password>
+            </div>
+
+            <div class="lo-field">
+                <label for="profil-new-pass">Nouveau mot de passe</label>
+                <p-password
+                    inputId="profil-new-pass"
+                    [(ngModel)]="password"
+                    [toggleMask]="true"
+                    [showClear]="true"
+                    [weakLabel]="'Faible'"
+                    [mediumLabel]="'Moyennement complexe'"
+                    [strongLabel]="'Complexe'"
+                    styleClass="w-full" inputStyleClass="w-full">
+                    <ng-template pTemplate="header">
+                        <h6>Choisir un mot de passe</h6>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <p-divider></p-divider>
+                        <p class="mt-2">Suggestions</p>
+                        <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
+                            <li>Au moins une majuscule</li>
+                            <li>Au moins une minuscule</li>
+                            <li>Au moins un nombre</li>
+                            <li>Minimum 8 caractères</li>
+                        </ul>
+                    </ng-template>
+                </p-password>
+            </div>
+
+            <div class="lo-field">
+                <label for="profil-confirm-pass">Confirmation du mot de passe</label>
+                <p-password
+                    inputId="profil-confirm-pass"
+                    [(ngModel)]="password_confirmation"
+                    [toggleMask]="true"
+                    [showClear]="true"
+                    [weakLabel]="'Faible'"
+                    [mediumLabel]="'Moyennement complexe'"
+                    [strongLabel]="'Complexe'"
+                    styleClass="w-full" inputStyleClass="w-full">
+                    <ng-template pTemplate="header">
+                        <h6>Choisir un mot de passe</h6>
+                    </ng-template>
+                    <ng-template pTemplate="footer">
+                        <p-divider></p-divider>
+                        <p class="mt-2">Suggestions</p>
+                        <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
+                            <li>Au moins une majuscule</li>
+                            <li>Au moins une minuscule</li>
+                            <li>Au moins un nombre</li>
+                            <li>Minimum 8 caractères</li>
+                        </ul>
+                    </ng-template>
+                </p-password>
+            </div>
+
+            <div class="lo-field lo-field--fixed">
+                <label aria-hidden="true">&nbsp;</label>
+                <button pButton pRipple icon="pi pi-check" label="Enregistrer" (click)="savePassword()"></button>
+            </div>
+        </div>
+
+        <p class="lo-muted text-sm mt-3 mb-0">Modifié le : {{getToLocalDateTime(userDetails?.updated_at)}}</p>
     </div>
 </div>

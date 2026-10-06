@@ -3,10 +3,11 @@
         <li admin-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
         <li *ngIf="item.separator" class="menu-separator"></li>
     </ng-container>
-    <li class="mt-5">
-        <a href="http://lightgroup.co.com/lightoil" target="_blank">
-            <img src="assets/layout/images/{{layoutService.config().colorScheme === 'light' ? 'lightoil-brand-black' : 'lightoil-brand-white'}}.png" 
-                alt="lightoil-brand" height="70" class="w-full mt-3 mb-2 rounded"/>
+    <li class="menu-branding">
+        <a href="http://lightgroup.co.com/lightoil" target="_blank" rel="noopener">
+            <img src="assets/layout/images/{{layoutService.config().colorScheme === 'light' ? 'lightoil-brand-black' : 'lightoil-brand-white'}}.png"
+                alt="LightOil" class="w-full rounded" />
         </a>
+        <small>Fuel operations platform</small>
     </li>
 </ul>

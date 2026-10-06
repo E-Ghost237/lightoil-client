@@ -1,5 +1,5 @@
 <div class="row ">
-    <span class="text-center h4">
+    <span class="lo-card-title" >
         Historiques des donnees du debimetre {{flowMeter?.sensor_reference+'-'+flowMeter?.product_service_station?.product?.name}}
     </span> 
 </div>
@@ -9,7 +9,7 @@
         styleClass="p-datatable-striped"
         scrollHeight="30rem"
         [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        currentPageReportTemplate="{first} à {last} sur {totalRecords} entrées"
         [rowsPerPageOptions]="[50, 100, 200]"
         [paginator]="true" [rows]="50"
         >

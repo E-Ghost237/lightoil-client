@@ -1,76 +1,76 @@
 <div class="sales-perf-charts">
-    <h2 class="charts-title">
-        Performances de ventes du reseau {{ point_of_sale_type ?? '...' }} au {{ date ?? '...' }}
-    </h2>
+    <div class="lo-section-head">
+        <h3>Performances de ventes du réseau {{ point_of_sale_type ?? '...' }} au {{ date ?? '...' }}</h3>
+        <span class="lo-section-rule"></span>
+    </div>
 
     <ng-container *ngIf="loading == false; else loadingTemplate">
         <ng-container *ngIf="sales_by_product !== undefined && sales_by_product.length > 0; else emptyTemplate">
             <div class="grid p-fluid mt-3">
                 <div class="col-12 xl:col-6 lg:col-6">
-                    <div class="card chart-card p-4">
-                        <h5 class="chart-title">Evolution des ventes par produit du {{ date ?? '...' }}</h5>
+                    <div class="lo-card chart-card">
+                        <h5 class="lo-card-title">Évolution des ventes par produit du {{ date ?? '...' }}</h5>
                         <p-chart type="line" [data]="periodicSalesPerProductData" [options]="periodicSalesPerProductOptions"></p-chart>
                     </div>
                 </div>
                 <div class="col-12 xl:col-6 lg:col-6">
-                    <div class="card summary-card p-4">
-                        <h5 class="chart-title">Synthese operationnelle</h5>
-                        <p>
-                            Vente totale du reseau:
-                            <span><strong>{{ (total_network_sales | number:'1.0-0':'fr') ?? '...' }} FCFA</strong></span>
-                        </p>
-                        <p *ngIf="best_sale_product !== undefined && best_sale_product !== null">
-                            Produit le plus vendu:
-                            <span [ngStyle]="{'color': getProductColor(best_sale_product.name)}">
-                                <strong>{{ best_sale_product.name }}</strong> =>
-                                <strong>{{ (best_sale_product.sales | number:'1.0-0':'fr') }} FCFA</strong>
-                            </span>
-                        </p>
-                        <p *ngIf="best_sale_product !== undefined && best_sale_product !== null">
-                            Point de vente le plus performant:
-                            <span>
-                                <strong>{{ best_point_of_sale.name }}</strong> =>
-                                <strong>{{ (best_point_of_sale.sales | number:'1.0-0':'fr') }} FCFA</strong>
-                            </span>
-                        </p>
+                    <div class="lo-card">
+                        <h5 class="lo-card-title">Synthèse opérationnelle</h5>
+                        <div class="lo-spec">
+                            <div class="lo-spec-row">
+                                <span class="lo-spec-label">Vente totale du réseau</span>
+                                <span class="lo-spec-value">{{ (total_network_sales | number:'1.0-0':'fr') ?? '...' }} FCFA</span>
+                            </div>
+                            <div *ngIf="best_sale_product !== undefined && best_sale_product !== null" class="lo-spec-row">
+                                <span class="lo-spec-label">Produit le plus vendu</span>
+                                <span class="lo-spec-value">
+                                    <span [ngStyle]="{'color': getProductColor(best_sale_product.name)}">{{ best_sale_product.name }}</span>
+                                    · {{ (best_sale_product.sales | number:'1.0-0':'fr') }} FCFA
+                                </span>
+                            </div>
+                            <div *ngIf="best_sale_product !== undefined && best_sale_product !== null" class="lo-spec-row">
+                                <span class="lo-spec-label">Point de vente le plus performant</span>
+                                <span class="lo-spec-value">
+                                    {{ best_point_of_sale.name }} · {{ (best_point_of_sale.sales | number:'1.0-0':'fr') }} FCFA
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="grid p-fluid">
                 <div class="col-12 xl:col-6 lg:col-6">
-                    <div class="card chart-card p-4 flex flex-column align-items-center">
-                        <h5 class="chart-title w-full">Ventes par produit du reseau du {{ date ?? '...' }}</h5>
+                    <div class="lo-card chart-card">
+                        <h5 class="lo-card-title">Ventes par produit du réseau du {{ date ?? '...' }}</h5>
                         <p-chart type="doughnut" [data]="productData" [options]="productOptions"></p-chart>
                     </div>
                 </div>
                 <div class="col-12 xl:col-6 lg:col-6">
-                    <div class="card chart-card p-4 flex flex-column align-items-center">
-                        <h5 class="chart-title w-full">Ventes par point de vente du {{ date ?? '...' }}</h5>
+                    <div class="lo-card chart-card">
+                        <h5 class="lo-card-title">Ventes par point de vente du {{ date ?? '...' }}</h5>
                         <p-chart type="pie" [data]="pointOfSaleData" [options]="pointOfSaleOptions"></p-chart>
                     </div>
                 </div>
                 <div class="col-12">
-                    <div class="card chart-card p-4">
-                        <h5 class="chart-title">Ventes de produits par point de vente du reseau du {{ date ?? '...' }}</h5>
+                    <div class="lo-card chart-card">
+                        <h5 class="lo-card-title">Ventes de produits par point de vente du réseau du {{ date ?? '...' }}</h5>
                         <p-chart type="line" [data]="salesOfProductPerPointOfSaleData" [options]="salesOfProductPerPointOfSaleOptions"></p-chart>
                     </div>
                 </div>
                 <div class="col-12">
-                    <div class="card chart-card p-4 pt-3 pb-3">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-bordered caption-top perf-table">
-                                <caption class="font-semibold text-900 text-xl text-dark mb-3">
-                                    Produit le plus vendu par point de vente du reseau au {{ date ?? '...' }}
-                                </caption>
+                    <div class="lo-card table-card">
+                        <h5 class="lo-card-title">Produit le plus vendu par point de vente du réseau au {{ date ?? '...' }}</h5>
+                        <div class="lo-table-scroll">
+                            <table class="lo-admin-table">
                                 <thead>
-                                    <tr class="font-bold">
+                                    <tr>
                                         <th scope="col">Point de vente</th>
                                         <th scope="col">Produit</th>
                                         <th scope="col">Montant</th>
                                     </tr>
                                 </thead>
-                                <tbody class="align-middle" *ngFor="let point_of_sale of best_sale_product_per_point_of_sale">
+                                <tbody *ngFor="let point_of_sale of best_sale_product_per_point_of_sale">
                                     <tr>
                                         <td>
                                             <b>{{ point_of_sale.name }}</b> <br><i>{{ point_of_sale.town }}</i>
@@ -92,15 +92,16 @@
     </ng-container>
 
     <ng-template #loadingTemplate>
-        <div class="report-loading-state">
-            <img src="../../../../../../../assets/img/logos/loading-oil-logo.gif" width="150" alt="Chargement...">
-            <p>Chargement des performances...</p>
+        <div class="lo-state">
+            <img src="../../../../../../../assets/img/logos/loading-oil-logo.gif" width="110" alt="Chargement...">
+            <p>Chargement des performances…</p>
         </div>
     </ng-template>
 
     <ng-template #emptyTemplate>
-        <div class="report-empty-state">
-            Aucune donnee de performances disponible pour les filtres selectionnes.
+        <div class="lo-state">
+            <i class="pi pi-chart-bar"></i>
+            <p>Aucune donnée de performances disponible pour les filtres sélectionnés.</p>
         </div>
     </ng-template>
 </div>

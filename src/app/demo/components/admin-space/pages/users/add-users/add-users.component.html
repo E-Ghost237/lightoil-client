@@ -2,19 +2,26 @@
 <p-toast key="tst"></p-toast>
 
 <!-- Page header -->
-<div class="card pb-0 mb-4 users-add-header">
-  <div class="card-body align-content-center justify-content-between pt-0">
-    <div class="text-center align-content-center text-xl text-uppercase">
-      <h1 class="font-bold">Créer un utilisateur</h1>
-      <p class="text-sm text-600 mt-2 mb-0">
-        Renseignez les informations ci-dessous et attribuez un rôle à l'utilisateur.
-      </p>
-    </div>
+<div class="lo-page-header">
+  <div>
+    <span class="lo-eyebrow">Espace administrateur</span>
+    <h1 class="lo-page-title">Créer un utilisateur</h1>
+    <p class="lo-page-subtitle">Renseignez les informations ci-dessous et attribuez un rôle à l'utilisateur.</p>
+  </div>
+  <div class="lo-page-actions">
+    <p-button
+      type="button"
+      label="Retour à la liste"
+      severity="secondary"
+      [outlined]="true"
+      icon="pi pi-arrow-left"
+      (click)="router.navigateByUrl('/admin/users/list-users')">
+    </p-button>
   </div>
 </div>
 
 <!-- Content -->
-<div class="card p-3 users-add-card">
+<div class="lo-card">
   <ng-container *ngIf="!loadingContext; else loadingTpl">
 
     <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="p-fluid">

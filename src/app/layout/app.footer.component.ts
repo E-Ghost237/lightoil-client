@@ -6,5 +6,7 @@ import { LayoutService } from "./service/app.layout.service";
     templateUrl: './app.footer.component.html'
 })
 export class AppFooterComponent {
+    currentYear = new Date().getFullYear();
+
     constructor(public layoutService: LayoutService) { }
 }

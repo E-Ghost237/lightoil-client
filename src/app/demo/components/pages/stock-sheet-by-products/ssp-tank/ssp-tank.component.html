@@ -1,11 +1,16 @@
-<div class="card">
-  <h5>Fiche de stock</h5>
+<div class="lo-page">
+  <div class="lo-page-header">
+    <div>
+      <span class="lo-eyebrow">Fiches de stock par produit</span>
+      <h1 class="lo-page-title">Fiche de stock</h1>
+      <p class="lo-page-subtitle">Situation journalière de la cuve : réceptions, ventes et écarts</p>
+    </div>
+  </div>
 
-
-  <div class="grid mt-3">
-    <div class="col-12 md:col-4">
-      <label class="block text-900 font-medium mb-2">Cuve de la station</label>
-      <p-dropdown [options]="tanks" [(ngModel)]="tankId" optionValue="id" [filter]="true"
+  <div class="lo-filterbar">
+    <div class="lo-field">
+      <label for="ssp-tank">Cuve de la station</label>
+      <p-dropdown inputId="ssp-tank" [options]="tanks" [(ngModel)]="tankId" optionValue="id" [filter]="true"
         filterBy="reference,name,product.name,capacity" placeholder="Sélectionner une cuve" (onChange)="onTankChange()"
         styleClass="w-full">
         <ng-template let-tank pTemplate="item">
@@ -26,78 +31,81 @@
           </span>
         </ng-template>
       </p-dropdown>
-      <small class="text-600" *ngIf="!stationId">Aucune station détectée (connecte-toi d’abord).</small>
+      <small class="p-error" *ngIf="!stationId">Aucune station détectée (connectez-vous d'abord).</small>
     </div>
 
-    <div class="col-12 md:col-3">
-      <label class="block text-900 font-medium mb-2">Période (début)</label>
-      <input pInputText type="date" [(ngModel)]="periodStart" />
+    <div class="lo-field lo-field--fixed">
+      <label for="ssp-start">Période (début)</label>
+      <input pInputText type="date" id="ssp-start" [(ngModel)]="periodStart" />
     </div>
 
-    <div class="col-12 md:col-3">
-      <label class="block text-900 font-medium mb-2">Période (fin)</label>
-      <input pInputText type="date" [(ngModel)]="periodEnd" />
+    <div class="lo-field lo-field--fixed">
+      <label for="ssp-end">Période (fin)</label>
+      <input pInputText type="date" id="ssp-end" [(ngModel)]="periodEnd" />
     </div>
 
-    <div class="col-12 md:col-2 flex align-items-end gap-2">
-      <button pButton type="button" label="Charger" icon="pi pi-search" (click)="loadSheet()"
-        [disabled]="loading"></button>
-      <button pButton type="button" label="PDF" icon="pi pi-file-pdf" class="p-button-secondary" (click)="downloadPdf()"
-        [disabled]="!sheet"></button>
-    </div>
-  </div>
-</div>
-
-<div class="card" *ngIf="sheet">
-  <div class="flex justify-content-between align-items-center mb-3">
-    <div>
-      <div class="text-900 font-semibold">Station : {{ sheet.service_station?.name || sheet.station_name || '-' }}</div>
-      <div class="text-600">Produit : {{ sheet.product?.name || '-' }} | Cuve : {{ sheet.tank_name || ('Cuve ' +
-        sheet.tank_id) }}</div>
+    <div class="lo-field lo-field--fixed">
+      <label aria-hidden="true">&nbsp;</label>
+      <div class="flex gap-2">
+        <button pButton type="button" label="Charger" icon="pi pi-search" (click)="loadSheet()"
+          [disabled]="loading"></button>
+        <button pButton type="button" label="PDF" icon="pi pi-file-pdf" class="p-button-secondary" (click)="downloadPdf()"
+          [disabled]="!sheet"></button>
+      </div>
     </div>
   </div>
 
-  <p-table [value]="sheet.lines" [scrollable]="true" scrollHeight="500px" [loading]="loading">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Date</th>
-        <th>Jauge (cm)</th>
-        <th>Volume (L)</th>
-        <th>Réception (L)</th>
-        <th>Vente (L)</th>
-        <!--<th>Remise cuves (L)</th> -->
-        <!--<th>Cumul vente (L)</th> -->
-        <th>Stock théo (L)</th>
-        <th>Stock phys (L)</th>
-        <th>Écart (L)</th>
-        <th>Cumul écarts (L)</th>
-      </tr>
-    </ng-template>
+  <div class="lo-table-card" *ngIf="sheet">
+    <div class="lo-table-toolbar p-3 pb-0">
+      <div>
+        <div class="lo-card-title">Station : {{ sheet.service_station?.name || sheet.station_name || '-' }}</div>
+        <div class="lo-card-subtitle mb-0">Produit : {{ sheet.product?.name || '-' }} · Cuve : {{ sheet.tank_name || ('Cuve ' + sheet.tank_id) }}</div>
+      </div>
+    </div>
 
-    <ng-template pTemplate="body" let-row>
-      <tr>
-        <td style="white-space:nowrap">{{ (row.date || '') | date:'dd/MM/yyyy':'':'fr' }}</td>
+    <p-table [value]="sheet.lines" [scrollable]="true" scrollHeight="500px" [loading]="loading"
+      styleClass="p-datatable-striped">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Date</th>
+          <th>Jauge (cm)</th>
+          <th>Volume (L)</th>
+          <th>Réception (L)</th>
+          <th>Vente (L)</th>
+          <th>Stock théo (L)</th>
+          <th>Stock phys (L)</th>
+          <th>Écart (L)</th>
+          <th>Cumul écarts (L)</th>
+        </tr>
+      </ng-template>
 
-        <td class="text-center">{{ row.height_cm | number:'1.2-2':'fr' }}</td>
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td style="white-space:nowrap">{{ (row.date || '') | date:'dd/MM/yyyy':'':'fr' }}</td>
+          <td class="text-center">{{ row.height_cm | number:'1.2-2':'fr' }}</td>
+          <td class="text-center">{{ row.volume_l | number:'1.2-2':'fr' }}</td>
+          <td class="text-center">{{ row.reception_l | number:'1.2-2':'fr' }}</td>
+          <td class="text-center">{{ getVenteVolume(row) | number:'1.2-2':'fr' }}</td>
+          <td class="text-center">{{ row.stock_theo_l | number:'1.2-2':'fr' }}</td>
+          <td class="text-center">{{ row.stock_phys_l | number:'1.2-2':'fr' }}</td>
+          <td class="text-center" [ngClass]="{ 'text-red-500': row.ecart_l < 0, 'text-green-500': row.ecart_l > 0 }">
+            {{ row.ecart_l | number:'1.2-2':'fr' }}
+          </td>
+          <td class="text-center">{{ row.cumul_ecart_l | number:'1.2-2':'fr' }}</td>
+        </tr>
+      </ng-template>
 
-        <td class="text-center">{{ row.volume_l | number:'1.2-2':'fr' }}</td>
-
-        <td class="text-center">{{ row.reception_l | number:'1.2-2':'fr' }}</td>
-
-        <td class="text-center">{{ getVenteVolume(row) | number:'1.2-2':'fr' }}</td>
-
-        <!--<td>
-          <input pInputText type="number" step="0.01" [(ngModel)]="row.remise_cuves_l" style="width: 110px" />
-        </td>
-
-        <td class="text-center">{{ row.cumul_vente_l | number:'1.2-2':'fr' }}</td>-->
-        <td class="text-center">{{ row.stock_theo_l | number:'1.2-2':'fr' }}</td>
-        <td class="text-center">{{ row.stock_phys_l | number:'1.2-2':'fr' }}</td>
-        <td class="text-center" [ngClass]="{ 'text-red-500': row.ecart_l < 0, 'text-green-500': row.ecart_l > 0 }">
-          {{ row.ecart_l | number:'1.2-2':'fr' }}
-        </td>
-        <td class="text-center">{{ row.cumul_ecart_l | number:'1.2-2':'fr' }}</td>
-      </tr>
-    </ng-template>
-  </p-table>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9">
+            <div class="lo-state">
+              <div class="lo-state-icon"><i class="pi pi-file"></i></div>
+              <h4>Aucune ligne</h4>
+              <p>La fiche de stock ne contient aucune ligne sur cette période.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </div>

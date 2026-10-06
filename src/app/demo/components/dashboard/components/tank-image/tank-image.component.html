@@ -1,205 +1,300 @@
-<div class="row card-body" *ngIf="type != 'Debimetre' && type != 'Débimètre'">
-    <div class="col-5 d-flex flex-column justify-content-center fl mr-3">
+<div class="tank-gauge" *ngIf="type != 'Debimetre' && type != 'Débimètre'">
+    <div class="tank-visual-wrapper"
+        pTooltip="État actuel de la cuve">
+        <svg class="tank-visual"
+            viewBox="0 0 920 470"
+            role="img"
+            [attr.aria-label]="getTankVisualLabel()">
+            <defs>
+                <clipPath [attr.id]="liquidClipId">
+                    <rect x="112" y="82" width="696" height="304"/>
+                    <ellipse cx="110" cy="234" rx="50" ry="148"/>
+                    <ellipse cx="810" cy="234" rx="50" ry="148"/>
+                </clipPath>
+                <linearGradient [attr.id]="outerShellId" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#54678c"/>
+                    <stop offset="16%" stop-color="#2a3a5c"/>
+                    <stop offset="45%" stop-color="#131e3a"/>
+                    <stop offset="72%" stop-color="#1b2949"/>
+                    <stop offset="100%" stop-color="#0a1128"/>
+                </linearGradient>
+                <linearGradient [attr.id]="innerEmptyId" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f8fafc"/>
+                    <stop offset="45%" stop-color="#dde5f1"/>
+                    <stop offset="100%" stop-color="#aeb9cf"/>
+                </linearGradient>
+                <linearGradient [attr.id]="fuelGradientId" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" [attr.stop-color]="fuelGradientTop"/>
+                    <stop offset="42%" [attr.stop-color]="fuelGradientMiddle"/>
+                    <stop offset="100%" [attr.stop-color]="fuelGradientBottom"/>
+                </linearGradient>
+                <linearGradient [attr.id]="waterGradientId" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#bfdbfe"/>
+                    <stop offset="55%" stop-color="#3b82f6"/>
+                    <stop offset="100%" stop-color="#1d4ed8"/>
+                </linearGradient>
+                <radialGradient [attr.id]="liquidHighlightId" cx="50%" cy="0%" r="80%">
+                    <stop offset="0%" stop-color="#020617" stop-opacity=".34"/>
+                    <stop offset="45%" stop-color="#020617" stop-opacity="0"/>
+                    <stop offset="100%" stop-color="#020617" stop-opacity=".26"/>
+                </radialGradient>
+                <linearGradient [attr.id]="glassFrontId" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
+                    <stop offset="35%" stop-color="#ffffff" stop-opacity=".05"/>
+                    <stop offset="100%" stop-color="#020617" stop-opacity=".10"/>
+                </linearGradient>
+            </defs>
 
-        <div class="tank-visual-wrapper"
-            pTooltip="Etat actuelle de la cuve">
-            <svg class="tank-visual"
-                viewBox="0 0 920 470"
-                role="img"
-                [attr.aria-label]="getTankVisualLabel()">
-                <defs>
-                    <clipPath [attr.id]="liquidClipId">
-                        <path d="M105 158 C154 105,260 82,460 82 C660 82,766 105,815 158 L815 314 C766 363,660 386,460 386 C260 386,154 363,105 314 Z"/>
-                    </clipPath>
-                    <linearGradient [attr.id]="outerShellId" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stop-color="#f4ead8"/>
-                        <stop offset="22%" stop-color="#d8c9b2"/>
-                        <stop offset="52%" stop-color="#8b7e6b"/>
-                        <stop offset="100%" stop-color="#3e382f"/>
-                    </linearGradient>
-                    <linearGradient [attr.id]="innerEmptyId" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#8f9a9d"/>
-                        <stop offset="45%" stop-color="#b9c0bd"/>
-                        <stop offset="100%" stop-color="#f6eddc"/>
-                    </linearGradient>
-                    <linearGradient [attr.id]="fuelGradientId" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" [attr.stop-color]="fuelGradientTop"/>
-                        <stop offset="36%" [attr.stop-color]="fuelGradientMiddle"/>
-                        <stop offset="100%" [attr.stop-color]="fuelGradientBottom"/>
-                    </linearGradient>
-                    <linearGradient [attr.id]="waterGradientId" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#bfdbfe"/>
-                        <stop offset="55%" stop-color="#3b82f6"/>
-                        <stop offset="100%" stop-color="#1d4ed8"/>
-                    </linearGradient>
-                    <radialGradient [attr.id]="liquidHighlightId" cx="50%" cy="10%" r="72%">
-                        <stop offset="0%" stop-color="#ffffff" stop-opacity=".45"/>
-                        <stop offset="48%" stop-color="#ffffff" stop-opacity=".09"/>
-                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
-                    </radialGradient>
-                    <linearGradient [attr.id]="glassFrontId" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
-                        <stop offset="44%" stop-color="#ffffff" stop-opacity=".06"/>
-                        <stop offset="100%" stop-color="#000000" stop-opacity=".13"/>
-                    </linearGradient>
-                </defs>
+            <g class="tank-root">
+                <!-- Ground shadow -->
+                <ellipse cx="460" cy="430" rx="350" ry="15" fill="#0b1220" opacity=".22"/>
+                <ellipse cx="460" cy="426" rx="270" ry="9" fill="#0b1220" opacity=".16"/>
 
-                <g class="tank-root">
-                    <path d="M74 92 C153 70,257 62,460 62 C663 62,767 70,846 92 C873 171,873 303,846 382 C767 404,663 412,460 412 C257 412,153 404,74 382 C47 303,47 171,74 92 Z" [attr.fill]="'url(#' + outerShellId + ')'"/>
-                    <path d="M74 92 C153 70,257 62,460 62 C663 62,767 70,846 92 C856 121,862 150,867 180 C775 145,660 128,460 128 C260 128,145 145,53 180 C58 150,64 121,74 92 Z" fill="#f7ecd9" opacity=".42"/>
-                    <path d="M92 132 C151 94,258 76,460 76 C662 76,769 94,828 132 L828 342 C769 382,662 400,460 400 C258 400,151 382,92 342 Z" fill="#403931" opacity=".72"/>
-                    <path d="M105 158 C154 105,260 82,460 82 C660 82,766 105,815 158 L815 314 C766 363,660 386,460 386 C260 386,154 363,105 314 Z" [attr.fill]="'url(#' + innerEmptyId + ')'" stroke="rgba(255,255,255,.68)" stroke-width="5"/>
+                <!-- Support saddles -->
+                <rect x="192" y="374" width="52" height="38" rx="6" fill="#3b4a63" stroke="#0b1226" stroke-width="2"/>
+                <rect x="676" y="374" width="52" height="38" rx="6" fill="#3b4a63" stroke="#0b1226" stroke-width="2"/>
+                <rect x="184" y="368" width="68" height="10" rx="4" fill="#22304d"/>
+                <rect x="668" y="368" width="68" height="10" rx="4" fill="#22304d"/>
 
-                    <g [attr.clip-path]="'url(#' + liquidClipId + ')'">
-                        <rect x="90" y="82" width="740" height="304" [attr.fill]="'url(#' + innerEmptyId + ')'"/>
-                        <rect class="fuel-fill"
-                            x="90"
-                            [attr.y]="fuelFillY"
-                            width="740"
-                            [attr.height]="fuelFillHeight"
-                            [attr.fill]="'url(#' + fuelGradientId + ')'"
-                            opacity=".94"/>
-                        <rect class="water-fill"
-                            x="90"
-                            [attr.y]="waterFillY"
-                            width="740"
-                            [attr.height]="waterFillHeight"
-                            [attr.fill]="'url(#' + waterGradientId + ')'"
-                            opacity=".98"/>
-                        <ellipse class="fuel-surface"
-                            cx="460"
-                            [attr.cy]="fuelFillY"
-                            rx="356"
-                            ry="13"
-                            [attr.fill]="fuelSurfaceColor"
-                            [attr.opacity]="fuelSurfaceOpacity"/>
-                        <ellipse class="water-surface"
-                            cx="460"
-                            [attr.cy]="waterFillY"
-                            rx="352"
-                            ry="9"
-                            fill="#bfdbfe"
-                            [attr.opacity]="waterSurfaceOpacity"/>
-                        <rect x="90" y="82" width="740" height="304" [attr.fill]="'url(#' + liquidHighlightId + ')'" opacity=".72"/>
-                        <rect x="90" y="82" width="740" height="304" [attr.fill]="'url(#' + glassFrontId + ')'" opacity=".55"/>
-                    </g>
-
-                    <path d="M126 155 C191 116,302 98,460 98 C618 98,729 116,794 155" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity=".36"/>
-                    <path d="M130 334 C212 362,328 372,460 372 C592 372,708 362,790 334" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".35"/>
-                    <path d="M105 160 C83 220,84 285,105 316" fill="none" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" opacity=".25"/>
-                    <path d="M815 160 C837 220,836 285,815 316" fill="none" stroke="#f8fafc" stroke-width="8" stroke-linecap="round" opacity=".22"/>
-                    <path d="M138 386 C245 420,675 420,782 386" fill="none" stroke="#313a43" stroke-width="8" stroke-linecap="round" opacity=".76"/>
-                    <path d="M160 382 C270 404,650 404,760 382" fill="none" stroke="#dbeafe" stroke-width="3" stroke-linecap="round" opacity=".45"/>
-                    <path d="M74 92 C47 171,47 303,74 382 C90 386,107 390,126 393 C96 300,96 174,126 82 C107 85,90 88,74 92 Z" fill="#2f2a24" opacity=".18"/>
-                    <path d="M846 92 C873 171,873 303,846 382 C830 386,813 390,794 393 C824 300,824 174,794 82 C813 85,830 88,846 92 Z" fill="#2f2a24" opacity=".18"/>
+                <!-- Cylindrical shell (horizontal tank) -->
+                <rect x="110" y="84" width="700" height="300" rx="6" [attr.fill]="'url(#' + outerShellId + ')'"/>
+                <ellipse cx="110" cy="234" rx="54" ry="152" [attr.fill]="'url(#' + outerShellId + ')'" stroke="#050b1e" stroke-width="2"/>
+                <ellipse cx="810" cy="234" rx="54" ry="152" [attr.fill]="'url(#' + outerShellId + ')'" stroke="#050b1e" stroke-width="2"/>
+                <ellipse cx="110" cy="234" rx="42" ry="140" fill="#0c1530" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+                <ellipse cx="810" cy="234" rx="42" ry="140" fill="#0c1530" stroke="rgba(255,255,255,.28)" stroke-width="2"/>
+                <!-- Cap bolts -->
+                <g fill="#8ea2c6" opacity=".8">
+                    <circle cx="110" cy="110" r="3.5"/><circle cx="110" cy="358" r="3.5"/>
+                    <circle cx="72" cy="170" r="3.5"/><circle cx="148" cy="170" r="3.5"/>
+                    <circle cx="72" cy="298" r="3.5"/><circle cx="148" cy="298" r="3.5"/>
+                    <circle cx="810" cy="110" r="3.5"/><circle cx="810" cy="358" r="3.5"/>
+                    <circle cx="772" cy="170" r="3.5"/><circle cx="848" cy="170" r="3.5"/>
+                    <circle cx="772" cy="298" r="3.5"/><circle cx="848" cy="298" r="3.5"/>
                 </g>
-            </svg>
-        </div>
+                <ellipse cx="96" cy="180" rx="9" ry="30" fill="#ffffff" opacity=".10"/>
+                <ellipse cx="824" cy="180" rx="9" ry="30" fill="#ffffff" opacity=".10"/>
 
+                <!-- Liquid chamber (sight-glass cutaway) -->
+                <g [attr.clip-path]="'url(#' + liquidClipId + ')'">
+                    <rect x="100" y="82" width="720" height="304" [attr.fill]="'url(#' + innerEmptyId + ')'"/>
+                    <rect class="fuel-fill"
+                        x="100"
+                        [attr.y]="fuelFillY"
+                        width="720"
+                        [attr.height]="fuelFillHeight"
+                        [attr.fill]="'url(#' + fuelGradientId + ')'"
+                        opacity=".95"/>
+                    <rect class="water-fill"
+                        x="100"
+                        [attr.y]="waterFillY"
+                        width="720"
+                        [attr.height]="waterFillHeight"
+                        [attr.fill]="'url(#' + waterGradientId + ')'"
+                        opacity=".97"/>
+                    <ellipse class="fuel-surface"
+                        cx="460"
+                        [attr.cy]="fuelFillY"
+                        rx="346"
+                        ry="8"
+                        [attr.fill]="fuelSurfaceColor"
+                        [attr.opacity]="fuelSurfaceOpacity"
+                        stroke="rgba(2,6,23,.18)"
+                        stroke-width="1"/>
+                    <ellipse class="water-surface"
+                        cx="460"
+                        [attr.cy]="waterFillY"
+                        rx="346"
+                        ry="6"
+                        fill="#dbeafe"
+                        [attr.opacity]="waterSurfaceOpacity"/>
+                    <rect x="100" y="82" width="720" height="304" [attr.fill]="'url(#' + liquidHighlightId + ')'"/>
+                </g>
 
-            <small class="text-center"
-                pTooltip="Date et heure d'arrivee de la derniere donnee"
-                tooltipPosition="bottom"
-                >
-                 {{getLastIncomeDateRecord()}}
-            </small>
+                <!-- Chamber frame + shell outline -->
+                <rect x="112" y="84" width="696" height="298" fill="none" stroke="rgba(255,255,255,.40)" stroke-width="2"/>
+                <rect x="110" y="84" width="700" height="300" rx="6" fill="none" stroke="#050b1e" stroke-width="3"/>
+                <rect x="130" y="92" width="660" height="22" rx="11" fill="#ffffff" opacity=".13"/>
+                <rect x="130" y="92" width="660" height="9" rx="4.5" fill="#ffffff" opacity=".10"/>
 
-            <small *ngIf="getNotiMessage()" class="text-center text-danger anim-clip"
-                pTooltip="Derniere notification"
-                tooltipPosition="bottom"
-                >
-                 {{getNotiMessage()}}
-            </small>
+                <!-- Fittings on top of the tank -->
+                <rect x="240" y="56" width="30" height="36" rx="5" fill="#2b3a55" stroke="#050b1e" stroke-width="2"/>
+                <ellipse cx="255" cy="56" rx="16" ry="6" fill="#54678c" stroke="#050b1e" stroke-width="2"/>
+                <rect x="652" y="62" width="22" height="30" rx="5" fill="#2b3a55" stroke="#050b1e" stroke-width="2"/>
+                <ellipse cx="663" cy="62" rx="12" ry="5" fill="#54678c" stroke="#050b1e" stroke-width="2"/>
+
+                <!-- Magnetostrictive probe (inserted vertically) -->
+                <g class="probe">
+                    <rect x="455" y="54" width="10" height="322" fill="#dbe3ef" stroke="#3b4a63" stroke-width="1.5"/>
+                    <line x1="457.5" y1="58" x2="457.5" y2="372" stroke="#ffffff" stroke-width="2" opacity=".7"/>
+                    <rect x="452" y="370" width="16" height="12" rx="4" fill="#22304d" stroke="#0b1226" stroke-width="1.5"/>
+                    <!-- Measurement ticks along the probe -->
+                    <line x1="469" y1="96" x2="469" y2="368" stroke="#f8fafc" stroke-width="2.5"
+                        stroke-dasharray="1 11" stroke-linecap="round" opacity=".85"/>
+                    <line x1="446" y1="158" x2="455" y2="158" stroke="#f8fafc" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="446" y1="234" x2="455" y2="234" stroke="#f8fafc" stroke-width="3" stroke-linecap="round"/>
+                    <line x1="446" y1="310" x2="455" y2="310" stroke="#f8fafc" stroke-width="3" stroke-linecap="round"/>
+                    <text x="438" y="165" text-anchor="end" font-size="20" font-weight="800" fill="#ffffff"
+                        stroke="rgba(2,6,23,.65)" stroke-width="3.5" paint-order="stroke" letter-spacing="1"
+                        font-family="Manrope,'Segoe UI',sans-serif">75</text>
+                    <text x="438" y="241" text-anchor="end" font-size="20" font-weight="800" fill="#ffffff"
+                        stroke="rgba(2,6,23,.65)" stroke-width="3.5" paint-order="stroke" letter-spacing="1"
+                        font-family="Manrope,'Segoe UI',sans-serif">50</text>
+                    <text x="438" y="317" text-anchor="end" font-size="20" font-weight="800" fill="#ffffff"
+                        stroke="rgba(2,6,23,.65)" stroke-width="3.5" paint-order="stroke" letter-spacing="1"
+                        font-family="Manrope,'Segoe UI',sans-serif">25</text>
+                    <!-- Product float riding on the fuel surface -->
+                    <rect class="probe-float"
+                        x="441"
+                        [attr.y]="fuelFillY - 8"
+                        width="38"
+                        height="16"
+                        rx="8"
+                        [attr.fill]="fuelGradientMiddle"
+                        stroke="#f8fafc"
+                        stroke-width="2.5"
+                        [attr.opacity]="fuelSurfaceOpacity"/>
+                    <!-- Interface float riding on the water layer -->
+                    <rect class="probe-float"
+                        x="445"
+                        [attr.y]="waterFillY - 6"
+                        width="30"
+                        height="12"
+                        rx="6"
+                        fill="#0369a1"
+                        stroke="#e0f2fe"
+                        stroke-width="2"
+                        [attr.opacity]="waterSurfaceOpacity"/>
+                    <!-- Transmitter head -->
+                    <rect x="412" y="6" width="96" height="50" rx="10"
+                        [attr.fill]="'url(#' + outerShellId + ')'" stroke="#050b1e" stroke-width="2"/>
+                    <text x="451" y="39" text-anchor="middle" font-size="17" font-weight="800" letter-spacing="2"
+                        fill="#e6eefc" font-family="Manrope,'Segoe UI',sans-serif">SONDE</text>
+                    <circle cx="493" cy="18" r="9" fill="#22c55e" opacity=".25"/>
+                    <circle cx="493" cy="18" r="4.5" fill="#22c55e" stroke="#052e16" stroke-width="1"/>
+                    <!-- Telemetry signal -->
+                    <path d="M516 22 q9 7 0 16" fill="none" stroke="#93c5fd" stroke-width="3.5" stroke-linecap="round"/>
+                    <path d="M524 15 q15 13 0 30" fill="none" stroke="#93c5fd" stroke-width="3.5" stroke-linecap="round" opacity=".7"/>
+                </g>
+
+                <!-- Front glass -->
+                <polygon points="200,82 250,82 150,386 112,386" fill="#ffffff" opacity=".06"/>
+                <rect x="100" y="82" width="720" height="304" [attr.fill]="'url(#' + glassFrontId + ')'" opacity=".45"/>
+            </g>
+        </svg>
     </div>
-    <div class="col-6 ">
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class="text-left "> Hauteur carburant(cm) </div>
-            <div class="text-right"> {{getLevel()}} </div>
+
+    <div class="tank-gauge-meta">
+        <div class="tank-occupation">
+            <span class="tank-occupation-label">Occupation</span>
+            <div class="lo-meter" [ngClass]="renderedFuelPercent < 20 ? 'tone-critical' : (renderedFuelPercent < 50 ? 'tone-warn' : 'tone-ok')">
+                <span [style.width.%]="renderedFuelPercent"></span>
+            </div>
+            <strong class="tank-occupation-value">{{ renderedFuelPercent.toFixed(0) + '%' }}</strong>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Volume carburant à {{getLiquidTemp()+ 'C(l)'}} </div>
-            <div class=" text-right"> {{getVolumeAtT()}}</div>
+        <div class="tank-gauge-sub">
+            <span class="tank-last-data"
+                pTooltip="Date et heure d'arrivée de la dernière donnée"
+                tooltipPosition="bottom">
+                <i class="pi pi-clock"></i>
+                {{getLastIncomeDateRecord()}}
+            </span>
+            <span class="lo-chip water" *ngIf="renderedWaterPercent > 0.5"
+                pTooltip="Présence d'eau au fond de la cuve"
+                tooltipPosition="bottom">
+                <i class="pi pi-tint"></i>
+                Eau {{ renderedWaterPercent.toFixed(1) + '%' }}
+            </span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Volume à 15C(l) </div>
-            <div class=" text-right"> {{getVolumeAtT15()}}</div>
+        <span *ngIf="getNotiMessage()" class="tank-alert"
+            pTooltip="Dernière notification"
+            tooltipPosition="bottom">
+            <i class="pi pi-exclamation-triangle"></i>
+            {{getNotiMessage()}}
+        </span>
+    </div>
+
+    <div class="lo-spec">
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Hauteur carburant (cm)</span>
+            <span class="lo-spec-value">{{getLevel()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Quantité Sortie : </div>
-            <div class=" text-right"> {{getOutputVolume()}} litre(s)</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Volume carburant (L)</span>
+            <span class="lo-spec-value">{{getVolumeAtT()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> T.liquide(C) </div>
-            <div class=" text-right"> {{getLiquidTemp()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Volume à 15 °C (L)</span>
+            <span class="lo-spec-value">{{getVolumeAtT15()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Hauteur d'eau(cm) </div>
-            <div class=" text-right"> {{getWaterLevel()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Sortie du jour (L)</span>
+            <span class="lo-spec-value">{{getOutputVolume()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Volume d'eau(l) </div>
-            <div class=" text-right"> {{getWaterVolume()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">T° liquide (°C)</span>
+            <span class="lo-spec-value">{{getLiquidTemp()}}</span>
         </div>
-        <!-- <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> T.ambiante(C) </div>
-            <div class=" text-right"> {{getEnvTemp()}}</div>
-        </div> -->
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Densité(*) </div>
-            <div class=" text-right"> {{getDensity()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Hauteur d'eau (cm)</span>
+            <span class="lo-spec-value">{{getWaterLevel()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between line-info">
-            <div class=" text-left "> Nombre de jours restants(*) </div>
-            <div class=" text-right"> {{getRmDay()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Volume d'eau (L)</span>
+            <span class="lo-spec-value">{{getWaterVolume()}}</span>
+        </div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Densité</span>
+            <span class="lo-spec-value">{{getDensity()}}</span>
+        </div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Jours restants</span>
+            <span class="lo-spec-value">{{getRmDay()}}</span>
         </div>
     </div>
 </div>
 
-
-<div class="row card-body" *ngIf="type == 'Debimetre' || type == 'Débimètre'">
-    <div class="col-5 d-flex flex-column justify-content-center fl mr-3">
-        <img width="100%" src="{{getTheCorrectImage()}}"
-            alt="une vue actuelle du débimètre"
-            pTooltip="Etat actuelle du Débimètre">
-
-
-            <small class="text-center"
-                pTooltip="Date et heure d'arrivée de la dernière donnée"
-                tooltipPosition="bottom"
-                >
-                 {{getLastIncomeDateRecordFlow()}}
-            </small>
-
-            <small *ngIf="getNotiMessage()" class="text-center text-danger anim-clip"
-                pTooltip="Dernière notification"
-                tooltipPosition="bottom"
-                >
-                 {{getNotiMessage()}}
-            </small>
+<div class="tank-gauge flowmeter-gauge" *ngIf="type == 'Debimetre' || type == 'Débimètre'">
+    <div class="flowmeter-visual">
+        <img [src]="getTheCorrectImage()"
+            alt="Vue actuelle du débitmètre"
+            pTooltip="État actuel du débitmètre">
     </div>
-    <div class="col-6 d-flex flex-column justify-content-between">
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class="text-left "> Débit instantanée </div>
-            <div class="text-right"> {{getInstantFlow()}} </div>
+
+    <div class="tank-gauge-meta">
+        <span class="tank-last-data"
+            pTooltip="Date et heure d'arrivée de la dernière donnée"
+            tooltipPosition="bottom">
+            <i class="pi pi-clock"></i>
+            {{getLastIncomeDateRecordFlow()}}
+        </span>
+        <span *ngIf="getNotiMessage()" class="tank-alert"
+            pTooltip="Dernière notification"
+            tooltipPosition="bottom">
+            <i class="pi pi-exclamation-triangle"></i>
+            {{getNotiMessage()}}
+        </span>
+    </div>
+
+    <div class="lo-spec">
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Débit instantané</span>
+            <span class="lo-spec-value">{{getInstantFlow()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Débit cumulatif </div>
-            <div class=" text-right"> {{getCumulativeFlow()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Débit cumulatif</span>
+            <span class="lo-spec-value">{{getCumulativeFlow()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "
+        <div class="lo-spec-row">
+            <span class="lo-spec-label"
                 pTooltip="Quantité ayant transité durant la dernière heure"
-                tooltipPosition="bottom"
-                > 
-                Quantite transistante 
-            </div>
-            <div class=" text-right"> {{getLastHourQuantity()}}</div>
+                tooltipPosition="bottom">
+                Quantité transistante
+            </span>
+            <span class="lo-spec-value">{{getLastHourQuantity()}}</span>
         </div>
-        <div class="d-flex flex-row justify-content-between mb-1 line-info">
-            <div class=" text-left "> Unité de mesure </div>
-            <div class=" text-right"> {{getUnitMeasurement()}}</div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Unité de mesure</span>
+            <span class="lo-spec-value">{{getUnitMeasurement()}}</span>
         </div>
-        
-        
     </div>
 </div>

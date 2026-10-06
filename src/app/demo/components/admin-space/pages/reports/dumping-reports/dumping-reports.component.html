@@ -1,40 +1,42 @@
 <div class="fuel-report-page">
-  <div class="card pb-0 mb-4 fuel-header-card">
-    <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
-      <div class="col-12 xl:col-7 lg:col-7 md:col-7 text-center xl:text-left align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
-        <h1 class="font-bold fuel-page-title">Rapport de depotage</h1>
-        <p class="fuel-page-subtitle">Analyse structuree des depotages par point de vente, produit et periode.</p>
-      </div>
-      <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
-        <label class="block font-bold text-lg section-label">Produit</label>
-        <p-dropdown
-          (onChange)="onFilterChange()"
-          styleClass="w-full filter-control"
-          [appendTo]="'body'"
-          [options]="productOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="Selectionner un produit"
-          [(ngModel)]="selectedProductId"
-          [showClear]="true"
-          [filter]="true">
-        </p-dropdown>
+  <div class="lo-page-header">
+    <div>
+      <span class="lo-eyebrow">Espace administrateur</span>
+      <h1 class="lo-page-title">Rapport de dépotage</h1>
+      <p class="lo-page-subtitle">Analyse structurée des dépotages par point de vente, produit et période.</p>
+    </div>
+  </div>
 
-        <div class="mt-3" *ngIf="isAdminLike() || (isGeneralDirector() && stationOptions.length > 1)">
-          <label class="block font-bold text-lg section-label">Point de vente</label>
-          <p-dropdown
-            (onChange)="onFilterChange()"
-            styleClass="w-full filter-control"
-            [appendTo]="'body'"
-            [options]="stationOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Selectionner un point de vente"
-            [(ngModel)]="selectedStationId"
-            [filter]="true">
-          </p-dropdown>
-        </div>
-      </div>
+  <div class="lo-filterbar">
+    <div class="lo-field">
+      <label>Produit</label>
+      <p-dropdown
+        (onChange)="onFilterChange()"
+        styleClass="w-full filter-control"
+        [appendTo]="'body'"
+        [options]="productOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Sélectionner un produit"
+        [(ngModel)]="selectedProductId"
+        [showClear]="true"
+        [filter]="true">
+      </p-dropdown>
+    </div>
+
+    <div class="lo-field" *ngIf="isAdminLike() || (isGeneralDirector() && stationOptions.length > 1)">
+      <label>Point de vente</label>
+      <p-dropdown
+        (onChange)="onFilterChange()"
+        styleClass="w-full filter-control"
+        [appendTo]="'body'"
+        [options]="stationOptions"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Sélectionner un point de vente"
+        [(ngModel)]="selectedStationId"
+        [filter]="true">
+      </p-dropdown>
     </div>
   </div>
 
@@ -43,7 +45,7 @@
       <ul class="nav nav-tabs nav-justified card-header-tabs fuel-period-tabs" role="tablist" id="dumping-tab">
         <li class="nav-item" role="presentation">
           <button class="nav-link text-uppercase" [class.active]="activeTab === 0" type="button" (click)="activeTab = 0; onTabChange({ index: 0 })">
-            Journalieres
+            Journalières
           </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -70,7 +72,7 @@
           <div class="grid">
             <div class="col-12 xl:col-6 lg:col-6 md:col-12">
               <div *ngIf="activeTab === 0">
-                <label class="block font-bold mb-1 section-label">Journee du</label>
+                <label class="block font-bold mb-1 section-label">Journée du</label>
                 <p-calendar
                   [(ngModel)]="dayDate"
                   [appendTo]="'body'"
@@ -110,7 +112,7 @@
               </div>
 
               <div *ngIf="activeTab === 3">
-                <label class="block font-bold mb-1 section-label">Annee</label>
+                <label class="block font-bold mb-1 section-label">Année</label>
                 <p-calendar
                   [(ngModel)]="yearDate"
                   [appendTo]="'body'"
@@ -165,9 +167,9 @@
     <div class="grid p-3 pb-0">
       <div class="col-12 md:col-4">
         <div class="p-3 border-round surface-50 report-summary">
-          <div class="text-600">Volume total des depotages</div>
+          <div class="text-600">Volume total des dépotages</div>
           <div class="text-2xl font-semibold mt-1">{{ grandTotal | number:'1.0-2' }} L</div>
-          <div class="text-500 mt-1">Periode : {{ formatEventDate(report?.date_start) }} -> {{ formatEventDate(report?.date_end) }}</div>
+          <div class="text-500 mt-1">Période : {{ formatEventDate(report?.date_start) }} -> {{ formatEventDate(report?.date_end) }}</div>
         </div>
       </div>
     </div>
@@ -181,14 +183,14 @@
               <small class="text-500">Produit : {{ s.product?.name }}</small>
             </div>
             <div class="text-right">
-              <div class="text-600">Total depotage</div>
+              <div class="text-600">Total dépotage</div>
               <div class="text-xl font-semibold">{{ s.total_input | number:'1.0-2' }} L</div>
             </div>
           </div>
 
           <p-divider class="my-3"></p-divider>
 
-          <h6 class="mt-0">Details des depotages</h6>
+          <h6 class="mt-0">Détails des dépotages</h6>
           <p-table
             [value]="s.events || []"
             [paginator]="true"
@@ -201,10 +203,10 @@
               <tr>
                 <th>Date</th>
                 <th>Cuve</th>
-                <th class="text-right">Volume avant depotage (L)</th>
-                <th>Heure de debut</th>
+                <th class="text-right">Volume avant dépotage (L)</th>
+                <th>Heure de début</th>
                 <th>Heure de fin</th>
-                <th class="text-right">Volume apres depotage (L)</th>
+                <th class="text-right">Volume après dépotage (L)</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-row>
@@ -220,7 +222,7 @@
             <ng-template pTemplate="emptymessage">
               <tr>
                 <td colspan="6" class="text-center text-500">
-                  Aucun depotage pour cette periode.
+                  Aucun dépotage pour cette période.
                 </td>
               </tr>
             </ng-template>

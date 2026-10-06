@@ -1,92 +1,206 @@
 :host {
-  display: block;
+    display: block;
 }
 
-:host ::ng-deep .card {
-  border: 1px solid #d8e3f2;
-  border-radius: 12px;
-  box-shadow: 0 16px 32px -28px rgba(2, 6, 23, 0.58);
+.tank-details-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
 }
 
-:host ::ng-deep .pi-arrow-left {
-  color: #0f3d92;
-  font-size: 1.1rem;
-  cursor: pointer;
+.tank-details-title .lo-icon-action {
+    flex: none;
 }
 
-:host ::ng-deep .p-badge {
-  font-weight: 700;
+.tank-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.42rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid;
+    white-space: nowrap;
 }
 
-:host ::ng-deep .p-button {
-  border-radius: 10px;
+.tank-status.is-live {
+    background: var(--lo-ok-bg, #e8f7ee);
+    color: var(--lo-ok, #15803d);
+    border-color: var(--lo-ok-border, #bbe7c9);
+}
+
+.tank-status.is-idle {
+    background: var(--lo-offline-bg, #eef2f7);
+    color: var(--lo-offline, #64748b);
+    border-color: var(--lo-offline-border, #d4dce8);
+}
+
+.tank-alert-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-radius: 12px;
+    border: 1px solid;
+    padding: 0.6rem 0.9rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+
+    &.critical {
+        background: var(--lo-critical-bg, #fdecec);
+        border-color: var(--lo-critical-border, #f5c2c2);
+        color: var(--lo-critical, #dc2626);
+    }
+
+    &.warn {
+        background: var(--lo-warn-bg, #fdf1de);
+        border-color: var(--lo-warn-border, #f3d9ac);
+        color: var(--lo-warn, #b45309);
+    }
+}
+
+.tank-details-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(340px, 5fr) 7fr;
+    align-items: start;
+}
+
+.tank-gauge-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    position: sticky;
+    top: 6.2rem;
+}
+
+.tank-occupation {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--lo-surface-2, #f6f9ff);
+    border: 1px solid var(--lo-border-soft, #e7edf8);
+    border-radius: 12px;
+    padding: 0.55rem 0.75rem;
+}
+
+.tank-occupation-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lo-ink-500, #64748b);
+    white-space: nowrap;
+}
+
+.tank-occupation .lo-meter {
+    flex: 1 1 auto;
+}
+
+.tank-occupation-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    color: var(--lo-navy-900, #0b1f45);
+    min-width: 3.5rem;
+    text-align: right;
 }
 
 .tank-visual-wrapper {
-  width: 100%;
-  display: grid;
-  place-items: center;
-  padding: 0.25rem 0;
-  overflow: visible;
+    width: 100%;
+    display: grid;
+    place-items: center;
+    overflow: visible;
 }
 
 .tank-visual {
-  display: block;
-  width: 118%;
-  max-width: 760px;
-  height: auto;
-  overflow: visible;
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
 }
 
 .tank-root {
-  filter: drop-shadow(0 18px 22px rgba(15, 23, 42, 0.18));
+    filter: drop-shadow(0 18px 22px rgba(15, 23, 42, 0.16));
 }
 
 .fuel-fill,
 .water-fill,
 .fuel-surface,
-.water-surface {
-  transition: y 0.34s ease, height 0.34s ease, cy 0.34s ease, opacity 0.22s ease;
+.water-surface,
+.probe-float {
+    transition: y 0.4s ease, height 0.4s ease, cy 0.4s ease, opacity 0.25s ease;
 }
 
-:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
-  background: #0f3d92;
-  color: #fff;
-  border-color: #0f3d92;
-  font-size: 0.74rem;
-  letter-spacing: 0.04em;
+.tank-gauge-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.7rem;
+
+    &:empty {
+        display: none;
+    }
 }
 
-:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
-  border-color: #dde6f3;
+.tank-details-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
 }
 
-:host ::ng-deep .p-overlaypanel {
-  border: 1px solid #d8e3f2;
+.tank-kpis {
+    margin-bottom: 0;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
-.anim-fade {
-  animation: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.tank-kpis .lo-kpi-value {
+    font-size: 1.2rem;
+    overflow-wrap: anywhere;
 }
 
-.anim-fade:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 36px -28px rgba(2, 6, 23, 0.68);
+:host ::ng-deep .tank-tabs .p-tabview-panels {
+    padding: 1rem;
 }
 
-.anim-clip {
-  animation: 1.3s linear 0s infinite alternate both animationClip;
+:host ::ng-deep .tank-tabs p-chart > div,
+:host ::ng-deep .tank-tabs canvas {
+    max-height: 22rem;
 }
 
-@keyframes animationClip {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
-  100% {
-    opacity: 1;
-  }
+@media (max-width: 1199px) {
+    .tank-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tank-gauge-card {
+        position: static;
+    }
+
+    .tank-visual {
+        max-width: 640px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 575px) {
+    .tank-details-title .lo-icon-action {
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+
+    .tank-kpis {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fuel-fill,
+    .water-fill,
+    .fuel-surface,
+    .water-surface,
+    .probe-float {
+        transition: none;
+    }
 }

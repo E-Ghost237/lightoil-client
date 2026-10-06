@@ -1,22 +1,25 @@
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Reconciliation des index de pompes avec les sorties de cuve</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/image_pistolet-removebg-preview.png" alt="icon">
-    </div>
-</div>
 
-<div class="card flex  flex-row justify-content-evenly mt-3 text-white" >
-    <div class="w-30rem">
-        <span class="p-float-label">
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Index de pompes et réconciliation</span>
+                <h1 class="lo-page-title">Réconciliation des volumes</h1>
+                <p class="lo-page-subtitle">Concordance entre index de pompes et sorties de cuves</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="reco-period">Date ou période</label>
             <p-calendar
+                inputId="reco-period"
                 [(ngModel)]="rangeDates"
                 selectionMode="range"
                 dateFormat="dd/mm/yy"
@@ -24,88 +27,64 @@
                 [showIcon]="true"
                 (onSelect)="onDateSelect($event)"
                 [maxDate]="maxDate"
-                inputStyleClass="w-100"
-                styleClass="w-100"
-                >
+                inputStyleClass="w-full"
+                styleClass="w-full">
             </p-calendar>
-            <label for="float-label text-white">Selectionnez la date ou la periode</label>
-        </span>
+        </div>
 
-    </div>
-
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="reco-quart">Quart de travail</label>
             <p-dropdown
+                inputId="reco-quart"
                 [options]="listQuartWorkings"
                 [(ngModel)]="selectedQuartWorking"
                 [showClear]="true"
-                placeholder="Selectionnez le quart de travail"
-                optionLabel="time_start" inputId="float-label"
+                placeholder="Sélectionnez le quart de travail"
+                optionLabel="time_start"
                 (onChange)="onDropDownQuartWorkingChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-                <div>
-                    {{ 
-                        selectedQuartWorking ? selectedQuartWorking?.time_start+'-'+selectedQuartWorking?.time_close : '' 
-                    }}
-                </div>
-            </ng-template>
-            <ng-template let-quartWorking pTemplate="item">
-                <div>
-                    {{ 
-                        quartWorking?.time_start+'-'+quartWorking?.time_close
-                    }}
-                </div>
-            </ng-template>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div>{{ selectedQuartWorking ? selectedQuartWorking?.time_start + '-' + selectedQuartWorking?.time_close : '' }}</div>
+                </ng-template>
+                <ng-template let-quartWorking pTemplate="item">
+                    <div>{{ quartWorking?.time_start + '-' + quartWorking?.time_close }}</div>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez le quart de travail</label>
-        </span>
-    </div>
+        </div>
 
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="reco-product">Produit</label>
             <p-dropdown
+                inputId="reco-product"
                 [options]="listProducts"
                 [(ngModel)]="selectedProduct"
                 [showClear]="true"
-                placeholder="Selectionnez le produit"
-                optionLabel="name" inputId="float-label"
+                placeholder="Sélectionnez le produit"
+                optionLabel="name"
                 (onChange)="onDropDownProductChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-
-                <div>{{ selectedProduct ? selectedProduct?.name : '' }}</div>
-
-            </ng-template>
-            <ng-template let-product pTemplate="item">
-                <div>{{ product?.name }}</div>
-            </ng-template>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div>{{ selectedProduct ? selectedProduct?.name : '' }}</div>
+                </ng-template>
+                <ng-template let-product pTemplate="item">
+                    <div>{{ product?.name }}</div>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez le produit</label>
-        </span>
+        </div>
+
+        <div class="lo-field lo-field--fixed">
+            <label aria-hidden="true">&nbsp;</label>
+            <button type="button" class="lo-icon-action"
+                pTooltip="Exporter les données au format PDF"
+                tooltipPosition="bottom"
+                [disabled]="activeExport"
+                (click)="generateProductReconciliationIndicesPdf()">
+                <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+            </button>
+        </div>
     </div>
 
-    <div class="">
-        <!-- <button class="">
-            <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
-        </button> -->
-        <p-button 
-            pRipple 
-            icon="pi pi-file-pdf" 
-            class="mr-2" 
-            [rounded]="true" 
-            [outlined]="true" 
-            [disabled]="activeExport"
-            severity="danger" 
-            pTooltip="exporter les données au format pdf" 
-            (click)="generateProductReconciliationIndicesPdf()" />
-        
+    <div class="lo-table-card">
+        <app-table-reconciliation></app-table-reconciliation>
     </div>
 </div>
-
-<div class="card">
-    <app-table-reconciliation> </app-table-reconciliation>
-</div>
-

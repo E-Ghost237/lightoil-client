@@ -1,23 +1,31 @@
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Historique des index de pompes</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/image_pistolet-removebg-preview.png" alt="icon">
-    </div>
-</div>
 
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Index de pompes et réconciliation</span>
+                <h1 class="lo-page-title">Index de pompes</h1>
+                <p class="lo-page-subtitle">Historique des index relevés aux pistolets</p>
+            </div>
+        </div>
+        <div class="lo-page-actions">
+            <p-button
+                label="Ajouter un index"
+                icon="pi pi-plus"
+                (click)="addNewIndex()"></p-button>
+        </div>
+    </div>
 
-<div class="card flex  flex-row justify-content-evenly mt-3 text-white" >
-    <div class="w-30rem">
-        <span class="p-float-label">
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="pump-idx-period">Date ou période</label>
             <p-calendar
+                inputId="pump-idx-period"
                 [(ngModel)]="rangeDates"
                 selectionMode="range"
                 dateFormat="dd/mm/yy"
@@ -25,133 +33,90 @@
                 [showIcon]="true"
                 (onSelect)="onDateSelect($event)"
                 [maxDate]="maxDate"
-                inputStyleClass="w-100"
-                styleClass="w-100"
-                >
+                inputStyleClass="w-full"
+                styleClass="w-full">
             </p-calendar>
-            <label for="float-label text-white">Selectionnez la date ou la periode</label>
-        </span>
+        </div>
 
-    </div>
-
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="pump-idx-pump">Pompe</label>
             <p-dropdown
+                inputId="pump-idx-pump"
                 [options]="listPumps"
                 [(ngModel)]="selectedPump"
                 [showClear]="true"
-                placeholder="Selectionnez la pompe"
-                optionLabel="name" inputId="float-label"
+                placeholder="Sélectionnez la pompe"
+                optionLabel="name"
                 (onChange)="onDropDownPumpChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-
-                <div>{{ selectedPump ? selectedPump?.name : '' }}</div>
-
-            </ng-template>
-            <ng-template let-pump pTemplate="item">
-                <div>{{ pump?.name }}</div>
-            </ng-template>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div>{{ selectedPump ? selectedPump?.name : '' }}</div>
+                </ng-template>
+                <ng-template let-pump pTemplate="item">
+                    <div>{{ pump?.name }}</div>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez la pompe</label>
-        </span>
-    </div>
+        </div>
 
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="pump-idx-gun">Pistolet</label>
             <p-dropdown
+                inputId="pump-idx-gun"
                 [options]="listGuns"
                 [(ngModel)]="selectedGun"
                 [showClear]="true"
-                placeholder="Selectionnez le pistolet"
-                optionLabel="name" inputId="float-label"
+                placeholder="Sélectionnez le pistolet"
+                optionLabel="name"
                 (onChange)="onDropDownGunChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-
-                <div>{{ selectedGun ? selectedGun?.code+" - "+selectedGun?.product.name : '' }}</div>
-
-            </ng-template>
-            <ng-template let-gun pTemplate="item">
-                <div>{{ gun?.code+" - "+gun?.product.name }}</div>
-            </ng-template>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div>{{ selectedGun ? selectedGun?.code + ' - ' + selectedGun?.product.name : '' }}</div>
+                </ng-template>
+                <ng-template let-gun pTemplate="item">
+                    <div>{{ gun?.code + ' - ' + gun?.product.name }}</div>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez le pistolet</label>
-        </span>
-    </div>
+        </div>
 
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="pump-idx-quart">Quart de travail</label>
             <p-dropdown
+                inputId="pump-idx-quart"
                 [options]="listQuartWorkings"
                 [(ngModel)]="selectedQuartWorking"
                 [showClear]="true"
-                placeholder="Selectionnez le quart de travail"
-                optionLabel="time_start" inputId="float-label"
+                placeholder="Sélectionnez le quart de travail"
+                optionLabel="time_start"
                 (onChange)="onDropDownQuartWorkingChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-                <div *ngIf="selectedQuartWorking" class="flex align-content-center justify-content-around">
-                    <div>
-                        {{
-                            selectedQuartWorking ? selectedQuartWorking.time_start+' - '+selectedQuartWorking.time_close : ''
-                        }}
-                    </div>
-                    <div>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div *ngIf="selectedQuartWorking" class="flex align-items-center gap-2">
+                        <span>{{ selectedQuartWorking ? selectedQuartWorking.time_start + ' - ' + selectedQuartWorking.time_close : '' }}</span>
                         <p-tag severity="warning" value="{{selectedQuartWorking.description}}"></p-tag>
                     </div>
-                </div>
-            </ng-template>
-            <ng-template let-quartWorking pTemplate="item">
-                <div class="flex align-content-center justify-content-around">
-                    <div>
-                        {{
-                            quartWorking?.time_start+' - '+quartWorking?.time_close
-                        }}
-                    </div>
-                    <div>
+                </ng-template>
+                <ng-template let-quartWorking pTemplate="item">
+                    <div class="flex align-items-center gap-2">
+                        <span>{{ quartWorking?.time_start + ' - ' + quartWorking?.time_close }}</span>
                         <p-tag severity="warning" value="{{quartWorking?.description}}"></p-tag>
                     </div>
-                </div>
-            </ng-template>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez le quart de travail</label>
-        </span>
+        </div>
+
+        <div class="lo-field lo-field--fixed">
+            <label aria-hidden="true">&nbsp;</label>
+            <button type="button" class="lo-icon-action"
+                pTooltip="Exporter les données au format PDF"
+                tooltipPosition="bottom"
+                [disabled]="activeExport"
+                (click)="generatePumpIndicesPdf()">
+                <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+            </button>
+        </div>
     </div>
 
-    <div>
-        <p-button
-            pRipple
-            pTooltip="Ajouter un index"
-            icon="pi pi-plus-circle"
-            class="mr-2"
-            [rounded]="true"
-            [outlined]="true"
-            severity="info"
-            (click)="addNewIndex()" />
+    <div class="lo-table-card">
+        <app-table-index activeEditAndDeleteButton="false"></app-table-index>
     </div>
-
-    <div class="">
-        <!-- <button class="">
-            <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
-        </button> -->
-        <p-button
-            pRipple
-            icon="pi pi-file-pdf"
-            class="mr-2"
-            [rounded]="true"
-            [outlined]="true"
-            [disabled]="activeExport"
-            severity="danger"
-            pTooltip="exporter les données au format pdf"
-            (click)="generatePumpIndicesPdf()" />
-
-    </div>
-</div>
-
-<div class="card">
-    <app-table-index activeEditAndDeleteButton="false"> </app-table-index>
 </div>

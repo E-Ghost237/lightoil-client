@@ -2,21 +2,25 @@
 <p-toast key="tst"></p-toast>
 
 <div class="sales-reports-page">
-    <div class="card pb-0 mb-4 sales-header-card">
-        <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
-            <div
-                class="col-12 xl:col-7 lg:col-7 md:col-7 text-center xl:text-left align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
-                <h1 class="font-bold sales-page-title">Rapports de ventes</h1>
-                <p class="sales-page-subtitle">Analyse multi-periode du reseau et export professionnel des performances.</p>
-            </div>
-            <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
-                <label for="sale-point-types" class="block font-bold text-lg section-label">Reseau</label>
-                <p-dropdown (onChange)="onSalePointTypeChange($event)"
-                    styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase filter-control" inputId="sale-point-types"
-                    [options]="sale_point_types" [(ngModel)]="selected_sale_point_type" optionLabel="name"
-                    [appendTo]="'body'"
-                    [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un reseau" />
-            </div>
+    <div class="lo-page-header">
+        <div>
+            <span class="lo-eyebrow">Espace administrateur</span>
+            <h1 class="lo-page-title">Rapports de ventes</h1>
+            <p class="lo-page-subtitle">Analyse multi-période du réseau et export professionnel des performances.</p>
+        </div>
+        <div class="lo-page-actions">
+            <span class="lo-chip navy"><i class="pi pi-chart-bar"></i> {{ selected_sale_point_type?.name ?? 'Réseau' }}</span>
+        </div>
+    </div>
+
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="sale-point-types">Réseau</label>
+            <p-dropdown (onChange)="onSalePointTypeChange($event)"
+                styleClass="w-full filter-control" inputId="sale-point-types"
+                [options]="sale_point_types" [(ngModel)]="selected_sale_point_type" optionLabel="name"
+                [appendTo]="'body'"
+                [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un réseau" />
         </div>
     </div>
 
@@ -28,7 +32,7 @@
                     <button class="nav-link active text-uppercase" id="daily-tab" data-bs-toggle="tab"
                         data-bs-target="#daily-tab-pane" type="button" role="tab" aria-controls="daily-tab-pane"
                         aria-selected="true" (click)="showCalendar('daily')">
-                        Journalieres
+                        Journalières
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -69,13 +73,13 @@
                                 [selectAll]="select_all_sale_points" [(ngModel)]="selected_sale_points" display="chip"
                                 optionLabel="name" [virtualScroll]="true" [virtualScrollItemSize]="30"
                                 class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="3"
-                                placeholder="Selectionner un ou plusieurs">
+                                placeholder="Sélectionner un ou plusieurs">
                                 <ng-template let-sale_point pTemplate="footer">
                                     <div class="py-2 px-3">
                                         <b>{{ selected_sale_points ? selected_sale_points.length : 0 }}</b>
                                         point{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' : '' }}
                                         de vente
-                                        selectionne{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' : '' }}.
+                                        sélectionné{{ (selected_sale_points ? selected_sale_points.length : 0) > 1 ? 's' : '' }}.
                                     </div>
                                 </ng-template>
                             </p-multiSelect>
@@ -91,12 +95,12 @@
                                 [selectAll]="select_all_products" [(ngModel)]="selected_products" display="chip"
                                 optionLabel="name" [virtualScroll]="true" [virtualScrollItemSize]="30"
                                 class="multiselect-custom-virtual-scroll" [maxSelectedLabels]="3"
-                                placeholder="Selectionner le(s) produit(s)">
+                                placeholder="Sélectionner le(s) produit(s)">
                                 <ng-template let-product pTemplate="footer">
                                     <div class="py-2 px-3">
                                         <b>{{ selected_products ? selected_products.length : 0 }}</b>
                                         produit{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}
-                                        selectionne{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}.
+                                        sélectionné{{ (selected_products ? selected_products.length : 0) > 1 ? 's' : '' }}.
                                     </div>
                                 </ng-template>
                             </p-multiSelect>
@@ -106,10 +110,10 @@
                         <div class="col-12 xl:col-4 lg:col-4 md:col-6">
                             <!-- Daily calendar -->
                             <div *ngIf="is_daily_report">
-                                <label for="daily_date" class="block font-bold mb-1 section-label">Journee du</label>
+                                <label for="daily_date" class="block font-bold mb-1 section-label">Journée du</label>
                                 <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="daily_date"
                                     [appendTo]="'body'" dateFormat="dd/mm/yy" [(ngModel)]="daily_date" [readonlyInput]="true" [showClear]="true"
-                                    placeholder="Selectionner un jour" [maxDate]="max_date" />
+                                    placeholder="Sélectionner un jour" [maxDate]="max_date" />
                             </div>
 
                             <!-- Weekly calendar -->
@@ -117,7 +121,7 @@
                                 <label for="weekly_date" class="block font-bold mb-1 section-label">Semaine du</label>
                                 <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="weekly_date"
                                     [appendTo]="'body'" dateFormat="dd/mm/yy" selectionMode="range" [(ngModel)]="weekly_date" [maxDate]="max_date"
-                                    [readonlyInput]="true" [showClear]="true" placeholder="Selectionner une periode" />
+                                    [readonlyInput]="true" [showClear]="true" placeholder="Sélectionner une période" />
                             </div>
 
                             <!-- Monthly calendar -->
@@ -125,15 +129,15 @@
                                 <label for="monthly_date" class="block font-bold mb-1 section-label">Mois de</label>
                                 <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="monthly_date"
                                     [appendTo]="'body'" dateFormat="mm-yy" view="month" [(ngModel)]="monthly_date" [readonlyInput]="true"
-                                    [showClear]="true" placeholder="Selectionner un mois" [maxDate]="max_date" />
+                                    [showClear]="true" placeholder="Sélectionner un mois" [maxDate]="max_date" />
                             </div>
 
                             <!-- Yearly calendar -->
                             <div *ngIf="is_annual_report">
-                                <label for="annual_date" class="block font-bold mb-1 section-label">Annee</label>
+                                <label for="annual_date" class="block font-bold mb-1 section-label">Année</label>
                                 <p-calendar (onSelect)="onDateSelect($event)" styleClass="w-full filter-control" inputId="annual_date"
                                     [appendTo]="'body'" dateFormat="yy" view="year" [showClear]="true" [(ngModel)]="annual_date"
-                                    placeholder="Selectionner une annee" [maxDate]="max_date" />
+                                    placeholder="Sélectionner une année" [maxDate]="max_date" />
                             </div>
                         </div>
                     </div>
@@ -144,11 +148,11 @@
                     <div class="grid">
                         <!-- Generate report button -->
                         <div class="col-12 xl:col-4 lg:col-4 md:col-4">
-                            <span class="block font-bold mb-1 section-label">Generer</span>
+                            <span class="block font-bold mb-1 section-label">Générer</span>
                             <div class="grid">
                                 <div class="col-12">
                                     <p-button (onClick)="generateReport()" styleClass="w-full align-content-center text-lg action-button btn-generate"
-                                        label="Generer" [raised]="true" severity="primary" [loading]="loading_icon"
+                                        label="Générer" [raised]="true" severity="primary" [loading]="loading_icon"
                                         loadingIcon="pi pi-sync" icon="pi pi-sync" iconPos="left"
                                         [disabled]="!can_generate_report">
                                     </p-button>

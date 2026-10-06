@@ -1,4 +1,4 @@
-<div class="card">
+<div class="p-3">
     <p-toast></p-toast>
     <p-toolbar styleClass="mb-4 gap-2">
         <ng-template pTemplate="left">
@@ -21,7 +21,7 @@
         [(selection)]="selectedQuarts"
         [rowHover]="true"
         dataKey="id"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        currentPageReportTemplate="{first} à {last} sur {totalRecords} entrées"
         [showCurrentPageReport]="true"
     >
         <ng-template pTemplate="caption">
@@ -29,7 +29,7 @@
                 <h5 class="m-0">Gestion des quarts de travail</h5>
                 <span class="p-input-icon-right">
                     <i class="pi pi-search"></i>
-                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Search..." />
+                    <input pInputText type="text" (input)="dt.filterGlobal($event.target.value, 'contains')" placeholder="Rechercher..." />
                 </span>
             </div>
         </ng-template>
@@ -40,7 +40,7 @@
                 </th>
                 <th style="min-width:15rem">#</th>
                 <th>Heure d'ouverture</th>
-                <th>Heure de cloture</th>
+                <th>Heure de clôture</th>
                 <th></th>
             </tr>
         </ng-template>
@@ -60,14 +60,14 @@
         </ng-template>
         <ng-template pTemplate="summary">
             <div class="flex align-items-center justify-content-between">
-                Au total il y'a {{ quarts ? quarts.length : 0 }} quarts de travail.</div>
+                Au total, il y a {{ quarts ? quarts.length : 0 }} quart(s) de travail.</div>
         </ng-template>
     </p-table>
 </div>
 <p-dialog 
     [(visible)]="quartDialog" 
     [style]="{ width: '450px' }" 
-    header="Details du quart de travail" 
+    header="Détails du quart de travail" 
     [modal]="true" 
     appendTo="body"
     styleClass="p-fluid">
@@ -77,11 +77,11 @@
                 <p-dropdown 
                     [options]="listHours" 
                     [(ngModel)]="quart.time_start" 
-                    placeholder="Selectionnez une heure"
+                    placeholder="Sélectionnez une heure"
                     appendTo="body" 
                     inputId="float-label">
                 </p-dropdown>
-                <label for="float-label">Selectionnez l'heure d'ouverture</label>
+                <label for="float-label">Sélectionnez l'heure d'ouverture</label>
             </span>
             <small class="p-error" *ngIf="submitted && quart.time_start.length <= 0">L'heure d'ouverture est requise.</small>
         </div>
@@ -90,11 +90,11 @@
                 <p-dropdown 
                     [options]="listHours" 
                     [(ngModel)]="quart.time_close" 
-                    placeholder="Selectionnez une heure" 
+                    placeholder="Sélectionnez une heure" 
                     appendTo="body" 
                     inputId="float-label">
                 </p-dropdown>
-                <label for="float-label">Selectionnez l'heure de cloture</label>
+                <label for="float-label">Sélectionnez l'heure de clôture</label>
             </span>
             <small class="p-error" *ngIf="submitted && quart.time_close.length <= 0">L'heure de cloture est requise.</small>
         </div>

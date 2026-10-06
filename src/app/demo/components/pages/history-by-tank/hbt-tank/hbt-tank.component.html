@@ -1,88 +1,82 @@
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Historique des donnees par cuve</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/70-2-xl-rbg.png" alt="icon">
-    </div>
-</div>
 
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Historiques par cuve</span>
+                <h1 class="lo-page-title">Jauges</h1>
+                <p class="lo-page-subtitle">Relevés de la sonde sur la période sélectionnée</p>
+            </div>
+        </div>
+    </div>
 
-<div class="card flex  flex-row justify-content-evenly mt-3 text-white" >
-    <div class="">
-        <span class="p-float-label">
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="hbt-tank-period">Période</label>
             <p-calendar
+                inputId="hbt-tank-period"
                 [(ngModel)]="rangeDates"
                 selectionMode="range"
                 dateFormat="dd/mm/yy"
                 [readonlyInput]="true"
                 [showIcon]="true"
                 (onSelect)="onDateSelect($event)"
-                [maxDate]="maxDate"
-                >
+                [maxDate]="maxDate">
             </p-calendar>
-            <label for="float-label text-white">Selectionnez la periode</label>
-        </span>
+        </div>
 
-    </div>
-
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="hbt-tank-select">Cuve</label>
             <p-dropdown
+                inputId="hbt-tank-select"
                 [options]="listTanks"
                 [(ngModel)]="selectedTank"
                 [showClear]="true"
-                placeholder="Selectionnez la cuve"
-                optionLabel="sensor_reference" inputId="float-label"
+                placeholder="Sélectionnez la cuve"
+                optionLabel="sensor_reference"
                 (onChange)="onDropDownChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-
-                <div>{{ selectedTank ? selectedTank?.sensor_reference+'-'+selectedTank?.product_service_station?.product?.name : '' }}</div>
-
-            </ng-template>
-            <ng-template let-tank pTemplate="item">
-
-                <div>{{ tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name }}</div>
-
-            </ng-template>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div>{{ selectedTank ? selectedTank?.sensor_reference + '-' + selectedTank?.product_service_station?.product?.name : '' }}</div>
+                </ng-template>
+                <ng-template let-tank pTemplate="item">
+                    <div>{{ tank?.sensor_reference + '-' + tank?.product_service_station?.product?.name }}</div>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez la cuve</label>
-        </span>
+        </div>
+
+        <div class="lo-field lo-field--fixed">
+            <label aria-hidden="true">&nbsp;</label>
+            <button type="button" class="lo-icon-action"
+                pTooltip="Exporter les données au format PDF"
+                tooltipPosition="bottom"
+                (click)="generateTankDataPdf()">
+                <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+            </button>
+        </div>
     </div>
 
-    <div class="border-round">
-        <!-- <button class="">
-            <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
-        </button> -->
-        <button class=""
-            pTooltip="exporter les données au format pdf"
-            (click)="generateTankDataPdf()"
-            >
-            <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
-        </button>
+    <div class="report-loading-state" *ngIf="!listRecords || listRecords.length === 0">
+        <p-progressSpinner strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
+        <p>Chargement des relevés...</p>
     </div>
 
-</div>
+    <div *ngIf="listRecords && listRecords?.length > 0">
+        <app-table-tank [listRecord]="listRecords" [tank]="selectedTank" [period]="period">
+        </app-table-tank>
+    </div>
 
-<div class="row d-flex justify-content-center mt-5" *ngIf="!listRecords || listRecords.length === 0">
-  <p-progressSpinner strokeWidth="4" animationDuration=".5s" styleClass="custom-spinner"></p-progressSpinner>
-</div>
-
-<div class="row" *ngIf="listRecords && listRecords?.length > 0">
-    <app-table-tank [listRecord] = "listRecords" [tank] = "selectedTank" [period]="period">
-    </app-table-tank>
-</div>
-<div class="row justify-content-center" *ngIf="listRecords && listRecords?.length <= 0">
-    <div class="col text-center">
-        Aucune données disponible dans la période
+    <div class="lo-card" *ngIf="listRecords && listRecords?.length <= 0">
+        <div class="lo-state">
+            <div class="lo-state-icon"><i class="pi pi-database"></i></div>
+            <h4>Aucune donnée</h4>
+            <p>Aucune donnée disponible dans la période sélectionnée.</p>
+        </div>
     </div>
 </div>
 

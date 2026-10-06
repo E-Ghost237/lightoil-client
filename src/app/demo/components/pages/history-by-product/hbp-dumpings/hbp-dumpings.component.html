@@ -1,245 +1,213 @@
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Historiques des mouvements de produit</h4>
-    </div>
-    <div class="col text-center">
-        <img width="400vh" src="assets/demo/images/70-2-xl-rbg.png" alt="icon">
-    </div>
-</div>
 
-<div class="mt-3">
-    <p-tabView [(activeIndex)]="activeIndex" class="bg-secondary">
-        <p-tabPanel header="SORTIES">
-            <div class="row justify-content-evenly">
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-calendar
-                            [(ngModel)]="rangeDates"
-                            selectionMode="range"
-                            dateFormat="dd/mm/yy"
-                            [readonlyInput]="true"
-                            [showIcon]="true"
-                            (onSelect)="onDateSelect($event)"
-                            [maxDate]="maxDate"
-                            >
-                        </p-calendar>
-                        <label for="float-label text-white">Sélectionnez la période</label>
-                    </span>
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div>
+            <span class="lo-eyebrow">Historiques par produit</span>
+            <h1 class="lo-page-title">Sorties et dépôtages</h1>
+            <p class="lo-page-subtitle">Mouvements de produit sur la période sélectionnée</p>
+        </div>
+    </div>
+
+    <p-tabView [(activeIndex)]="activeIndex">
+        <p-tabPanel header="Sorties">
+            <div class="lo-filterbar">
+                <div class="lo-field">
+                    <label for="hbp-out-period">Période</label>
+                    <p-calendar
+                        inputId="hbp-out-period"
+                        [(ngModel)]="rangeDates"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        [readonlyInput]="true"
+                        [showIcon]="true"
+                        (onSelect)="onDateSelect($event)"
+                        [maxDate]="maxDate">
+                    </p-calendar>
                 </div>
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listQuarter"
-                            [(ngModel)]="selectedQuart"
-                            [showClear]="true"
-                            placeholder="Selectionnez le quart"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeQuart($event)"
-                            [styleClass]="'w-100'"
-                        >
+
+                <div class="lo-field">
+                    <label for="hbp-out-quart">Quart de travail</label>
+                    <p-dropdown
+                        inputId="hbp-out-quart"
+                        [options]="listQuarter"
+                        [(ngModel)]="selectedQuart"
+                        [showClear]="true"
+                        placeholder="Sélectionnez le quart"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeQuart($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
-
-                            <div>{{ selectedQuart ? selectedQuart?.time_start+'-'+selectedQuart?.time_close : "" }}</div>
-
+                            <div>{{ selectedQuart ? selectedQuart?.time_start + '-' + selectedQuart?.time_close : '' }}</div>
                         </ng-template>
                         <ng-template let-quart pTemplate="item">
-
-                            <div>{{ quart?.time_start+'-'+quart?.time_close }}</div>
-
+                            <div>{{ quart?.time_start + '-' + quart?.time_close }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="">Sélectionnez le quart</label>
-                    </span>
-
+                    </p-dropdown>
                 </div>
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listStationProducts"
-                            [(ngModel)]="selectedStationProduct"
-                            [showClear]="true"
-                            placeholder="Selectionnez la cuve"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeTank($event)"
-                            [styleClass]="'w-100'"
-                        >
+                <div class="lo-field">
+                    <label for="hbp-out-product">Produit</label>
+                    <p-dropdown
+                        inputId="hbp-out-product"
+                        [options]="listStationProducts"
+                        [(ngModel)]="selectedStationProduct"
+                        [showClear]="true"
+                        placeholder="Sélectionnez le produit"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeTank($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
-
                             <div>{{ selectedStationProduct?.product?.name }}</div>
-
                         </ng-template>
                         <ng-template let-stationProduct pTemplate="item">
-                            <div class="flex flex-row justify-content-around">
-                                <span>
-                                    {{ stationProduct?.product?.name }}
-                                </span>
-                            </div>
+                            <div>{{ stationProduct?.product?.name }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="float-label">Selectionnez le produit</label>
-                    </span>
+                    </p-dropdown>
                 </div>
-               <div class="col-2 text-center">
-                  <!-- <button class=" ">
-                    <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(67, 225, 109);"></i>
-                  </button> -->
-                  <button class=" "
-                        pTooltip="exporter les données au format pdf" 
+
+                <div class="lo-field lo-field--fixed">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button type="button" class="lo-icon-action"
+                        pTooltip="Exporter les données au format PDF"
+                        tooltipPosition="bottom"
                         (click)="generateTankProductOutputPdf()">
-                    <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
-                  </button>
+                        <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="row" *ngIf="dataOutputs && hasOutputRows()">
-                <app-hbp-table-dumpings-output [listOutputs] = "dataOutputs" [stationProduct]="selectedStationProduct" [timezone]="stationTimezone">
+            <div *ngIf="dataOutputs && hasOutputRows()">
+                <app-hbp-table-dumpings-output [listOutputs]="dataOutputs" [stationProduct]="selectedStationProduct" [timezone]="stationTimezone">
                 </app-hbp-table-dumpings-output>
             </div>
-            <div class="row justify-content-center" *ngIf="dataOutputs && !hasOutputRows()">
-                <div class="col text-center">
-                    Aucune données disponible dans la période
+            <div class="lo-card" *ngIf="dataOutputs && !hasOutputRows()">
+                <div class="lo-state">
+                    <div class="lo-state-icon"><i class="pi pi-upload"></i></div>
+                    <h4>Aucune sortie</h4>
+                    <p>Aucune donnée disponible dans la période sélectionnée.</p>
                 </div>
             </div>
-
         </p-tabPanel>
-        <p-tabPanel header="DEPOTAGES">
-            <div class="row justify-content-around">
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-calendar
-                            [(ngModel)]="rangeDatesDep"
-                            selectionMode="range"
-                            dateFormat="dd/mm/yy"
-                            [readonlyInput]="true"
-                            [showIcon]="true"
-                            (onSelect)="onDateSelectDep($event)"
-                            [maxDate]="maxDate"
-                            >
-                        </p-calendar>
-                        <label for="float-label text-white">Selectionnez la periode</label>
-                    </span>
+
+        <p-tabPanel header="Dépotages">
+            <div class="lo-filterbar">
+                <div class="lo-field">
+                    <label for="hbp-in-period">Période</label>
+                    <p-calendar
+                        inputId="hbp-in-period"
+                        [(ngModel)]="rangeDatesDep"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        [readonlyInput]="true"
+                        [showIcon]="true"
+                        (onSelect)="onDateSelectDep($event)"
+                        [maxDate]="maxDate">
+                    </p-calendar>
                 </div>
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listStationProducts"
-                            [(ngModel)]="selectedStationProductDep"
-                            [showClear]="true"
-                            placeholder="Selectionnez le produit"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeStationProductDep($event)"
-                            [styleClass]="'w-100'"
-                        >
+                <div class="lo-field">
+                    <label for="hbp-in-product">Produit</label>
+                    <p-dropdown
+                        inputId="hbp-in-product"
+                        [options]="listStationProducts"
+                        [(ngModel)]="selectedStationProductDep"
+                        [showClear]="true"
+                        placeholder="Sélectionnez le produit"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeStationProductDep($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
                             <div>{{ selectedStationProductDep?.product?.name }}</div>
                         </ng-template>
                         <ng-template let-stationProduct pTemplate="item">
-                            <div class="flex flex-row justify-content-around">
-                                <span>
-                                    {{ stationProduct?.product?.name }}
-                                </span>
-                            </div>
+                            <div>{{ stationProduct?.product?.name }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="float-label">Selectionnez le produit</label>
-                    </span>
+                    </p-dropdown>
                 </div>
 
-                <div class="col-2 text-center">
-                  <!-- <button class=" ">
-                    <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(67, 225, 109);"></i>
-                  </button> -->
-                  <button class=" "
-                        pTooltip="exporter les données au format pdf" 
+                <div class="lo-field lo-field--fixed">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button type="button" class="lo-icon-action"
+                        pTooltip="Exporter les données au format PDF"
+                        tooltipPosition="bottom"
                         (click)="generateTankProductInputPdf()">
-                    <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
-                  </button>
+                        <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+                    </button>
                 </div>
             </div>
-            <div class="row" *ngIf="dataInputs && dataInputs?.periodInputs?.length > 0">
-                <app-hbp-table-dumpings-input [listInputs] = "dataInputs" [stationProduct]="selectedStationProductDep">
+
+            <div *ngIf="dataInputs && dataInputs?.periodInputs?.length > 0">
+                <app-hbp-table-dumpings-input [listInputs]="dataInputs" [stationProduct]="selectedStationProductDep">
                 </app-hbp-table-dumpings-input>
             </div>
-            <div class="row justify-content-center" *ngIf="dataInputs && dataInputs?.periodInputs?.length <= 0">
-                <div class="col text-center">
-                    Aucune données disponible dans la période
+            <div class="lo-card" *ngIf="dataInputs && dataInputs?.periodInputs?.length <= 0">
+                <div class="lo-state">
+                    <div class="lo-state-icon"><i class="pi pi-download"></i></div>
+                    <h4>Aucun dépôtage</h4>
+                    <p>Aucune donnée disponible dans la période sélectionnée.</p>
                 </div>
             </div>
         </p-tabPanel>
-        <p-tabPanel header="RAPPORTS">
-            <div class="row justify-content-evenly">
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-calendar
-                            [(ngModel)]="rangeDatesRap"
-                            selectionMode="range"
-                            dateFormat="dd/mm/yy"
-                            [readonlyInput]="true"
-                            [showIcon]="true"
-                            (onSelect)="onDateSelectRap($event)"
-                            [maxDate]="maxDate"
-                            >
-                        </p-calendar>
-                        <label for="float-label text-white">Selectionnez la periode</label>
-                    </span>
+
+        <p-tabPanel header="Rapports">
+            <div class="lo-filterbar">
+                <div class="lo-field">
+                    <label for="hbp-rep-period">Période</label>
+                    <p-calendar
+                        inputId="hbp-rep-period"
+                        [(ngModel)]="rangeDatesRap"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        [readonlyInput]="true"
+                        [showIcon]="true"
+                        (onSelect)="onDateSelectRap($event)"
+                        [maxDate]="maxDate">
+                    </p-calendar>
                 </div>
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listStationProducts"
-                            [(ngModel)]="selectedStationProductRap"
-                            [showClear]="true"
-                            placeholder="Selectionnez le produit"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeStationProductRap($event)"
-                            [styleClass]="'w-100'"
-                        >
+                <div class="lo-field">
+                    <label for="hbp-rep-product">Produit</label>
+                    <p-dropdown
+                        inputId="hbp-rep-product"
+                        [options]="listStationProducts"
+                        [(ngModel)]="selectedStationProductRap"
+                        [showClear]="true"
+                        placeholder="Sélectionnez le produit"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeStationProductRap($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
                             <div>{{ selectedStationProductRap?.product?.name }}</div>
                         </ng-template>
                         <ng-template let-stationProduct pTemplate="item">
-                            <div class="flex flex-row justify-content-around">
-                                <span>
-                                    {{ stationProduct?.product?.name }}
-                                </span>
-                            </div>
+                            <div>{{ stationProduct?.product?.name }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="float-label">Selectionnez le produit</label>
-                    </span>
+                    </p-dropdown>
                 </div>
 
-                <div class="col-2 text-center">
-                  <!-- <button class=" ">
-                    <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(67, 225, 109);"></i>
-                  </button> -->
-                  <button class=" "
-                        pTooltip="exporter les données au format pdf" 
+                <div class="lo-field lo-field--fixed">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button type="button" class="lo-icon-action"
+                        pTooltip="Exporter les données au format PDF"
+                        tooltipPosition="bottom"
                         (click)="generateTankProductReportPdf()">
-                    <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
-                  </button>
+                        <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+                    </button>
                 </div>
-
             </div>
-            <div class="row" *ngIf="dataReport && dataReport?.listDayRecord?.length > 0">
-                <app-hbp-table-dumpings-report [listReport] = "dataReport" [stationProduct]="selectedStationProductRap">
+
+            <div *ngIf="dataReport && dataReport?.listDayRecord?.length > 0">
+                <app-hbp-table-dumpings-report [listReport]="dataReport" [stationProduct]="selectedStationProductRap">
                 </app-hbp-table-dumpings-report>
             </div>
-            <div class="row justify-content-center" *ngIf="dataReport && dataReport?.listDayRecord?.length <= 0">
-                <div class="col text-center">
-                    Aucune données disponible dans la période
+            <div class="lo-card" *ngIf="dataReport && dataReport?.listDayRecord?.length <= 0">
+                <div class="lo-state">
+                    <div class="lo-state-icon"><i class="pi pi-file"></i></div>
+                    <h4>Aucun rapport</h4>
+                    <p>Aucune donnée disponible dans la période sélectionnée.</p>
                 </div>
             </div>
-
         </p-tabPanel>
     </p-tabView>
 </div>

@@ -1,25 +1,23 @@
 <p-toast key="tst"></p-toast>
 
 <div class="super-dashboard">
-  <div class="card hero mb-1">
-    <div class="hero-content">
-      <h1>Tableau de bord</h1>
-      <p>Vue globale de la plateforme: entreprises, stations, cuves, alertes critiques et positions des stations.</p>
-      <div class="hero-meta">
-        <span>Dernière mise à jour :</span>
-        <strong *ngIf="lastUpdatedAt as updatedAt; else pendingUpdate">{{ updatedAt | date:'dd/MM/yyyy à HH:mm':'':'fr' }}</strong>
-        <ng-template #pendingUpdate><strong>--/--/---- --:--</strong></ng-template>
+  <div class="lo-page-header">
+    <div>
+      <span class="lo-eyebrow">Super administrateur</span>
+      <h1 class="lo-page-title">Tableau de bord</h1>
+      <p class="lo-page-subtitle">Vue globale de la plateforme : entreprises, stations, cuves, alertes critiques et positions des stations.</p>
+    </div>
+    <div class="lo-page-actions">
+      <span class="lo-chip navy">
         <i class="pi pi-refresh"></i>
-      </div>
+        <span *ngIf="lastUpdatedAt as updatedAt; else pendingUpdate">{{ updatedAt | date:'dd/MM/yyyy à HH:mm':'':'fr' }}</span>
+        <ng-template #pendingUpdate><span>--/--/---- --:--</span></ng-template>
+      </span>
     </div>
   </div>
 
-  <div class="card filters-card mb-1">
-    <div class="filters-head">
-      <h2>Filtres réseau</h2>
-    </div>
-    <div class="filters-grid">
-      <div class="field">
+  <div class="lo-filterbar">
+      <div class="lo-field">
         <label for="filter-region">Région</label>
         <p-dropdown
           inputId="filter-region"
@@ -30,11 +28,11 @@
           [ngModel]="selectedRegionId"
           (ngModelChange)="onRegionChange($event)"
           [showClear]="true"
-          placeholder="Toutes les regions">
+          placeholder="Toutes les régions">
         </p-dropdown>
       </div>
 
-      <div class="field">
+      <div class="lo-field">
         <label for="filter-town">Ville</label>
         <p-dropdown
           inputId="filter-town"
@@ -49,7 +47,7 @@
         </p-dropdown>
       </div>
 
-      <div class="field">
+      <div class="lo-field">
         <label for="filter-company">Entreprise</label>
         <p-dropdown
           inputId="filter-company"
@@ -64,7 +62,7 @@
         </p-dropdown>
       </div>
 
-      <div class="field">
+      <div class="lo-field">
         <label for="filter-status">Statut (actif/inactif)</label>
         <p-dropdown
           inputId="filter-status"
@@ -78,72 +76,70 @@
         </p-dropdown>
       </div>
 
-      <div class="field action-field">
-        <label class="action-spacer" for="filter-reset">Action</label>
+      <div class="lo-field lo-field-action">
+        <label for="filter-reset">&nbsp;</label>
         <p-button
           id="filter-reset"
-          styleClass="reset-action"
           label="Réinitialiser"
           icon="pi pi-refresh"
           severity="secondary"
-          [text]="true"
+          [outlined]="true"
           (onClick)="clearFilters()">
         </p-button>
       </div>
-    </div>
   </div>
 
-  <div class="kpi-grid">
-    <div class="card kpi-card">
-      <div class="kpi-icon is-blue"><i class="pi pi-building"></i></div>
-      <div class="kpi-content">
-        <span class="kpi-label">Stations</span>
-        <strong>{{ summary.stationsCount | number:'1.0-0':'fr' }}</strong>
-        <small>Total stations enregistrées</small>
+  <div class="lo-kpi-grid">
+    <div class="lo-kpi">
+      <span class="lo-kpi-icon"><i class="pi pi-building"></i></span>
+      <div class="lo-kpi-body">
+        <span class="lo-kpi-label">Stations</span>
+        <div class="lo-kpi-value">{{ summary.stationsCount | number:'1.0-0':'fr' }}</div>
+        <div class="lo-kpi-sub">Total stations enregistrées</div>
       </div>
     </div>
-    <div class="card kpi-card">
-      <div class="kpi-icon is-blue"><i class="pi pi-database"></i></div>
-      <div class="kpi-content">
-        <span class="kpi-label">Cuves connectées</span>
-        <strong>{{ summary.connectedTanksCount | number:'1.0-0':'fr' }}</strong>
-        <small>Capteurs actifs</small>
+    <div class="lo-kpi">
+      <span class="lo-kpi-icon"><i class="pi pi-database"></i></span>
+      <div class="lo-kpi-body">
+        <span class="lo-kpi-label">Cuves connectées</span>
+        <div class="lo-kpi-value">{{ summary.connectedTanksCount | number:'1.0-0':'fr' }}</div>
+        <div class="lo-kpi-sub">Capteurs actifs</div>
       </div>
     </div>
-    <div class="card kpi-card online">
-      <div class="kpi-icon is-green"><i class="pi pi-wifi"></i></div>
-      <div class="kpi-content">
-        <span class="kpi-label">Stations online</span>
-        <strong>{{ summary.onlineStationsCount | number:'1.0-0':'fr' }}</strong>
-        <small>Connectées maintenant</small>
+    <div class="lo-kpi tone-ok">
+      <span class="lo-kpi-icon"><i class="pi pi-wifi"></i></span>
+      <div class="lo-kpi-body">
+        <span class="lo-kpi-label">Stations online</span>
+        <div class="lo-kpi-value">{{ summary.onlineStationsCount | number:'1.0-0':'fr' }}</div>
+        <div class="lo-kpi-sub">Connectées maintenant</div>
       </div>
     </div>
-    <div class="card kpi-card offline">
-      <div class="kpi-icon is-slate"><i class="pi pi-wifi"></i></div>
-      <div class="kpi-content">
-        <span class="kpi-label">Stations offline</span>
-        <strong>{{ summary.offlineStationsCount | number:'1.0-0':'fr' }}</strong>
-        <small>À vérifier</small>
+    <div class="lo-kpi">
+      <span class="lo-kpi-icon"><i class="pi pi-wifi"></i></span>
+      <div class="lo-kpi-body">
+        <span class="lo-kpi-label">Stations offline</span>
+        <div class="lo-kpi-value">{{ summary.offlineStationsCount | number:'1.0-0':'fr' }}</div>
+        <div class="lo-kpi-sub">À vérifier</div>
       </div>
     </div>
-    <div class="card kpi-card kpi-alert">
-      <div class="kpi-icon is-red"><i class="pi pi-bell"></i></div>
-      <div class="kpi-content">
-        <span class="kpi-label">Alertes</span>
-        <strong>{{ summary.activeAlertsCount | number:'1.0-0':'fr' }}</strong>
-        <small>Alertes critiques</small>
+    <div class="lo-kpi tone-critical">
+      <span class="lo-kpi-icon"><i class="pi pi-bell"></i></span>
+      <div class="lo-kpi-body">
+        <span class="lo-kpi-label">Alertes</span>
+        <div class="lo-kpi-value">{{ summary.activeAlertsCount | number:'1.0-0':'fr' }}</div>
+        <div class="lo-kpi-sub">Alertes critiques</div>
       </div>
     </div>
   </div>
 
   <div class="tables-grid">
-    <div class="card info-table-card">
+    <div class="lo-card table-card">
       <div class="table-head">
         <h2>Entreprises et stations</h2>
         <small>{{ companyStationsRows.length }} entreprise(s)</small>
       </div>
-      <div class="table-wrap">
-        <table class="info-table">
+      <div class="lo-table-scroll">
+        <table class="lo-admin-table">
           <thead>
             <tr>
               <th>Entreprise</th>
@@ -192,18 +188,18 @@
       </div>
     </div>
 
-    <div class="card info-table-card">
+    <div class="lo-card table-card">
       <div class="table-head">
-        <h2>Liste d'utilisateurs</h2>
+        <h2>Liste des utilisateurs</h2>
         <small>{{ filteredUsersRows.length }} utilisateur(s)</small>
       </div>
-      <div class="table-wrap">
-        <table class="info-table">
+      <div class="lo-table-scroll">
+        <table class="lo-admin-table">
           <thead>
             <tr>
               <th>Utilisateur</th>
               <th>Email</th>
-              <th>Role</th>
+              <th>Rôle</th>
               <th>Entreprise</th>
               <th>Statut</th>
             </tr>
@@ -240,7 +236,7 @@
     </div>
   </div>
 
-  <div class="card map-section">
+  <div class="lo-card map-section">
     <div class="map-head">
       <div>
         <h2>Carte des stations</h2>
@@ -259,7 +255,7 @@
           [rounded]="true"
           [severity]="isFullScreen ? 'danger' : 'secondary'"
           [icon]="isFullScreen ? 'pi pi-times' : 'pi pi-window-maximize'"
-          [pTooltip]="isFullScreen ? 'Quitter le plein ecran' : 'Plein ecran'"
+          [pTooltip]="isFullScreen ? 'Quitter le plein écran' : 'Plein écran'"
           tooltipPosition="left"
           (onClick)="toggleFullScreen()">
         </p-button>
@@ -286,7 +282,7 @@
     </div>
 
     <div class="map-foot">
-      <small>{{ filteredStations.length }} station(s) affichee(s), dont {{ emittingStations.length }} emettrice(s).</small>
+      <small>{{ filteredStations.length }} station(s) affichée(s), dont {{ emittingStations.length }} émettrice(s).</small>
     </div>
   </div>
 </div>

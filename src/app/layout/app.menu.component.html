@@ -5,14 +5,14 @@
 </ng-container>
 
 <ng-template #menuLoadedTemplate>
-    <ul class="layout-menu mt-5">
+    <ul class="layout-menu">
         <ng-container *ngFor="let item of model; let i = index;">
             <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
             <li *ngIf="item.separator" class="menu-separator"></li>
         </ng-container>
-        <li class="menu-branding mt-5">
+        <li class="menu-branding">
             <img src="assets/layout/images/{{layoutService.config.colorScheme === 'light' ? 'lightoil-brand-black' : 'lightoil-brand-white'}}.png"
-                alt="Light Oil" class="w-full rounded" />
+                alt="LightOil" class="w-full rounded" />
             <small>Fuel operations platform</small>
         </li>
     </ul>

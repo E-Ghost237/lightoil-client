@@ -1,253 +1,116 @@
 <div class="grid">
-    <!-- Card of total gas stations -->
     <div class="col-12 xl:col-2 lg:col-6 md:col-6">
-        <div class="card p-4">
-            <span class="font-semibold text-900 text-dark text-xl mb-4">Nbre. de {{ sale_point_type ?? '...' }}</span>
-
-            <div class="flex flex-wrap gap-4 justify-content-start">
-                <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
-                    [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                    <img src="assets/img/gas-station/gas-station.png" alt="gas-station-image">
-                </div>
-                <ng-container *ngIf="number_of_sale_points; else elseTemplate">
-                    <div class="align-items-center font-semibold text-700 text-dark text-lg text-center pt-2">
-                        {{ number_of_sale_points | number:'1.0-0':'fr' }}
-                    </div>
-                </ng-container>
-                <ng-template #elseTemplate>
-                    <div class="flex flex-column align-items-center justify-content-center pt-2">
-                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                    </div>
-                </ng-template>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card of total connected tanks -->
-    <div class="col-12 xl:col-2 lg:col-6 md:col-6">
-        <div class="card p-4">
-            <span class="font-semibold text-900 text-dark text-xl mb-4">Nbre. de Cuves Connectées</span>
-
-            <div class="flex flex-wrap gap-4 justify-content-start">
-                <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
-                    [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                    <img src="assets/img/oil-tank.png" alt="oil-tank-image">
-                </div>
-                <ng-container *ngIf="number_of_connected_tanks; else elseTemplate">
-                    <div class="align-items-center font-semibold text-700 text-dark text-lg text-center pt-2">
-                        {{ number_of_connected_tanks | number:'1.0-0':'fr' }}
-                    </div>
-                </ng-container>
-                <ng-template #elseTemplate>
-                    <div class="flex flex-column align-items-center justify-content-center pt-2">
-                        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                    </div>
-                </ng-template>
-            </div>
-        </div>
-    </div>
-
-    <!-- Card of weekly dumping per product -->
-    <div class="col-12 xl:col-4 lg:col-6 md:col-6">
-        <div class="card pt-4 pr-4 pb-1 pl-4">
-            <span class="font-semibold text-900 text-dark text-xl mb-4">
-                Dépotage, semaine du {{ start_of_week ?? '...' }} au {{ end_of_week ?? '...' }}
+        <div class="lo-kpi">
+            <span class="lo-kpi-icon product">
+                <img src="assets/img/gas-station/gas-station.png" alt="Points de vente">
             </span>
+            <div class="lo-kpi-body">
+                <span class="lo-kpi-label">Nbre. de {{ sale_point_type ?? '...' }}</span>
+                <div *ngIf="number_of_sale_points; else elseCountTemplate" class="lo-kpi-value">
+                    {{ number_of_sale_points | number:'1.0-0':'fr' }}
+                </div>
+                <ng-template #elseCountTemplate>
+                    <div class="lo-kpi-value"><i class="pi pi-spin pi-spinner"></i></div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
 
-            <ng-container
-                *ngIf="dumping_per_product !== undefined && dumping_per_product.length > 0; else elseTemplate">
-                <div *ngFor="let product of dumping_per_product">
-                    <div *ngIf="product.name == 'Super'" class="flex flex-wrap mb-3">
-                        <div class="flex align-items-center justify-content-center bg-blue-100 border-round mr-3"
-                            [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                            <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #014da4;"></i>
-                        </div>
-                        <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                            <div class="text-start mr-4" style="color: #014da4;">Super : </div>
-                            <div class="text-700 text-end text-dark">
-                                {{ (product.deposited_volume | number:'1.2-2':'fr') ?? '...' }} L
-                            </div>
-                        </div>
-                    </div>
+    <div class="col-12 xl:col-2 lg:col-6 md:col-6">
+        <div class="lo-kpi">
+            <span class="lo-kpi-icon product">
+                <img src="assets/img/oil-tank.png" alt="Cuves connectées">
+            </span>
+            <div class="lo-kpi-body">
+                <span class="lo-kpi-label">Cuves connectées</span>
+                <div *ngIf="number_of_connected_tanks; else elseTankTemplate" class="lo-kpi-value">
+                    {{ number_of_connected_tanks | number:'1.0-0':'fr' }}
+                </div>
+                <ng-template #elseTankTemplate>
+                    <div class="lo-kpi-value"><i class="pi pi-spin pi-spinner"></i></div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
 
-                    <div *ngIf="product.name == 'Gasoil'" class="flex flex-wrap mb-3">
-                        <div class="flex align-items-center justify-content-center bg-yellow-100 border-round mr-3"
-                            [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                            <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #fdc401;"></i>
+    <div class="col-12 xl:col-4 lg:col-6 md:col-6">
+        <div class="lo-card">
+            <h3 class="lo-card-title">
+                Dépotage, semaine du {{ start_of_week ?? '...' }} au {{ end_of_week ?? '...' }}
+            </h3>
+            <ng-container *ngIf="dumping_per_product !== undefined && dumping_per_product.length > 0; else elseTemplate">
+                <div class="lo-spec">
+                    <ng-container *ngFor="let product of dumping_per_product">
+                        <div *ngIf="product.name == 'Super'" class="lo-spec-row">
+                            <span class="lo-spec-label product" style="color: #014da4;">Super</span>
+                            <span class="lo-spec-value">{{ (product.deposited_volume | number:'1.2-2':'fr') ?? '...' }} L</span>
                         </div>
-                        <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                            <div class="text-start mr-4" style="color: #fdc401;">Gasoil : </div>
-                            <div class="text-700 text-end text-dark">
-                                {{ (product.deposited_volume | number:'1.2-2':'fr') ?? '...' }} L
-                            </div>
+                        <div *ngIf="product.name == 'Gasoil'" class="lo-spec-row">
+                            <span class="lo-spec-label product" style="color: #b98a00;">Gasoil</span>
+                            <span class="lo-spec-value">{{ (product.deposited_volume | number:'1.2-2':'fr') ?? '...' }} L</span>
                         </div>
-                    </div>
-
-                    <div *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" class="flex flex-wrap mb-3">
-                        <div class="flex mr-3 align-items-center justify-content-center bg-green-100 border-round"
-                            [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                            <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #007138;"></i>
+                        <div *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" class="lo-spec-row">
+                            <span class="lo-spec-label product" style="color: #007138;">Pétrole</span>
+                            <span class="lo-spec-value">{{ (product.deposited_volume | number:'1.2-2':'fr') ?? '...' }} L</span>
                         </div>
-                        <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                            <div class="text-start mr-3" style="color: #007138;">Pétrole : </div>
-                            <div class="text-700 text-end text-dark">
-                                {{ (product.deposited_volume | number:'1.2-2':'fr') ?? '...' }} L
-                            </div>
-                        </div>
-                    </div>
+                    </ng-container>
                 </div>
             </ng-container>
             <ng-template #elseTemplate>
-                <div class="flex flex-wrap mb-3">
-                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round mr-3"
-                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                        <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #014da4;"></i>
-                    </div>
-                    <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                        <div class="text-start mr-5" style="color: #014da4;">Super : </div>
-                        <div class="text-700 text-end text-dark">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap mb-3">
-                    <div class="flex align-items-center justify-content-center bg-yellow-100 border-round mr-3"
-                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                        <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #fdc401;"></i>
-                    </div>
-                    <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                        <div class="text-start mr-5" style="color: #fdc401;">Gasoil : </div>
-                        <div class="text-700 text-end text-dark">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap mb-3">
-                    <div class="flex mr-3 align-items-center justify-content-center bg-green-100 border-round"
-                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                        <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #007138;"></i>
-                    </div>
-                    <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                        <div class="text-start mr-4" style="color: #007138;">Pétrole : </div>
-                        <div class="text-700 text-end text-dark">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </div>
+                <div class="lo-state compact">
+                    <p-progressSpinner strokeWidth="4" [style]="{ width: '2.25rem', height: '2.25rem' }"></p-progressSpinner>
+                    <p>Chargement des dépotages…</p>
                 </div>
             </ng-template>
         </div>
     </div>
 
-    <!-- Card of volume per product -->
     <div class="col-12 xl:col-4 lg:col-6 md:col-6">
-        <div class="card pt-4 pr-4 pb-1 pl-4">
-            <span class="font-semibold text-900 text-dark text-xl mb-4">
-                Volume par produit au {{ product_stock_date ?? '...' }}
-            </span>
-
-            <ng-container *ngIf="stock_per_product != undefined && stock_per_product.length > 0; else elseTemplate">
-                <div *ngFor="let product of stock_per_product">
-                    <div *ngIf="product.name == 'Super'" class="flex flex-wrap mb-3">
-                        <div class="flex align-items-center justify-content-center bg-blue-100 border-round mr-3"
-                            [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                            <img src="assets/img/oil/gasoline.png" alt="gasoline-image">
-                        </div>
-                        <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                            <div class="text-start mr-4" style="color: #014da4;">Super : </div>
+        <div class="lo-card">
+            <h3 class="lo-card-title">Volume par produit au {{ product_stock_date ?? '...' }}</h3>
+            <ng-container *ngIf="stock_per_product != undefined && stock_per_product.length > 0; else elseStockTemplate">
+                <div class="lo-spec">
+                    <ng-container *ngFor="let product of stock_per_product">
+                        <div *ngIf="product.name == 'Super'" class="lo-spec-row">
+                            <span class="lo-spec-label product" style="color: #014da4;">Super</span>
                             <ng-container
                                 *ngIf="(product.volume != undefined && product.tank_volume != undefined) && (product.volume != 0 && product.tank_volume != 0); else noVolume">
-                                <div class="text-700 text-end text-dark">
-                                    {{ product.volume | number:'1.2-2':'fr' }} <span class="font-semibold">L / </span>
-                                    {{ product.tank_volume | number:'1.0-0':'fr' }} <span class="font-semibold">L</span>
-                                </div>
+                                <span class="lo-spec-value">
+                                    {{ product.volume | number:'1.2-2':'fr' }} L /
+                                    {{ product.tank_volume | number:'1.0-0':'fr' }} L
+                                </span>
                             </ng-container>
-                            <ng-template #noVolume>
-                                <div class="text-700 text-end text-dark">... L / ... L</div>
-                            </ng-template>
                         </div>
-                    </div>
-
-                    <div *ngIf="product.name == 'Gasoil'" class="flex flex-wrap mb-3">
-                        <div class="flex align-items-center justify-content-center bg-yellow-100 border-round mr-3"
-                            [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                            <img src="assets/img/oil/diesel.png" alt="diesel-image">
-                        </div>
-                        <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                            <div class="text-start mr-4" style="color: #fdc401;">Gasoil : </div>
+                        <div *ngIf="product.name == 'Gasoil'" class="lo-spec-row">
+                            <span class="lo-spec-label product" style="color: #b98a00;">Gasoil</span>
                             <ng-container
                                 *ngIf="(product.volume != undefined && product.tank_volume != undefined) && (product.volume != 0 && product.tank_volume != 0); else noVolume">
-                                <div class="text-700 text-end text-dark">
-                                    {{ product.volume | number:'1.2-2':'fr' }} <span class="font-semibold">L / </span>
-                                    {{ product.tank_volume | number:'1.0-0':'fr' }} <span class="font-semibold">L</span>
-                                </div>
+                                <span class="lo-spec-value">
+                                    {{ product.volume | number:'1.2-2':'fr' }} L /
+                                    {{ product.tank_volume | number:'1.0-0':'fr' }} L
+                                </span>
                             </ng-container>
-                            <ng-template #noVolume>
-                                <div class="text-700 text-end text-dark">... L / ... L</div>
-                            </ng-template>
                         </div>
-                    </div>
-
-                    <div *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" class="flex flex-wrap mb-3">
-                        <div class="flex align-items-center justify-content-center bg-green-100 border-round mr-3"
-                            [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                            <img src="assets/img/oil/petroleum.png" alt="petroleum-image">
-                        </div>
-                        <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                            <div class="text-start mr-3" style="color: #007138;">Pétrole : </div>
+                        <div *ngIf="product.name == 'Pétrole' || product.name == 'Petrole'" class="lo-spec-row">
+                            <span class="lo-spec-label product" style="color: #007138;">Pétrole</span>
                             <ng-container
                                 *ngIf="(product.volume != undefined && product.tank_volume != undefined) && (product.volume != 0 && product.tank_volume != 0); else noVolume">
-                                <div class="text-700 text-end text-dark">
-                                    {{ product.volume | number:'1.2-2':'fr' }} <span class="font-semibold">L / </span>
-                                    {{ product.tank_volume | number:'1.0-0':'fr' }} <span class="font-semibold">L</span>
-                                </div>
+                                <span class="lo-spec-value">
+                                    {{ product.volume | number:'1.2-2':'fr' }} L /
+                                    {{ product.tank_volume | number:'1.0-0':'fr' }} L
+                                </span>
                             </ng-container>
-                            <ng-template #noVolume>
-                                <div class="text-700 text-end text-dark">... L / ... L</div>
-                            </ng-template>
                         </div>
-                    </div>
+                    </ng-container>
+                    <ng-template #noVolume>
+                        <span class="lo-spec-value">... L / ... L</span>
+                    </ng-template>
                 </div>
             </ng-container>
-            <ng-template #elseTemplate>
-                <div class="flex flex-wrap mb-3">
-                    <div class="flex align-items-center justify-content-center bg-blue-100 border-round mr-3"
-                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                        <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #014da4;"></i>
-                    </div>
-                    <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                        <div class="text-start mr-5" style="color: #014da4;">Super : </div>
-                        <div class="text-700 text-end text-dark">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap mb-3">
-                    <div class="flex align-items-center justify-content-center bg-yellow-100 border-round mr-3"
-                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                        <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #fdc401;"></i>
-                    </div>
-                    <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                        <div class="text-start mr-5" style="color: #fdc401;">Gasoil : </div>
-                        <div class="text-700 text-end text-dark">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap mb-3">
-                    <div class="flex mr-3 align-items-center justify-content-center bg-green-100 border-round"
-                        [ngStyle]="{ width: '2.5rem', height: '2.5rem' }">
-                        <i class="pi pi-window-minimize" style="font-size: 1.5rem; color: #007138;"></i>
-                    </div>
-                    <div class="flex flex-wrap justify-content-between font-semibold text-lg pt-2">
-                        <div class="text-start mr-4" style="color: #007138;">Pétrole : </div>
-                        <div class="text-700 text-end text-dark">
-                            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-                        </div>
-                    </div>
+            <ng-template #elseStockTemplate>
+                <div class="lo-state compact">
+                    <p-progressSpinner strokeWidth="4" [style]="{ width: '2.25rem', height: '2.25rem' }"></p-progressSpinner>
+                    <p>Chargement des stocks…</p>
                 </div>
             </ng-template>
         </div>

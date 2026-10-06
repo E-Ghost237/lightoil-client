@@ -1,21 +1,24 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div class="card">
-    <h4>Corrections des données clients</h4>
-    <p class="text-500">
-        Accordez ou révoquez l'accès à la modification des données d'analyse comparative pour une station, et
-        consultez le journal d'audit de toutes les actions effectuées (réservé au Super Admin).
-    </p>
+<div class="lo-page-header">
+    <div>
+        <span class="lo-eyebrow">Espace administrateur</span>
+        <h1 class="lo-page-title">Corrections des données clients</h1>
+        <p class="lo-page-subtitle">
+            Accordez ou révoquez l'accès à la modification des données d'analyse comparative pour une station, et
+            consultez le journal d'audit de toutes les actions effectuées (réservé au Super Admin).
+        </p>
+    </div>
 </div>
 
 <p-tabView>
     <!-- Access management -->
     <p-tabPanel header="Gestion de l'accès">
-        <div class="card">
+        <div class="lo-card">
             <form [formGroup]="accessForm" class="grid">
-                <div class="col-12 md:col-4">
-                    <label class="block text-sm mb-1">Compagnie</label>
+                <div class="col-12 md:col-4 lo-field">
+                    <label>Compagnie</label>
                     <p-dropdown
                         [options]="companyOptions"
                         formControlName="company_id"
@@ -23,12 +26,12 @@
                         optionValue="value"
                         [showClear]="true"
                         placeholder="Sélectionnez une compagnie"
-                        styleClass="w-100"
+                        styleClass="w-full"
                         (onChange)="onAccessCompanyChange($event.value)"
                     ></p-dropdown>
                 </div>
-                <div class="col-12 md:col-4">
-                    <label class="block text-sm mb-1">Station service</label>
+                <div class="col-12 md:col-4 lo-field">
+                    <label>Station service</label>
                     <p-dropdown
                         [options]="stationOptions"
                         formControlName="station_id"
@@ -36,26 +39,29 @@
                         optionValue="value"
                         [showClear]="true"
                         placeholder="Sélectionnez une station"
-                        styleClass="w-100"
+                        styleClass="w-full"
                         (onChange)="onAccessStationChange($event.value)"
                     ></p-dropdown>
                 </div>
             </form>
 
             <div *ngIf="selectedStationId" class="mt-4">
-                <div *ngIf="accessLoading">Chargement du statut...</div>
+                <div *ngIf="accessLoading" class="lo-state compact">
+                    <p-progressSpinner strokeWidth="4" [style]="{ width: '2rem', height: '2rem' }"></p-progressSpinner>
+                    <p>Chargement du statut…</p>
+                </div>
 
-                <div *ngIf="!accessLoading" class="flex align-items-center justify-content-between flex-wrap">
+                <div *ngIf="!accessLoading" class="flex align-items-center justify-content-between flex-wrap gap-3">
                     <div>
-                        <span *ngIf="isAccessOpen" class="text-green-600 font-bold">
+                        <span *ngIf="isAccessOpen" class="lo-chip ok">
                             <i class="pi pi-lock-open"></i> Accès ouvert
-                            <span *ngIf="accessStatus?.opened_at" class="text-500 font-normal">
+                            <span *ngIf="accessStatus?.opened_at" class="font-normal">
                                 depuis le {{ accessStatus?.opened_at | date:'dd/MM/yyyy HH:mm' }}
                             </span>
                         </span>
-                        <span *ngIf="!isAccessOpen" class="text-red-500 font-bold">
+                        <span *ngIf="!isAccessOpen" class="lo-chip critical">
                             <i class="pi pi-lock"></i> Accès fermé
-                            <span *ngIf="accessStatus?.closed_at" class="text-500 font-normal">
+                            <span *ngIf="accessStatus?.closed_at" class="font-normal">
                                 depuis le {{ accessStatus?.closed_at | date:'dd/MM/yyyy HH:mm' }}
                                 ({{ accessStatus?.close_reason === 'auto_close_on_export' ? 'fermeture automatique après export' : 'révoqué manuellement' }})
                             </span>
@@ -86,18 +92,19 @@
                 </div>
             </div>
 
-            <div *ngIf="!selectedStationId" class="text-500 mt-3">
-                Sélectionnez une compagnie puis une station pour gérer l'accès à la modification.
+            <div *ngIf="!selectedStationId" class="lo-banner info mt-3">
+                <i class="pi pi-info-circle"></i>
+                <span>Sélectionnez une compagnie puis une station pour gérer l'accès à la modification.</span>
             </div>
         </div>
     </p-tabPanel>
 
     <!-- Audit trail -->
     <p-tabPanel header="Journal d'audit">
-        <div class="card">
+        <div class="lo-card">
             <form [formGroup]="filtersForm" class="grid align-items-end">
-                <div class="col-12 md:col-3">
-                    <label class="block text-sm mb-1">Compagnie</label>
+                <div class="col-12 md:col-3 lo-field">
+                    <label>Compagnie</label>
                     <p-dropdown
                         [options]="companyOptions"
                         formControlName="company_id"
@@ -105,12 +112,12 @@
                         optionValue="value"
                         [showClear]="true"
                         placeholder="Toutes"
-                        styleClass="w-100"
+                        styleClass="w-full"
                         (onChange)="onFilterCompanyChange($event.value)"
                     ></p-dropdown>
                 </div>
-                <div class="col-12 md:col-3">
-                    <label class="block text-sm mb-1">Station service</label>
+                <div class="col-12 md:col-3 lo-field">
+                    <label>Station service</label>
                     <p-dropdown
                         [options]="filterStationOptions"
                         formControlName="station_id"
@@ -118,41 +125,44 @@
                         optionValue="value"
                         [showClear]="true"
                         placeholder="Toutes"
-                        styleClass="w-100"
+                        styleClass="w-full"
                     ></p-dropdown>
                 </div>
-                <div class="col-12 md:col-3">
-                    <label class="block text-sm mb-1">Type d'action</label>
+                <div class="col-12 md:col-3 lo-field">
+                    <label>Type d'action</label>
                     <p-dropdown
                         [options]="eventTypeOptions"
                         formControlName="event_type"
                         optionLabel="label"
                         optionValue="value"
-                        styleClass="w-100"
+                        styleClass="w-full"
                     ></p-dropdown>
                 </div>
-                <div class="col-6 md:col-2">
-                    <label class="block text-sm mb-1">Du</label>
-                    <p-calendar formControlName="date_from" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-100" inputStyleClass="w-full"></p-calendar>
+                <div class="col-6 md:col-2 lo-field">
+                    <label>Du</label>
+                    <p-calendar formControlName="date_from" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full"></p-calendar>
                 </div>
-                <div class="col-6 md:col-2">
-                    <label class="block text-sm mb-1">Au</label>
-                    <p-calendar formControlName="date_to" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-100" inputStyleClass="w-full"></p-calendar>
+                <div class="col-6 md:col-2 lo-field">
+                    <label>Au</label>
+                    <p-calendar formControlName="date_to" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full"></p-calendar>
                 </div>
-                <div class="col-12 md:col-1">
+                <div class="col-12 md:col-1 lo-field">
+                    <label class="lo-field-spacer">&nbsp;</label>
                     <button
                         pButton
                         type="button"
                         label="Filtrer"
                         icon="pi pi-search"
-                        class="p-button-sm w-100"
+                        class="p-button-sm w-full"
                         [loading]="auditLoading"
                         (click)="searchAuditLogs(1)"
                     ></button>
                 </div>
             </form>
+        </div>
 
-            <p-table [value]="auditLogs" [loading]="auditLoading" styleClass="mt-3" responsiveLayout="scroll">
+        <div class="lo-table-card mt-3">
+            <p-table [value]="auditLogs" [loading]="auditLoading" responsiveLayout="scroll">
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Date</th>
@@ -179,7 +189,12 @@
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
                     <tr>
-                        <td colspan="8" class="text-center text-500">Aucune entrée trouvée pour ces filtres.</td>
+                        <td colspan="8">
+                            <div class="lo-state compact">
+                                <i class="pi pi-list"></i>
+                                <p>Aucune entrée trouvée pour ces filtres.</p>
+                            </div>
+                        </td>
                     </tr>
                 </ng-template>
             </p-table>

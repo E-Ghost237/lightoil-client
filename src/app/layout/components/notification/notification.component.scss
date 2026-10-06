@@ -1,0 +1,57 @@
+.notif-card {
+    position: relative;
+    background: var(--lo-surface, #fff);
+    border: 1px solid var(--lo-border, #d7e0f0);
+    border-radius: 14px;
+    padding: 0.85rem 0.95rem;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 4px;
+        background: linear-gradient(180deg, var(--lo-navy-700, #1e55af), var(--lo-navy-800, #0f3d92));
+    }
+
+    &.is-critical::before {
+        background: linear-gradient(180deg, #f87171, #dc2626);
+    }
+}
+
+.notif-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-bottom: 0.3rem;
+}
+
+.notif-tank {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 800;
+    font-size: 0.88rem;
+    color: var(--lo-navy-900, #0b1f45);
+
+    i {
+        color: var(--lo-navy-700, #1e55af);
+        font-size: 0.85rem;
+    }
+}
+
+.notif-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--lo-ink-500, #64748b);
+    margin-bottom: 0.55rem;
+    font-variant-numeric: tabular-nums;
+
+    i {
+        font-size: 0.75rem;
+    }
+}

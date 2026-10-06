@@ -1,26 +1,31 @@
 <p-toast key="tst"></p-toast>
 
 <div class="detail-page" *ngIf="!loading; else loadingTpl">
-  <div class="hero card">
+  <div class="lo-page-header">
     <div>
-      <p-tag [value]="company?.status || 'unknown'" [severity]="company?.status === 'enabled' ? 'success' : 'danger'"></p-tag>
-      <h1>{{ company?.name || 'Entreprise' }}</h1>
-      <p>{{ company?.email || 'Email non renseigne' }} · {{ company?.phone || 'Telephone non renseigne' }}</p>
+      <span class="lo-eyebrow">Espace administrateur · Entreprises</span>
+      <h1 class="lo-page-title">{{ company?.name || 'Entreprise' }}</h1>
+      <p class="lo-page-subtitle">{{ company?.email || 'Email non renseigné' }} · {{ company?.phone || 'Téléphone non renseigné' }}</p>
     </div>
+    <div class="lo-page-actions">
+      <p-tag [value]="company?.status || 'unknown'" [severity]="company?.status === 'enabled' ? 'success' : 'danger'"></p-tag>
+    </div>
+  </div>
+  <div class="lo-card detail-actions-card">
     <div class="actions">
       <p-button label="Modifier l’entreprise" [text]="true" (onClick)="showEditCompany = !showEditCompany"></p-button>
       <p-button label="Ajouter une station" [text]="true" severity="secondary" (onClick)="showAddStation = !showAddStation"></p-button>
-      <p-button [label]="company?.status === 'enabled' ? 'Suspendre' : 'Reactiver'" severity="warning" (onClick)="toggleCompanyStatus()"></p-button>
+      <p-button [label]="company?.status === 'enabled' ? 'Suspendre' : 'Réactiver'" severity="warning" (onClick)="toggleCompanyStatus()"></p-button>
       <p-button label="Rappel paiement" severity="help" (onClick)="sendPaymentReminder()"></p-button>
     </div>
   </div>
 
   <div class="grid-two">
-    <div class="card section-card" *ngIf="showEditCompany">
-      <h2>Edit company</h2>
+    <div class="lo-card section-card" *ngIf="showEditCompany">
+      <h3 class="lo-card-title">Modifier l’entreprise</h3>
       <form [formGroup]="companyForm" class="form-grid">
         <p class="required-hint field-span-2">
-          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
+          Les champs marqués <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
         </p>
         <div class="field">
           <label>Nom <span class="required-indicator">*</span></label>
@@ -40,7 +45,7 @@
           </small>
         </div>
         <div class="field">
-          <label>Telephone</label>
+          <label>Téléphone</label>
           <input pInputText formControlName="phone" />
         </div>
         <div class="field">
@@ -63,11 +68,11 @@
           <input pInputText formControlName="logo" />
         </div>
         <div class="field">
-          <label>Date de debut</label>
+          <label>Date de début</label>
           <input pInputText type="date" formControlName="start_date" />
         </div>
         <div class="field">
-          <label>Date de fin prevue</label>
+          <label>Date de fin prévue</label>
           <input pInputText type="date" formControlName="expected_end_date" />
         </div>
       </form>
@@ -76,12 +81,12 @@
       </div>
     </div>
 
-    <div class="card section-card" *ngIf="showAddStation">
-      <h2>Add station</h2>
-      <p class="muted">Le company_id de la station est deja fixe sur cette entreprise.</p>
+    <div class="lo-card section-card" *ngIf="showAddStation">
+      <h3 class="lo-card-title">Ajouter une station</h3>
+      <p class="muted">Le company_id de la station est déjà fixé sur cette entreprise.</p>
       <form [formGroup]="stationForm" class="form-grid">
         <p class="required-hint field-span-2">
-          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour creer la station.
+          Les champs marqués <span class="required-indicator">*</span> sont obligatoires pour créer la station.
         </p>
         <div class="field">
           <label>Nom <span class="required-indicator">*</span></label>
@@ -106,10 +111,10 @@
           <textarea pInputTextarea rows="3" formControlName="description"></textarea>
         </div>
         <div class="field">
-          <label>Region <span class="required-indicator">*</span></label>
+          <label>Région <span class="required-indicator">*</span></label>
           <p-dropdown [options]="regions" optionLabel="name" optionValue="id" formControlName="region_id"></p-dropdown>
           <small class="field-error" *ngIf="showControlError(stationForm.get('region_id'))">
-            La region est obligatoire.
+            La région est obligatoire.
           </small>
         </div>
         <div class="field">
@@ -149,20 +154,20 @@
         </div>
       </form>
       <div class="footer-actions">
-        <p-button label="Creer la station" [loading]="submitting" (onClick)="createStation()"></p-button>
+        <p-button label="Créer la station" [loading]="submitting" (onClick)="createStation()"></p-button>
       </div>
     </div>
   </div>
 
-  <div class="card section-card">
+  <div class="lo-card section-card">
     <div class="section-head">
       <div>
-        <h2>Stations</h2>
-        <p class="muted">Ajoutez une station ou ouvrez sa page de details pour les produits, cuves et jauges.</p>
+        <h3 class="lo-card-title">Stations</h3>
+        <p class="muted">Ajoutez une station ou ouvrez sa page de détails pour les produits, cuves et jauges.</p>
       </div>
     </div>
 
-    <p-table [value]="stations" [scrollable]="true" scrollHeight="420px" styleClass="p-datatable-striped">
+    <div class="lo-table-card"><p-table [value]="stations" [scrollable]="true" scrollHeight="420px" styleClass="p-datatable-striped">
       <ng-template pTemplate="header">
         <tr>
           <th>Station</th>
@@ -190,14 +195,13 @@
         </tr>
       </ng-template>
     </p-table>
+    </div>
   </div>
 </div>
 
 <ng-template #loadingTpl>
-  <div class="loading-card card">
-    <div class="lightgroup-loader">
-      <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
-      <p class="lightgroup-loader__text">Chargement des donnees de l’entreprise...</p>
-    </div>
+  <div class="lo-state">
+    <img src="assets/img/logos/loading-oil-logo.gif" width="110" alt="Chargement..." />
+    <p>Chargement des données de l’entreprise…</p>
   </div>
 </ng-template>

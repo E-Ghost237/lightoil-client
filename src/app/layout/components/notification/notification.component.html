@@ -1,97 +1,49 @@
+<div class="notif-card"
+    [ngClass]="{'is-critical': getNotificationCode() == 'niv-cri' || getNotificationCode() == 'jo-co-re' || getNotificationCode() == 'de-de' || getNotificationCode() == 'de-en-co' || getNotificationCode() == 'fi-de'}">
+    <div class="notif-card-head">
+        <span class="notif-tank">
+            <i class="pi pi-database"></i>
+            {{'Cuve ' + (notiData?.sensor_reference || notiData?.tank?.sensor_reference || '--')}}
+        </span>
+        <p-badge value="{{(index + 1) ?? '--'}}" size="small" severity="info"></p-badge>
+    </div>
 
+    <div class="notif-time">
+        <i class="pi pi-clock"></i>
+        {{getDateTimeToLocale(getEventTime())}}
+    </div>
 
-
-<div class="text-bg-secondary m-2 border-round flex flex-column justify-content-center">
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-center">
-            {{'Cuve '+(notiData?.sensor_reference || notiData?.tank?.sensor_reference || '--')}}
+    <div class="lo-spec">
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Type de notification</span>
+            <span class="lo-spec-value">{{getNotificationTypeWording()}}</span>
         </div>
-        <div class="col p-0 text-center">
-            <span>
-                <p-badge value="{{(index+1)??'--'}}"
-                        size="small" severity="info"
-                        >
-                </p-badge>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Niveau</span>
+            <span class="lo-spec-value" [ngClass]="{'is-critical': getNotificationCode() == 'niv-cri'}">
+                {{'' + getRoundedValue(notiData?.liquid_height) + ' cm'}}
             </span>
         </div>
-        <div class="col p-0 text-center">
-            {{getDateTimeToLocale(getEventTime())}}
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Volume</span>
+            <span class="lo-spec-value">{{'' + getRoundedValue(notiData?.volume) + ' L'}}</span>
+        </div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Jours restants</span>
+            <span class="lo-spec-value" [ngClass]="{'is-critical': getNotificationCode() == 'jo-co-re'}">
+                {{getRoundedValue(notiData?.remaining_day)}}
+            </span>
+        </div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Température</span>
+            <span class="lo-spec-value">{{'' + getRoundedValue(notiData?.liquid_temperature) + ' °C'}}</span>
+        </div>
+        <div class="lo-spec-row">
+            <span class="lo-spec-label">Occupation</span>
+            <span class="lo-spec-value"
+                [ngClass]="{'is-critical': getNotificationCode() == 'de-de' || getNotificationCode() == 'de-en-co' || getNotificationCode() == 'fi-de'}">
+                {{'' + getRoundedValue(notiData?.percent) + ' %'}}
+            </span>
         </div>
     </div>
-
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-left">
-            {{'Type de notification : '}}
-        </div>
-        <div class="col p-0 text-right">
-            {{getNotificationTypeWording()}}
-        </div>
-    </div>
-
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-left">
-            {{'Niveau : '}}
-        </div>
-        <div *ngIf="getNotificationCode() == 'niv-cri'">
-            <div class="col p-0 text-right text-red-500">
-                {{''+getRoundedValue(notiData?.liquid_height)+' cm'}}
-            </div>
-        </div>
-        <div *ngIf="getNotificationCode() != 'niv-cri'">
-            <div class="col p-0 text-right">
-                {{''+getRoundedValue(notiData?.liquid_height)+' cm'}}
-            </div>
-        </div>
-    </div>
-
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-left">
-            {{'Volume : '}}
-        </div>
-        <div class="col p-0 text-right">
-            {{''+getRoundedValue(notiData?.volume)+' litres'}}
-        </div>
-    </div>
-
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-left">
-            {{'Nombre de jours restants : '}}
-        </div>
-        <div *ngIf="getNotificationCode() == 'jo-co-re'">
-            <div class="col p-0 text-right text-red-500">
-                {{getRoundedValue(notiData.remaining_day)}}
-            </div>
-        </div>
-        <div *ngIf="getNotificationCode() != 'jo-co-re'">
-            <div class="col p-0 text-right">
-                {{getRoundedValue(notiData.remaining_day)}}
-            </div>
-        </div>
-    </div>
-
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-left">
-            {{'Temperature : '}}
-        </div>
-        <div class="col p-0 text-right">
-            {{''+getRoundedValue(notiData?.liquid_temperature)+' degres celsius'}}
-        </div>
-    </div>
-
-    <div class="d-flex flex-row justify-content-between p-0 mx-2 ">
-        <div class="col p-0 text-left">
-            {{"Pourcentage d'occupation : "}}
-        </div>
-        <div *ngIf="getNotificationCode() == 'de-de' || getNotificationCode() == 'de-en-co' || getNotificationCode() == 'fi-de'">
-            <div class="col p-0 text-right text-red-500">
-                {{''+getRoundedValue(notiData.percent)+' %'}}
-            </div>
-        </div>
-        <div *ngIf="getNotificationCode() != 'de-de' && getNotificationCode() != 'de-en-co' && getNotificationCode() != 'fi-de'">
-            <div class="col p-0 text-right">
-                {{''+getRoundedValue(notiData.percent)+' %'}}
-            </div>
-        </div>
-    </div>
-
 </div>

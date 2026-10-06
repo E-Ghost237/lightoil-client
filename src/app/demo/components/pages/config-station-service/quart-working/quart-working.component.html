@@ -1,20 +1,21 @@
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Configuration des quarts de travail</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/product/icon.jpg" alt="icon">
-    </div>
-</div>
 
-<div class="card m-1">
-    <div class="row">
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Configuration · Station service</span>
+                <h1 class="lo-page-title">Quarts de travail</h1>
+                <p class="lo-page-subtitle">Plages horaires utilisées pour segmenter les sorties et les index</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="lo-table-card">
         <app-custom-table-quart [stationId]="user_details?.service_station_id">
         </app-custom-table-quart>
     </div>

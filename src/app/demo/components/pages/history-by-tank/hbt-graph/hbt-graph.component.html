@@ -1,77 +1,70 @@
-
-
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Graphe des donnees par cuve</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/70-2-xl-rbg.png" alt="icon">
-    </div>
-</div>
 
-
-<div class="card mt-3 p-2" >
-    <div class="row justify-content-evenly text-white">
-        <div class="col">
-            <span class="p-float-label">
-                <p-calendar
-                    [(ngModel)]="rangeDates"
-                    selectionMode="range"
-                    dateFormat="dd/mm/yy"
-                    [readonlyInput]="true"
-                    [showIcon]="true"
-                    (onSelect)="onDateSelect($event)"
-                    [maxDate]="maxDate"
-                    >
-                </p-calendar>
-                <label for="float-label text-white">Selectionnez la periode</label>
-            </span>
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Historiques par cuve</span>
+                <h1 class="lo-page-title">Graphe d'évolution</h1>
+                <p class="lo-page-subtitle">Évolution des niveaux et volumes sur la période sélectionnée</p>
+            </div>
         </div>
-        <div class="col">
-            <span class="p-float-label">
-                <p-dropdown
-                    [options]="listTanks"
-                    [(ngModel)]="selectedTank"
-                    [showClear]="true"
-                    placeholder="Selectionnez la cuve"
-                    optionLabel="sensor_reference" inputId="float-label"
-                    (onChange)="onDropDownChange($event)"
-                    [styleClass]="'w-100'"
-                >
+    </div>
+
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="hbt-graph-period">Période</label>
+            <p-calendar
+                inputId="hbt-graph-period"
+                [(ngModel)]="rangeDates"
+                selectionMode="range"
+                dateFormat="dd/mm/yy"
+                [readonlyInput]="true"
+                [showIcon]="true"
+                (onSelect)="onDateSelect($event)"
+                [maxDate]="maxDate">
+            </p-calendar>
+        </div>
+
+        <div class="lo-field">
+            <label for="hbt-graph-select">Cuve</label>
+            <p-dropdown
+                inputId="hbt-graph-select"
+                [options]="listTanks"
+                [(ngModel)]="selectedTank"
+                [showClear]="true"
+                placeholder="Sélectionnez la cuve"
+                optionLabel="sensor_reference"
+                (onChange)="onDropDownChange($event)"
+                styleClass="w-full">
                 <ng-template pTemplate="selectedItem">
-    
-                    <div>{{ selectedTank ? selectedTank?.sensor_reference+'-'+selectedTank?.product_service_station?.product?.name : '' }}</div>
-    
+                    <div>{{ selectedTank ? selectedTank?.sensor_reference + '-' + selectedTank?.product_service_station?.product?.name : '' }}</div>
                 </ng-template>
                 <ng-template let-tank pTemplate="item">
-    
-                    <div>{{ tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name }}</div>
-    
+                    <div>{{ tank?.sensor_reference + '-' + tank?.product_service_station?.product?.name }}</div>
                 </ng-template>
-                </p-dropdown>
-                <label for="float-label">Selectionnez la cuve</label>
-            </span>
+            </p-dropdown>
         </div>
-        <div class="col-2 border-round">
-            <!-- <button class="">
-                <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(118, 237, 82);"></i>
-            </button> -->
-            <button class=""
-                pTooltip="exporter le graphe" 
+
+        <div class="lo-field lo-field--fixed">
+            <label aria-hidden="true">&nbsp;</label>
+            <button type="button" class="lo-icon-action"
+                pTooltip="Exporter le graphe"
+                tooltipPosition="bottom"
                 (click)="generateTankGraphPdf()">
-                <i class=" pi pi-image" style="font-size: 2.5rem; color: rgb(0, 255, 17);"></i>
+                <i class="pi pi-image" style="color: #059669;"></i>
             </button>
         </div>
     </div>
-</div>
 
-<app-custom-hbt-graph></app-custom-hbt-graph>
+    <div class="lo-card">
+        <app-custom-hbt-graph></app-custom-hbt-graph>
+    </div>
+</div>
 
 <!-- Chatbot -->
 <app-chatbot></app-chatbot>

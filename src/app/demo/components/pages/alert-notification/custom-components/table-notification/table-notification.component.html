@@ -1,5 +1,5 @@
 <div class="row ">
-    <span class="text-center h4">
+    <span class="lo-card-title" >
         Historiques des notifications du {{stationProduct?.product?.name}}
     </span>
 </div>
@@ -11,7 +11,7 @@
         scrollHeight="30rem"
         [globalFilterFields]="['updated_at', 'tank.sensor_reference', 'type_notification.wording', 'percent', 'volume', 'remaining_day']"
         [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        currentPageReportTemplate="{first} à {last} sur {totalRecords} entrées"
         [rowsPerPageOptions]="[50, 100, 200]"
         [paginator]="true" [rows]="50"
         >

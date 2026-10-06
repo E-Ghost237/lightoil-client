@@ -1,23 +1,23 @@
-<div class="tank-list-page">
+<div class="lo-page tank-list-page">
     <ng-container *ngIf="dashboardData?.length > 0; else elseTemplate">
         <p-toast></p-toast>
-        <div class="tank-list-header row justify-content-between align-items-center">
-            <div class="col h5 mb-0">
-                Cliquez sur une cuve pour plus de details
+
+        <div class="lo-page-header">
+            <div>
+                <span class="lo-eyebrow">Monitoring temps réel</span>
+                <h1 class="lo-page-title">Tableau de bord des cuves</h1>
+                <p class="lo-page-subtitle">Cliquez sur une cuve pour le détail · {{d}}</p>
             </div>
-            <div class="col text-center tank-list-date">
-                {{d}}
-            </div>
-            <div class="col text-right">
-                <span class="mr-3">Total de cuves:</span>
-                <p-badge [value]="getBigTotalOfTank()" size="large" severity="info"></p-badge>
+            <div class="lo-page-actions">
+                <span class="lo-chip navy">
+                    <i class="pi pi-database"></i>
+                    {{getBigTotalOfTank()}} cuve(s)
+                </span>
             </div>
         </div>
 
-        <div>
-            <app-tank-list-by-type *ngFor="let dashboardDataType of exempleDashBoardData" [listTank]="dashboardDataType">
-            </app-tank-list-by-type>
-        </div>
+        <app-tank-list-by-type *ngFor="let dashboardDataType of exempleDashBoardData" [listTank]="dashboardDataType">
+        </app-tank-list-by-type>
 
         <app-chatbot></app-chatbot>
     </ng-container>

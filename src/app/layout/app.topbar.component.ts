@@ -54,6 +54,11 @@ export class AppTopBarComponent {
         ) { }
 
 
+    /** Badge count for the notification bell. Undefined hides the badge. */
+    get notifBadge(): string | undefined {
+        return this.listNoti?.length > 0 ? String(this.listNoti.length) : undefined;
+    }
+
     showTestText(){
         ("reussi");
     }

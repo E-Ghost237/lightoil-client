@@ -1,22 +1,55 @@
 :host {
-  display: block;
+    display: block;
 }
 
-.anim-fade {
-  animation: none;
-  border: 1px solid #d8e3f2;
-  border-radius: 12px;
-  background: #fff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+.tank-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr));
 }
 
-.anim-fade:hover {
-  cursor: pointer;
-  transform: translateY(-2px);
-  border-color: #b7cbeb;
-  box-shadow: 0 16px 34px -26px rgba(2, 6, 23, 0.62);
+.tank-card {
+    background: var(--lo-surface, #fff);
+    border: 1px solid var(--lo-border, #d7e0f0);
+    border-radius: 18px;
+    box-shadow: var(--lo-shadow-md, 0 20px 42px -30px rgba(2, 6, 23, 0.55));
+    padding: 1rem 1.1rem 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    min-width: 0;
+
+    &:hover {
+        transform: translateY(-3px);
+        border-color: #b7cbeb;
+        box-shadow: 0 26px 44px -28px rgba(2, 6, 23, 0.6);
+    }
+
+    &:hover .tank-card-cta {
+        color: var(--lo-navy-800, #0f3d92);
+
+        i {
+            transform: translateX(3px);
+        }
+    }
 }
 
-:host ::ng-deep app-custom-divider {
-  margin-bottom: 0.55rem;
+.tank-card-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed var(--lo-border, #d7e0f0);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--lo-ink-400, #94a3b8);
+    transition: color 0.2s ease;
+
+    i {
+        font-size: 0.75rem;
+        transition: transform 0.2s ease;
+    }
 }

@@ -23,6 +23,7 @@ import { ButtonModule } from 'primeng/button';
 import { PasswordModule } from 'primeng/password';
 import { AvatarModule } from 'primeng/avatar';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ChatbotModule } from "../../../chatbot/chatbot.module";
 
@@ -56,6 +57,7 @@ import { ChatbotModule } from "../../../chatbot/chatbot.module";
     AvatarModule,
     FormsModule,
     MultiSelectModule,
+    ProgressSpinnerModule,
     ReactiveFormsModule,
     ChatbotModule
 ]

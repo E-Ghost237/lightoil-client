@@ -1,16 +1,16 @@
 <p-toast key="tst"></p-toast>
 
 <div class="subscriptions-page">
-  <div class="card hero-card">
+  <div class="lo-page-header">
     <div>
-      <h1><strong>Abonnements Stations</strong></h1>
-      <p>
+      <span class="lo-eyebrow">Espace administrateur</span>
+      <h1 class="lo-page-title">Abonnements stations</h1>
+      <p class="lo-page-subtitle">
         Configuration des nouvelles souscriptions, suivi des cycles et actions critiques
         (paiement, relances, automatisation) au niveau station.
       </p>
     </div>
-
-    <div class="hero-actions">
+    <div class="lo-page-actions">
       <p-button
         label="Lancer l'automatisation"
         icon="pi pi-play"
@@ -23,7 +23,7 @@
   </div>
 
   <div class="new-subscription-grid">
-    <div class="card setup-card">
+    <div class="lo-card setup-card">
       <div class="section-head">
         <h2>Nouvelles Souscriptions</h2>
         <small>Configurez et démarrez la souscription d’une station.</small>
@@ -168,7 +168,7 @@
       </div>
     </div>
 
-    <div class="card new-stations-card">
+    <div class="lo-card new-stations-card">
       <div class="section-head">
         <h3>Stations sans cycle visible</h3>
         <small>Pré-sélection utile pour nouvelles souscriptions</small>
@@ -187,7 +187,7 @@
     </div>
   </div>
 
-  <div class="card monitor-filters">
+  <div class="lo-card monitor-filters">
     <div class="section-head">
       <h2>Suivi des cycles</h2>
       <small>Filtres entreprise / station / statut / plage d'échéance</small>
@@ -276,18 +276,19 @@
   </div>
 
   <div class="monitor-grid">
-    <div class="card cycles-card">
+    <div class="lo-card cycles-card">
       <div class="section-head">
         <h3>Cycles</h3>
         <small>{{ cycleRows.length }} ligne(s)</small>
       </div>
 
-      <div class="lightgroup-loader" *ngIf="loadingCycles">
-        <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+      <div class="lo-state compact" *ngIf="loadingCycles">
+        <img src="assets/img/logos/loading-oil-logo.gif" width="90" alt="Chargement..." />
+        <p>Chargement des cycles…</p>
       </div>
 
-      <div class="table-wrap" *ngIf="!loadingCycles">
-        <table class="cycles-table">
+      <div class="lo-table-scroll" *ngIf="!loadingCycles">
+        <table class="lo-admin-table cycles-table">
           <thead>
             <tr>
               <th>Entreprise</th>
@@ -325,14 +326,15 @@
       </div>
     </div>
 
-    <div class="card detail-card">
+    <div class="lo-card detail-card">
       <div class="section-head">
         <h3>Détail Souscription Station</h3>
         <small>Cycle ouvert + journal des rappels</small>
       </div>
 
-      <div class="lightgroup-loader" *ngIf="loadingDetail">
-        <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
+      <div class="lo-state compact" *ngIf="loadingDetail">
+        <img src="assets/img/logos/loading-oil-logo.gif" width="90" alt="Chargement..." />
+        <p>Chargement du détail…</p>
       </div>
 
       <div *ngIf="!loadingDetail && stationNotConfigured" class="empty-hint">
@@ -340,22 +342,22 @@
       </div>
 
       <div *ngIf="!loadingDetail && !stationNotConfigured && selectedSubscription as subscription" class="detail-content">
-        <div class="summary-grid">
-          <div class="summary-item">
-            <span>Entreprise</span>
-            <strong>{{ subscription.companyName }}</strong>
+        <div class="lo-spec">
+          <div class="lo-spec-row">
+            <span class="lo-spec-label">Entreprise</span>
+            <span class="lo-spec-value">{{ subscription.companyName }}</span>
           </div>
-          <div class="summary-item">
-            <span>Station</span>
-            <strong>{{ subscription.stationName }}</strong>
+          <div class="lo-spec-row">
+            <span class="lo-spec-label">Station</span>
+            <span class="lo-spec-value">{{ subscription.stationName }}</span>
           </div>
-          <div class="summary-item">
-            <span>Mode tarifaire</span>
-            <strong>{{ resolvePricingModeLabel(subscription.pricingMode) }}</strong>
+          <div class="lo-spec-row">
+            <span class="lo-spec-label">Mode tarifaire</span>
+            <span class="lo-spec-value">{{ resolvePricingModeLabel(subscription.pricingMode) }}</span>
           </div>
-          <div class="summary-item">
-            <span>Kits</span>
-            <strong>{{ subscription.kitQuantity }}</strong>
+          <div class="lo-spec-row">
+            <span class="lo-spec-label">Kits</span>
+            <span class="lo-spec-value">{{ subscription.kitQuantity }}</span>
           </div>
         </div>
 
@@ -419,7 +421,7 @@
         </div>
 
         <div class="logs-block" *ngIf="selectedCycle?.reminderLogs?.length">
-          <h4>Journal d'envoi des rappels</h4>
+          <h4>Journal d’envoi des rappels</h4>
           <div class="log-row" *ngFor="let log of selectedCycle?.reminderLogs">
             <div class="log-main">
               <strong>{{ log.reminderType }}</strong>
@@ -440,7 +442,7 @@
         </div>
 
         <div class="logs-block" *ngIf="!selectedCycle?.reminderLogs?.length">
-          <h4>Journal d'envoi des rappels</h4>
+          <h4>Journal d’envoi des rappels</h4>
           <p>Aucun log de relance pour ce cycle.</p>
         </div>
       </div>

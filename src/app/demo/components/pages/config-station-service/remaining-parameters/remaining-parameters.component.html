@@ -1,84 +1,57 @@
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Configuration des quarts de travail</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/product/icon.jpg" alt="icon">
-    </div>
-</div>
 
-<div class="card my-8">
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around"
-        pTooltip="Duree de livraison du produit apres commande chez le fournisseur">
-        <div class="col text-center">
-            Delai D'approvisionnement
-        </div>
-        <div class="col text-center">
-            <div class="row" *ngIf="!editScdpDelayBool">
-                <div class="col">
-                    {{remainingParameters?.scdp_delay_day ?? '--'}} jours
-                </div>
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Configuration · Station service</span>
+                <h1 class="lo-page-title">Approvisionnement et seuils</h1>
+                <p class="lo-page-subtitle">Paramètres de réassort et d'alerte de niveau</p>
             </div>
-            <div class="row" *ngIf="editScdpDelayBool">
-                <div class="flex flex-row justify-content-evenly align-items-center ">
-                    <span class="p-float-label">
-                        <p-inputNumber [(ngModel)]="remainingParameters.scdp_delay_day"
-                            [showButtons]="true" 
-                            inputId="minmax-buttons" 
-                            [min]="1" [max]="1000"
-                            suffix=" jours"> 
-                        </p-inputNumber>
-                        <label for="number-input">Delai d'approvisionnement</label>
-                    </span>
-                    <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-success mr-2" (click)="saveScdpDelay()"></button>
-                </div>
-            </div>
-        </div>
-        <div class="col text-center" *ngIf="!editScdpDelayBool">
-            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info mr-2" (click)="editScdpDelay()"></button>
         </div>
     </div>
 
-    <div class="row bg-light border-bottom-2 mb-2 justify-content-around"
-        pTooltip="Pourcentage d'occupation de la cuve declenchant une alerte de niveau de produit">
-        <div class="col text-center">
-            Limite critique
-        </div>
-        <div class="col text-center">
-            <div class="row" *ngIf="!editCriticLimitBool">
-                <div class="col">
-                    {{remainingParameters?.critic_limit ?? '--'}} %
-                </div>
+    <div class="lo-card">
+        <div class="lo-spec">
+            <div class="lo-spec-row" pTooltip="Durée de livraison du produit après commande chez le fournisseur" tooltipPosition="bottom">
+                <span class="lo-spec-label">Délai d'approvisionnement</span>
+                <span class="lo-spec-value" *ngIf="!editScdpDelayBool">{{remainingParameters?.scdp_delay_day ?? '--'}} jours</span>
+                <span class="flex align-items-center gap-2" *ngIf="editScdpDelayBool">
+                    <p-inputNumber [(ngModel)]="remainingParameters.scdp_delay_day"
+                        [showButtons]="true"
+                        inputId="scdp-delay"
+                        [min]="1" [max]="1000"
+                        suffix=" jours">
+                    </p-inputNumber>
+                    <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-success" (click)="saveScdpDelay()"
+                        pTooltip="Enregistrer" tooltipPosition="bottom"></button>
+                </span>
+                <button *ngIf="!editScdpDelayBool" pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-text"
+                    (click)="editScdpDelay()" pTooltip="Modifier" tooltipPosition="bottom"></button>
             </div>
-            <div class="row" *ngIf="editCriticLimitBool">
-                <div class="flex flex-row justify-content-evenly align-items-center ">
-                    <span class="p-float-label">
-                        <p-inputNumber [(ngModel)]="remainingParameters.critic_limit"
-                            [showButtons]="true" 
-                            inputId="minmax-buttons" 
-                            [min]="1" [max]="100"
-                            suffix=" %"> 
-                        </p-inputNumber>
-                        <label for="number-input">Limite critique</label>
-                    </span>
-                    <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-success mr-2" (click)="saveCriticLimit()"></button>
-                </div>
-            </div>
-        </div>
-        <div class="col text-center" *ngIf="!editCriticLimitBool">
-            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-infor mr-2" (click)="editCriticLimit()"></button>
-        </div>
-    </div>
 
-    <div class="row justify-content-center">
-        <div class="col text-center">
-            modifié le : {{getToLocalDateTime(remainingParameters?.updated_at)}}
+            <div class="lo-spec-row" pTooltip="Pourcentage d'occupation de la cuve déclenchant une alerte de niveau de produit" tooltipPosition="bottom">
+                <span class="lo-spec-label">Limite critique</span>
+                <span class="lo-spec-value" *ngIf="!editCriticLimitBool">{{remainingParameters?.critic_limit ?? '--'}} %</span>
+                <span class="flex align-items-center gap-2" *ngIf="editCriticLimitBool">
+                    <p-inputNumber [(ngModel)]="remainingParameters.critic_limit"
+                        [showButtons]="true"
+                        inputId="critic-limit"
+                        [min]="1" [max]="100"
+                        suffix=" %">
+                    </p-inputNumber>
+                    <button pButton pRipple icon="pi pi-check" class="p-button-rounded p-button-success" (click)="saveCriticLimit()"
+                        pTooltip="Enregistrer" tooltipPosition="bottom"></button>
+                </span>
+                <button *ngIf="!editCriticLimitBool" pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-info p-button-text"
+                    (click)="editCriticLimit()" pTooltip="Modifier" tooltipPosition="bottom"></button>
+            </div>
         </div>
+
+        <p class="lo-muted text-sm mt-3 mb-0">Modifié le : {{getToLocalDateTime(remainingParameters?.updated_at)}}</p>
     </div>
 </div>

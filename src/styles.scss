@@ -467,3 +467,6 @@ img {
         font-size: .8rem;
     }
 }
+
+/* LightOil design system — tokens + shared patterns (imported last so it wins) */
+@import "assets/layout/styles/layout/lightoil";

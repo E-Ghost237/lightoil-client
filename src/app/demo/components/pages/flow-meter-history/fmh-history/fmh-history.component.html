@@ -1,92 +1,76 @@
-
-
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Historique des donnees du débitmètre</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/debimetreXl-removebg.png" alt="icon">
-    </div>
-</div>
 
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Historiques des débitmètres</span>
+                <h1 class="lo-page-title">Débitmètres</h1>
+                <p class="lo-page-subtitle">Relevés du débitmètre sur la période sélectionnée</p>
+            </div>
+        </div>
+    </div>
 
-<div class="card flex  flex-row justify-content-evenly mt-3 text-white " >
-    <div class="">
-        <span class="p-float-label">
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="fmh-hist-period">Période</label>
             <p-calendar
+                inputId="fmh-hist-period"
                 [(ngModel)]="rangeDates"
                 selectionMode="range"
                 dateFormat="dd/mm/yy"
                 [readonlyInput]="true"
                 [showIcon]="true"
                 (onSelect)="onDateSelect($event)"
-                [maxDate]="maxDate"
-                >
+                [maxDate]="maxDate">
             </p-calendar>
-            <label for="float-label text-white">Selectionnez la periode</label>
-        </span>
+        </div>
 
-    </div>
-
-    <div class="">
-        <span class="p-float-label">
+        <div class="lo-field">
+            <label for="fmh-hist-select">Débitmètre</label>
             <p-dropdown
+                inputId="fmh-hist-select"
                 [options]="listFlowMeters"
                 [(ngModel)]="selectedFlowMeter"
                 [showClear]="true"
-                placeholder="Selectionnez le débitmètre"
-                optionLabel="sensor_reference" inputId="float-label"
+                placeholder="Sélectionnez le débitmètre"
+                optionLabel="sensor_reference"
                 (onChange)="onDropDownChange($event)"
-                [styleClass]="'w-100'"
-            >
-            <ng-template pTemplate="selectedItem">
-
-                <div>{{ selectedFlowMeter ? selectedFlowMeter?.sensor_reference+'-'+selectedFlowMeter?.product_service_station?.product?.name : '' }}</div>
-
-            </ng-template>
-            <ng-template let-flowMeter pTemplate="item">
-
-                <div>{{ flowMeter?.sensor_reference+'-'+flowMeter?.product_service_station?.product?.name }}</div>
-
-            </ng-template>
+                styleClass="w-full">
+                <ng-template pTemplate="selectedItem">
+                    <div>{{ selectedFlowMeter ? selectedFlowMeter?.sensor_reference + '-' + selectedFlowMeter?.product_service_station?.product?.name : '' }}</div>
+                </ng-template>
+                <ng-template let-flowMeter pTemplate="item">
+                    <div>{{ flowMeter?.sensor_reference + '-' + flowMeter?.product_service_station?.product?.name }}</div>
+                </ng-template>
             </p-dropdown>
-            <label for="float-label">Selectionnez le débitmètre</label>
-        </span>
+        </div>
+
+        <div class="lo-field lo-field--fixed">
+            <label aria-hidden="true">&nbsp;</label>
+            <button type="button" class="lo-icon-action"
+                pTooltip="Exporter les données au format PDF"
+                tooltipPosition="bottom"
+                (click)="generateFlowMeterDataPdf()">
+                <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+            </button>
+        </div>
     </div>
 
-    <div class="border-round">
-        <button class=""
-            pTooltip="exporter les données au format pdf" 
-            (click)="generateFlowMeterDataPdf()"
-            >
-            <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
-        </button>
+    <div *ngIf="listRecords && listRecords?.length > 0">
+        <app-flow-meter-table [listRecord]="listRecords" [flowMeter]="selectedFlowMeter" [period]="period">
+        </app-flow-meter-table>
     </div>
 
-</div>
-
-<div class="row" *ngIf="listRecords && listRecords?.length > 0">
-    <app-flow-meter-table [listRecord] = "listRecords" [flowMeter] = "selectedFlowMeter" [period]="period">
-    </app-flow-meter-table>
-</div>
-<div class="row justify-content-center" *ngIf="listRecords && listRecords?.length <= 0">
-    <div class="col text-center">
-        Aucune données disponible dans la période
+    <div class="lo-card" *ngIf="listRecords && listRecords?.length <= 0">
+        <div class="lo-state">
+            <div class="lo-state-icon"><i class="pi pi-database"></i></div>
+            <h4>Aucune donnée</h4>
+            <p>Aucune donnée disponible dans la période sélectionnée.</p>
+        </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-

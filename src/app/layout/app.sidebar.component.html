@@ -1,8 +1,10 @@
-<div class="sidebar-profile-card">
-    <span class="sidebar-user-name">{{user?.first_name + ' ' + user?.last_name}}</span>
-    <span>{{user?.email}}</span>
-    <span>{{user?.phone}}</span>
-    <span>{{role[0]?.name}}</span>
+<div class="sidebar-user">
+    <span class="sidebar-avatar">{{ ((user?.first_name || ' ') | slice:0:1) + ((user?.last_name || ' ') | slice:0:1) }}</span>
+    <span class="sidebar-user-meta">
+        <span class="sidebar-user-name">{{user?.first_name + ' ' + user?.last_name}}</span>
+        <span class="sidebar-user-role">{{role?.name || role?.[0]?.name}}</span>
+        <span class="sidebar-user-email lo-truncate">{{user?.email}}</span>
+    </span>
 </div>
 <div class="row">
     <app-menu></app-menu>

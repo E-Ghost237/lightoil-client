@@ -3,21 +3,25 @@
 
 <div class="sales-perf-page">
     <!-- Header bloc -->
-    <div class="card pb-0 mb-4 perf-header-card">
-        <div class="card-body grid align-content-center justify-content-between pt-0 xl:pt-3 lg:pt-3">
-            <div
-                class="col-12 xl:col-7 lg:col-7 md:col-7 text-center xl:text-left align-content-center text-xl text-uppercase xl:mt-3 lg:mt-3 md:mt-3">
-                <h1 class="font-bold perf-title">Performances de ventes</h1>
-                <p class="perf-subtitle">Indicateurs de performance et tendances multi-periodes du reseau.</p>
-            </div>
-            <div class="col-12 xl:col-5 lg:col-5 md:col-5 align-content-center xl:pt-0 lg:pt-0">
-                <label for="sale-point-types" class="block font-bold text-lg perf-label">Reseau</label>
-                <p-dropdown (onChange)="onPointOfSaleTypeChange($event)"
-                    styleClass="w-full xl:w-auto lg:w-auto md:w-auto font-bold text-uppercase perf-control" inputId="sale-point-types"
-                    [options]="point_of_sale_types" [(ngModel)]="selected_point_of_sale_type" optionLabel="name"
-                    [appendTo]="'body'"
-                    [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un reseau" />
-            </div>
+    <div class="lo-page-header">
+        <div>
+            <span class="lo-eyebrow">Espace administrateur</span>
+            <h1 class="lo-page-title">Performances de ventes</h1>
+            <p class="lo-page-subtitle">Indicateurs de performance et tendances multi-périodes du réseau.</p>
+        </div>
+        <div class="lo-page-actions">
+            <span class="lo-chip navy"><i class="pi pi-chart-line"></i> {{ selected_point_of_sale_type?.name ?? 'Réseau' }}</span>
+        </div>
+    </div>
+
+    <div class="lo-filterbar">
+        <div class="lo-field">
+            <label for="sale-point-types">Réseau</label>
+            <p-dropdown (onChange)="onPointOfSaleTypeChange($event)"
+                styleClass="w-full perf-control" inputId="sale-point-types"
+                [options]="point_of_sale_types" [(ngModel)]="selected_point_of_sale_type" optionLabel="name"
+                [appendTo]="'body'"
+                [virtualScroll]="true" [virtualScrollItemSize]="30" placeholder="Choisir un réseau" />
         </div>
     </div>
 

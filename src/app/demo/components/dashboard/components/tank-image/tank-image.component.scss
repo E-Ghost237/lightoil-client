@@ -1,78 +1,134 @@
+:host {
+    display: block;
+}
+
+.tank-gauge {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
 
 .tank-visual-wrapper {
     width: 100%;
     display: grid;
     place-items: center;
-    padding: 0.25rem 0;
+    padding: 0.35rem 0.25rem 0;
     overflow: visible;
 }
 
 .tank-visual {
     display: block;
-    width: 126%;
-    max-width: 390px;
+    width: 100%;
+    max-width: 560px;
     height: auto;
     overflow: visible;
 }
 
 .tank-root {
-    filter: drop-shadow(0 14px 18px rgba(15, 23, 42, 0.18));
+    filter: drop-shadow(0 14px 18px rgba(15, 23, 42, 0.16));
 }
 
 .fuel-fill,
 .water-fill,
 .fuel-surface,
-.water-surface {
-    transition: y 0.34s ease, height 0.34s ease, cy 0.34s ease, opacity 0.22s ease;
+.water-surface,
+.probe-float {
+    transition: y 0.4s ease, height 0.4s ease, cy 0.4s ease, opacity 0.25s ease;
 }
 
-.anim-clip{
-    animation: 1s linear 0s infinite alternate both animationClip;
+.tank-gauge-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
 }
 
+.tank-occupation {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--lo-surface-2, #f6f9ff);
+    border: 1px solid var(--lo-border-soft, #e7edf8);
+    border-radius: 12px;
+    padding: 0.5rem 0.7rem;
+}
 
-@keyframes animationClip {
-    0% {
-      opacity: 1;
-    }
+.tank-occupation-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--lo-ink-500, #64748b);
+    white-space: nowrap;
+}
 
-    10% {
-        opacity: 0.9;
-    }
+.tank-occupation .lo-meter {
+    flex: 1 1 auto;
+}
 
-    20% {
-        opacity: 0.8;
-    }
+.tank-occupation-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    color: var(--lo-navy-900, #0b1f45);
+    min-width: 3rem;
+    text-align: right;
+}
 
-    30% {
-        opacity: 0.7;
-    }
+.tank-gauge-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.7rem;
+}
 
-    40% {
-        opacity: 0.6;
-    }
+.tank-last-data {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--lo-ink-500, #64748b);
+    font-variant-numeric: tabular-nums;
 
-    50% {
-        opacity: 0.5;
+    i {
+        font-size: 0.75rem;
+        color: var(--lo-navy-700, #1e55af);
     }
+}
 
-    60% {
-        opacity: 0.6;
-    }
+.tank-alert {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--lo-critical, #dc2626);
+    background: var(--lo-critical-bg, #fdecec);
+    border: 1px solid var(--lo-critical-border, #f5c2c2);
+    border-radius: 10px;
+    padding: 0.4rem 0.65rem;
+}
 
-    70% {
-        opacity: 0.7;
-    }
+.flowmeter-visual {
+    display: grid;
+    place-items: center;
+    padding: 0.4rem;
+    background: linear-gradient(180deg, #f7faff, #eef4ff);
+    border: 1px solid var(--lo-border-soft, #e7edf8);
+    border-radius: 14px;
 
-    80% {
-        opacity: 0.8;
+    img {
+        max-width: 220px;
+        width: 100%;
+        height: auto;
     }
+}
 
-    90% {
-        opacity: 0.9;
+@media (prefers-reduced-motion: reduce) {
+    .fuel-fill,
+    .water-fill,
+    .fuel-surface,
+    .water-surface,
+    .probe-float {
+        transition: none;
     }
-
-    100% {
-        opacity: 1;
-    }
-  }
+}

@@ -41,7 +41,7 @@
     [globalFilterFields]="['full_name', 'email', 'phone', 'company_name']"
   >
     <ng-template pTemplate="caption">
-      <div class="flex align-items-center justify-content-between">
+      <div class="lo-table-toolbar">
         <p-button
           (click)="loadData()"
           styleClass="font-semibold align-content-center mr-2"
@@ -53,9 +53,9 @@
           loadingIcon="pi pi-spin pi-refresh"
         />
 
-        <span class="block p-input-icon-left">
+        <span class="p-input-icon-left lo-search">
           <i class="pi pi-search"></i>
-          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." class="w-full sm:w-auto" />
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher un utilisateur..." class="w-full" />
         </span>
       </div>
     </ng-template>
@@ -178,51 +178,44 @@
   (onHide)="closeDialogs()"
 >
   <ng-container *ngIf="selectedUser as u">
-    <div class="grid">
-      <div class="col-12 md:col-6">
-        <div class="text-500 text-xs">Nom</div>
-        <div class="font-semibold">{{ u.full_name || '-' }}</div>
+    <div class="lo-spec">
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Nom</span>
+        <span class="lo-spec-value">{{ u.full_name || '-' }}</span>
       </div>
-
-      <div class="col-12 md:col-6">
-        <div class="text-500 text-xs">Statut</div>
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Statut</span>
         <p-tag [value]="u.status" [severity]="getStatusSeverity(u.status)">{{ u.status }}</p-tag>
       </div>
-
-      <div class="col-12 md:col-6">
-        <div class="text-500 text-xs">Email</div>
-        <div>{{ u.email || '-' }}</div>
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Email</span>
+        <span class="lo-spec-value">{{ u.email || '-' }}</span>
       </div>
-
-      <div class="col-12 md:col-6">
-        <div class="text-500 text-xs">Téléphone</div>
-        <div>{{ u.phone || '-' }}</div>
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Téléphone</span>
+        <span class="lo-spec-value">{{ u.phone || '-' }}</span>
       </div>
-
-      <div class="col-12">
-        <div class="text-500 text-xs">Adresse</div>
-        <div>{{ u.address || '-' }}</div>
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Adresse</span>
+        <span class="lo-spec-value">{{ u.address || '-' }}</span>
       </div>
-
-      <div class="col-12">
-        <div class="text-500 text-xs">Entreprise</div>
-        <div>{{ u.company_name || '-' }}</div>
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Entreprise</span>
+        <span class="lo-spec-value">{{ u.company_name || '-' }}</span>
       </div>
-
-      <div class="col-12">
-        <div class="text-500 text-xs">Rôle(s)</div>
-        <div class="flex flex-wrap gap-2 mt-2">
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Rôle(s)</span>
+        <span class="flex flex-wrap gap-2 justify-content-end">
           <p-tag *ngFor="let r of u.roles" [value]="r" severity="info">{{ r }}</p-tag>
           <span *ngIf="!u.roles?.length" class="text-500">-</span>
-        </div>
+        </span>
       </div>
-
-      <div class="col-12">
-        <div class="text-500 text-xs">Station(s)</div>
-        <div class="flex flex-wrap gap-2 mt-2">
+      <div class="lo-spec-row">
+        <span class="lo-spec-label">Station(s)</span>
+        <span class="flex flex-wrap gap-2 justify-content-end">
           <p-tag *ngFor="let s of u.stations" [value]="s" severity="warning">{{ s }}</p-tag>
           <span *ngIf="!u.stations?.length" class="text-500">-</span>
-        </div>
+        </span>
       </div>
     </div>
   </ng-container>

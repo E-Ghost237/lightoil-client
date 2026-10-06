@@ -3,11 +3,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: .35rem;
+    flex-wrap: wrap;
+    gap: .6rem;
     padding-top: 1rem;
     border-top: 1px solid rgba(15, 61, 146, 0.16);
     color: #334155;
     font-weight: 600;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.18));
     border-radius: 10px;
+}
+
+.layout-footer-text {
+    margin: 0;
+    font-size: .8rem;
+
+    a {
+        color: #0f3d92;
+        font-weight: 800;
+    }
+
+    strong {
+        color: #0b1f45;
+    }
+}
+
+.layout-footer-sep {
+    margin: 0 .45rem;
+    color: #94a3b8;
+}
+
+.layout-footer-muted {
+    color: #64748b;
+    font-weight: 600;
+}
+
+@media (max-width: 575px) {
+    .layout-footer-muted,
+    .layout-footer-sep {
+        display: none;
+    }
 }

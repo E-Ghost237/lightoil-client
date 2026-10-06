@@ -1,7 +1,7 @@
 
 <div *ngIf="listRecord && listRecord?.volume?.length > 0">
     <div class="row">
-        <span class="text-center h4">
+        <span class="lo-card-title" >
             Graphe des donnees de la cuve {{sensorReference.sensor_reference+'-'+sensorReference.liquid_type}}
         </span>
     </div>
@@ -12,7 +12,7 @@
 <div *ngIf="listRecord && listRecord?.level?.length <= 0">
     <div class="row justify-content-center">
         <span class="col text-center">
-            Aucune données disponible dans la période
+            Aucune donnée disponible dans la période sélectionnée
         </span>
     </div>
 </div>

@@ -1,236 +1,139 @@
 <ng-container *ngIf="flowMeterDetailsData; else elseTemplate">
-    <div class="row my-1 justify-content-center" #targetEl>
-        <p-toast></p-toast>
-        <div class="col-5 col-sm-5 col-xl-4 card m-0 mb-2 d-flex flex-column justify-content-between">
-            <div class="row ">
-                <div class="col-1" (click)="backToDashboard()">
-                    <i class="pi pi-arrow-left" pTooltip="Retour au dashboard"></i>
+    <p-toast></p-toast>
+
+    <div class="lo-page flowmeter-details-page">
+        <div class="lo-page-header">
+            <div class="lo-back-title">
+                <button type="button" class="lo-icon-action" (click)="backToDashboard()"
+                    pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                    <i class="pi pi-arrow-left"></i>
+                </button>
+                <div>
+                    <span class="lo-eyebrow">{{getNameProduct()}}</span>
+                    <h1 class="lo-page-title">{{'Débitmètre ' + getSensorReference()}}</h1>
+                    <p class="lo-page-subtitle">{{d}}</p>
                 </div>
-                <div class="col-1 ">
-                    <ng-container *ngIf="getOnlineStatuSensor(); else elseTemplate">
-                        <div class="spinner-grow text-success" role="status" pTooltip="Jauge active">
-                            <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="lo-page-actions">
+                <span class="tank-status" [ngClass]="getOnlineStatuSensor() ? 'is-live' : 'is-idle'">
+                    <span class="lo-dot" [ngClass]="getOnlineStatuSensor() ? 'live' : 'idle'"></span>
+                    {{getOnlineStatuSensor() ? 'Capteur actif' : 'Capteur inactif'}}
+                </span>
+            </div>
+        </div>
+
+        <div class="flowmeter-details-grid">
+            <section class="lo-card flowmeter-visual-card lo-rise">
+                <div class="flowmeter-visual" pTooltip="État actuel du débitmètre">
+                    <img [src]="getTheCorrectImage()" alt="Vue actuelle du débitmètre">
+                </div>
+                <span class="tank-last-data" pTooltip="Date et heure de la dernière donnée" tooltipPosition="bottom">
+                    <i class="pi pi-clock"></i>
+                    {{getLastIncomeDateRecordFlow()}}
+                </span>
+            </section>
+
+            <div class="flowmeter-details-main">
+                <div class="lo-kpi-grid lo-rise lo-rise-1">
+                    <div class="lo-kpi">
+                        <span class="lo-kpi-icon"><i class="pi pi-bolt"></i></span>
+                        <div class="lo-kpi-body">
+                            <span class="lo-kpi-label">Débit instantané</span>
+                            <div class="lo-kpi-value">{{getInstantFlow()}}</div>
+                            <div class="lo-kpi-sub">{{getUnitMeasurement()}}</div>
                         </div>
-                    </ng-container>
-                    <ng-template #elseTemplate>
-                        <div class="spinner-grow text-secondary" role="status" pTooltip="Jauge inactive">
-                            <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="lo-kpi">
+                        <span class="lo-kpi-icon"><i class="pi pi-chart-line"></i></span>
+                        <div class="lo-kpi-body">
+                            <span class="lo-kpi-label">Débit cumulatif</span>
+                            <div class="lo-kpi-value">{{getCumulativeFlow()}}</div>
+                            <div class="lo-kpi-sub" pTooltip="En mètre cube par seconde">m³/s</div>
                         </div>
-                    </ng-template>
-                </div>
-                <div class="col text-center ">
-                    <span class="h5">
-                        {{'Debimetre '+getSensorReference()+'- '+getNameProduct()}}
-                    </span>
-                </div>
-                <div class="col text-end">
-                    <span>{{d}}</span>
-                </div>
-            </div>
-
-            <div class="row d-flex flex-row justify-content-center mb-3">
-                <div class="col text-center anim-fade">
-                    <img width="300vw" src="{{getTheCorrectImage()}}"
-                        alt="une vue actuelle du debimetre"
-                        pTooltip="Etat actuel du debimetre">
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-6 col-sm-5 col-xl-5  m-0 mb-2 d-flex flex-column justify-content-between">
-            <div class="row justify-content-center">
-                <div class="col-10 offset-1 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Unite de mesure du debit instantanee: </span>
-                    <span>
-                        <p-badge [value]="getUnitMeasurement()" size="large" severity="info">
-                        </p-badge>
-                    </span>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-10 offset-1 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Debit instantanee: </span>
-                    <span>
-                        <p-badge value="{{getInstantFlow()}}" size="large" severity="info">
-                        </p-badge>
-                    </span>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-10 offset-1 card d-flex flex-row justify-content-between anim-fade">
-                    <span class="" pTooltip="En metre cube par seconde"> Debit cumulatif: </span>
-                    <span>
-                        <p-badge value="{{getCumulativeFlow()}}" size="large" severity="info">
-                        </p-badge>
-                    </span>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-10 offset-1 card d-flex flex-row justify-content-between anim-fade">
-                    <span class=""> Dernier volume transitant(litres): </span>
-                    <span>
-                        <p-badge value="{{volume}}" size="large" severity="info">
-                        </p-badge>
-                    </span>
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-10 offset-1 card anim-fade text-center">
-                    <span class="text-center" pTooltip="Date et heure dernière donnée" tooltipPosition="bottom"> 
-                        {{getLastIncomeDateRecordFlow()}}
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        
-        <span></span>
-    </div>
-    <div class="row my-4 justify-content-center">
-        <div class="col-11 col-sm-10 col-xl-9 card m-0 mb-2 d-flex flex-column justify-content-between">
-            <div class="row p-1 pb-0">
-                <div class="col ">
-                    <p-button (click)="op.toggle($event, targetEl)" 
-                        label="Afficher tout" 
-                        [text]="true" 
-                        [raised]="true" 
-                        severity="info">
-                    </p-button>
-                </div>
-                <div class="col d-flex flex-row justify-content-end ">
-                    <p-button (click)="og.toggle($event, targetEl)" 
-                        label="Graphe" 
-                        [text]="true" 
-                        [raised]="true" 
-                        severity="info">
-                    </p-button>
-                </div>
-            </div>
-            <div class="row p-0 ">
-                <p-table
-                    [value]="records"
-                    [scrollable]="true"
-                    scrollHeight="370px"
-                    styleClass="p-datatable-striped"
-                    [tableStyle]="{'min-width': '30rem'}">
-                    <ng-template pTemplate="header" let-columns>
-                        <tr>
-                            <th>#</th>
-                            <th>Relevé à</th>
-                            <th pTooltip="en litres par seconde" tooltipPosition="bottom">Débit instantanée</th>
-                            <th pTooltip="en metres cube par seconde" tooltipPosition="bottom">Débit cumulatif</th>
-                            <th pTooltip="unite de mesure" tooltipPosition="bottom">Unité de mesure</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-record let-columns="columns" let-rowIndex="rowIndex">
-                        <tr>
-                            <td>{{rowIndex+1}}</td>
-                            <td>{{getToLocalDateTime(record.hourFlowSensor)}}</td>
-                            <td pTooltip="{{record.unit_measurement_flow}}" tooltipPosition="bottom">
-                                {{getRoundValue(record.instant_flow)}}
-                            </td>
-                            <td pTooltip="En metre cube par seconde" tooltipPosition="bottom">
-                                {{getRoundValue(record.cumulative_flow)}}
-                            </td>
-                            <td pTooltip="{{record.unit_measurement_flow}}" tooltipPosition="bottom">
-                                {{record.unit_measurement_flow}}
-                            </td>
-
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </div>
-        </div>
-        <span></span>
-    </div>
-
-    <!-- affficher tout -->
-    <p-overlayPanel #op [style]="{'width': '98%','height': '92%'}" [showCloseIcon]="true">
-        <ng-template pTemplate="content">
-            <div class="row justify-content-evenly">
-                <div class="col text-center h4">
-                    Historiques des donnees de la journee
-                </div>
-                <div class="col text-center">
-                    <button class="border-none" (click)="generateFlowMeterDataDetailsPdf()">
-                        <i class="pi pi-fw pi-file-pdf"
-                            pTooltip="Exporter au format pdf" tooltipPosition="bottom"
-                            style="font-size: 3rem; color: red;">
-                        </i>
-                    </button>
-                </div>
-            </div>
-            <div class="row mt-8">
-                <p-table [value]="records"
-                    [scrollable]="true"
-                    styleClass="p-datatable-striped"
-                    scrollHeight="60rem"
-                    [showCurrentPageReport]="true"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                    [rowsPerPageOptions]="[15, 50, 100]"
-                    (onRowSelect)="onRowSelect($event, op)"
-                    [paginator]="true" [rows]="15"
-                    >
-                    <ng-template pTemplate="header" let-columns>
-                        <tr>
-                            <th>#</th>
-                            <th>Relevé à</th>
-                            <th pTooltip="en litres par seconde" tooltipPosition="bottom">Débit instantanée</th>
-                            <th pTooltip="en metres cube par seconde" tooltipPosition="bottom">Débit cumulatif</th>
-                            <th pTooltip="unite de mesure" tooltipPosition="bottom">Unité de mesure</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template pTemplate="body" let-record let-rowData let-columns="columns" let-rowIndex="rowIndex">
-                        <tr>
-                            <td>{{rowIndex+1}}</td>
-                            <td>{{getToLocalDateTime(record.hourFlowSensor)}}</td>
-                            <td pTooltip="{{record.unit_measurement_flow}}" tooltipPosition="bottom">
-                                {{getRoundValue(record.instant_flow)}}
-                            </td>
-                            <td pTooltip="En metre cube par seconde" tooltipPosition="bottom">
-                                {{getRoundValue(record.cumulative_flow)}}
-                            </td>
-                            <td pTooltip="{{record.unit_measurement_flow}}" tooltipPosition="bottom">
-                                {{record.unit_measurement_flow}}
-                            </td>
-                        </tr>
-                    </ng-template>
-                </p-table>
-            </div>
-        </ng-template>
-    </p-overlayPanel>
-
-    <!-- graphe -->
-    <p-overlayPanel #og [style]="{'width': '98%','height': '92%'}"  [showCloseIcon]="true">
-        <ng-template pTemplate="content" >
-            <div class="flex flex-column justify-content-center align-content-center ">
-                <div class="row ">
-                    <span class="text-center h4">
-                        Graphe d'evolution des debits de la journee
-                    </span>
-                </div>
-                <div class="row mt-8">
-                    <p-chart #line type="line" [data]="data" [options]="options"></p-chart>
-                </div>
-                <div class="row mt-1">
-                    <div class="col text-center">
-                        <button class="border-none" (click)="generateFlowMeterDataDetailsImage()">
-                            <i class="pi pi-fw pi-image"
-                                pTooltip="Exporter l'image" tooltipPosition="bottom"
-                                style="font-size: 3rem; color: rgb(0, 255, 4);">
-                            </i>
-                        </button>
+                    </div>
+                    <div class="lo-kpi">
+                        <span class="lo-kpi-icon"><i class="pi pi-filter"></i></span>
+                        <div class="lo-kpi-body">
+                            <span class="lo-kpi-label">Dernier volume transitant</span>
+                            <div class="lo-kpi-value">{{volume}}<small>L</small></div>
+                        </div>
                     </div>
                 </div>
+
+                <p-tabview styleClass="flowmeter-tabs lo-rise lo-rise-2">
+                    <p-tabPanel header="Relevés du jour">
+                        <div class="lo-table-toolbar">
+                            <span class="lo-muted">Historique des relevés de la journée</span>
+                            <button type="button" class="lo-icon-action" (click)="generateFlowMeterDataDetailsPdf()"
+                                pTooltip="Exporter au format PDF" tooltipPosition="bottom">
+                                <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+                            </button>
+                        </div>
+                        <p-table [value]="records"
+                            styleClass="p-datatable-striped"
+                            [paginator]="true" [rows]="12"
+                            [rowsPerPageOptions]="[12, 25, 50]"
+                            [showCurrentPageReport]="true"
+                            currentPageReportTemplate="{first} à {last} sur {totalRecords} relevés">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Relevé à</th>
+                                    <th pTooltip="En litres par seconde" tooltipPosition="bottom">Débit instantané</th>
+                                    <th pTooltip="En mètres cubes par seconde" tooltipPosition="bottom">Débit cumulatif</th>
+                                    <th pTooltip="Unité de mesure" tooltipPosition="bottom">Unité de mesure</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
+                                <tr>
+                                    <td>{{rowIndex + 1}}</td>
+                                    <td>{{getToLocalDateTime(record.hourFlowSensor)}}</td>
+                                    <td pTooltip="{{record.unit_measurement_flow}}" tooltipPosition="bottom">
+                                        {{getRoundValue(record.instant_flow)}}
+                                    </td>
+                                    <td pTooltip="En mètre cube par seconde" tooltipPosition="bottom">
+                                        {{getRoundValue(record.cumulative_flow)}}
+                                    </td>
+                                    <td pTooltip="{{record.unit_measurement_flow}}" tooltipPosition="bottom">
+                                        {{record.unit_measurement_flow}}
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="lo-state">
+                                            <div class="lo-state-icon"><i class="pi pi-database"></i></div>
+                                            <h4>Aucun relevé</h4>
+                                            <p>Il n'y a aucun relevé pour la journée en cours.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-tabPanel>
+
+                    <p-tabPanel header="Graphe d'évolution">
+                        <div class="lo-table-toolbar">
+                            <span class="lo-muted">Évolution des débits de la journée</span>
+                            <button type="button" class="lo-icon-action" (click)="generateFlowMeterDataDetailsImage()"
+                                pTooltip="Exporter l'image" tooltipPosition="bottom">
+                                <i class="pi pi-image" style="color: #059669;"></i>
+                            </button>
+                        </div>
+                        <p-chart #line type="line" [data]="data" [options]="options"></p-chart>
+                    </p-tabPanel>
+                </p-tabview>
             </div>
-        </ng-template>
-    </p-overlayPanel>
+        </div>
+    </div>
 
     <!-- Chatbot -->
     <app-chatbot></app-chatbot>
 </ng-container>
 <ng-template #elseTemplate>
-    <div class="d-flex flex-row justify-content-center align-content-center" style="margin-top: 20%;">
-        <img width="150rem" src="../../../../../assets/layout/images/logo.gif" alt="Loading" >
+    <div class="report-loading-state">
+        <img width="150" src="../../../../../assets/layout/images/logo.gif" alt="Chargement...">
+        <p>Chargement des données du débitmètre...</p>
     </div>
 </ng-template>

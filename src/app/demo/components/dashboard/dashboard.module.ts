@@ -24,6 +24,7 @@ import { TagModule } from 'primeng/tag';
 import { TankListByTypeComponent } from './components/tank-list-by-type/tank-list-by-type.component';
 import { FlowMeterDetailsComponent } from './flow-meter-details/flow-meter-details.component';
 import { ChatbotModule } from '../chatbot/chatbot.module';
+import { TabViewModule } from 'primeng/tabview';
 
 @NgModule({
     imports: [
@@ -43,7 +44,8 @@ import { ChatbotModule } from '../chatbot/chatbot.module';
         BadgeModule,
         TagModule,
         DashboardsRoutingModule,
-        ChatbotModule
+        ChatbotModule,
+        TabViewModule
     ],
     declarations: [DashboardComponent, TankImageComponent, TankHeaderComponent, TankDetailsComponent, TankListComponent, CustomDividerComponent, TankListByTypeComponent, FlowMeterDetailsComponent]
 })

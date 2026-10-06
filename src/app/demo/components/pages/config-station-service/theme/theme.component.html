@@ -1,36 +1,35 @@
-
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left" (click)="backToDshboard()"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Personnalisation de l'image de fond de la plateforme</h4>
-    </div>
-    <div class="col text-center">
-        <img src="../../../../../../assets/demo/images/product/icon.jpg" alt="icon">
-    </div>
-</div>
 
-<div class="card flex justify-content-center mt-3 ">
-    <div class="w-50 mx-auto">
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div class="lo-back-title">
+            <button type="button" class="lo-icon-action" (click)="backToDshboard()"
+                pTooltip="Retour au tableau de bord" tooltipPosition="bottom">
+                <i class="pi pi-arrow-left"></i>
+            </button>
+            <div>
+                <span class="lo-eyebrow">Configuration · Station service</span>
+                <h1 class="lo-page-title">Image de fond</h1>
+                <p class="lo-page-subtitle">Personnalisez l'arrière-plan de votre espace de travail</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="lo-card">
+        <h3 class="lo-card-title">Téléverser une image</h3>
+        <p class="lo-card-subtitle">Format image accepté. Elle sera appliquée comme fond de la plateforme.</p>
         <p-fileUpload name="demo[]" #uploader
-            [url]="urlSetImage" 
-            (onSelect)="onSelectedFile($event)" 
+            [url]="urlSetImage"
+            (onSelect)="onSelectedFile($event)"
             (uploadHandler)="onCustomUpload($event)"
             chooseLabel="Choisir une image"
             uploadLabel="Charger l'image"
-            cancelLabel="Annuler l'image"
-            [multiple]="false" 
+            cancelLabel="Annuler"
+            [multiple]="false"
             [customUpload]="true"
-            chooseStyleClass="mx-2 my-2 w-auto"
-            uploadStyleClass="mx-2 my-2 w-auto"
-            cancelStyleClass="mx-2 my-2 w-auto"
             previewWidth="100"
             method="post"
-            accept="image/*" 
+            accept="image/*"
             maxFileSize="1000000000">
             <ng-template pTemplate="content">
                 <ul *ngIf="uploadedFiles.length">
@@ -38,5 +37,5 @@
                 </ul>
             </ng-template>
         </p-fileUpload>
-    </div> 
+    </div>
 </div>

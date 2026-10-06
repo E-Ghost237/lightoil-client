@@ -1,7 +1,9 @@
-<div class="layout-footer flex flex-wrap pt-3 mt-4">
-    <img src="assets/img/logos/{{layoutService.config().colorScheme === 'light' ? 'lightoil-logo-black' : 'lightoil-logo-white'}}.png" 
-        alt="lightoil-logo" height="25" class="mt-1 mr-2"/>
-    <p class="font-bold mt-2">
-        by <a href="http://lightgroup.co.com" target="_blank" class="ml-1">Light Group</a> &copy; {{currentYear}}, all rights reserved.
+<div class="layout-footer">
+    <img src="assets/img/logos/{{layoutService.config().colorScheme === 'light' ? 'lightoil-logo-black' : 'lightoil-logo-white'}}.png"
+        alt="LightOil" height="24" />
+    <p class="layout-footer-text">
+        &copy; {{currentYear}} <strong>LightOil</strong> par <a href="http://lightgroup.co.com" target="_blank" rel="noopener">Light Group</a>
+        <span class="layout-footer-sep">·</span>
+        <span class="layout-footer-muted">Pilotage réseau en temps réel</span>
     </p>
 </div>

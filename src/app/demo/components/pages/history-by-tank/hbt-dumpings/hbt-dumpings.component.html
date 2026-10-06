@@ -1,257 +1,213 @@
-
 <p-toast></p-toast>
-<div class="row bg-secondary justify-content-evenly" >
-    <div class="col">
-        <button class="bg-secondary" style="border: none;">
-            <i class="pi pi-arrow-left"></i>
-        </button>
-    </div>
-    <div class="col-8 text-center">
-        <h4 class="text-white">Historiques des mouvements de cuve</h4>
-    </div>
-    <div class="col text-center">
-        <img src="assets/demo/images/70-2-xl-rbg.png" alt="icon">
-    </div>
-</div>
 
-<div class="mt-3">
-    <p-tabView [(activeIndex)]="activeIndex" class="bg-secondary">
-        <p-tabPanel header="SORTIES">
-            <div class="row justify-content-evenly">
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-calendar
-                            [(ngModel)]="rangeDates"
-                            selectionMode="range"
-                            dateFormat="dd/mm/yy"
-                            [readonlyInput]="true"
-                            [showIcon]="true"
-                            (onSelect)="onDateSelect($event)"
-                            [maxDate]="maxDate"
-                            >
-                        </p-calendar>
-                        <label for="float-label text-white">Selectionnez la periode</label>
-                    </span>
+<div class="lo-page">
+    <div class="lo-page-header">
+        <div>
+            <span class="lo-eyebrow">Historiques par cuve</span>
+            <h1 class="lo-page-title">Sorties et dépôtages</h1>
+            <p class="lo-page-subtitle">Mouvements de produit détectés par la sonde</p>
+        </div>
+    </div>
+
+    <p-tabView [(activeIndex)]="activeIndex">
+        <p-tabPanel header="Sorties">
+            <div class="lo-filterbar">
+                <div class="lo-field">
+                    <label for="hbt-out-period">Période</label>
+                    <p-calendar
+                        inputId="hbt-out-period"
+                        [(ngModel)]="rangeDates"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        [readonlyInput]="true"
+                        [showIcon]="true"
+                        (onSelect)="onDateSelect($event)"
+                        [maxDate]="maxDate">
+                    </p-calendar>
                 </div>
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listQuarter"
-                            [(ngModel)]="selectedQuart"
-                            [showClear]="true"
-                            placeholder="Selectionnez le quart"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeQuart($event)"
-                            [styleClass]="'w-100'"
-                        >
+
+                <div class="lo-field">
+                    <label for="hbt-out-quart">Quart de travail</label>
+                    <p-dropdown
+                        inputId="hbt-out-quart"
+                        [options]="listQuarter"
+                        [(ngModel)]="selectedQuart"
+                        [showClear]="true"
+                        placeholder="Sélectionnez le quart"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeQuart($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
-
-                            <div>{{ selectedQuart ? selectedQuart?.time_start+'-'+selectedQuart?.time_close : "" }}</div>
-
+                            <div>{{ selectedQuart ? selectedQuart?.time_start + '-' + selectedQuart?.time_close : '' }}</div>
                         </ng-template>
                         <ng-template let-quart pTemplate="item">
-
-                            <div>{{ quart?.time_start+'-'+quart?.time_close }}</div>
-
+                            <div>{{ quart?.time_start + '-' + quart?.time_close }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="">selectionez le quart</label>
-                    </span>
-
+                    </p-dropdown>
                 </div>
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listTanks"
-                            [(ngModel)]="selectedTank"
-                            [showClear]="true"
-                            placeholder="Selectionnez la cuve"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeTank($event)"
-                            [styleClass]="'w-100'"
-                        >
+                <div class="lo-field">
+                    <label for="hbt-out-tank">Cuve</label>
+                    <p-dropdown
+                        inputId="hbt-out-tank"
+                        [options]="listTanks"
+                        [(ngModel)]="selectedTank"
+                        [showClear]="true"
+                        placeholder="Sélectionnez la cuve"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeTank($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
-
-                            <div>{{ selectedTank ? selectedTank?.sensor_reference+'-'+selectedTank?.product_service_station?.product?.name : '' }}</div>
-
+                            <div>{{ selectedTank ? selectedTank?.sensor_reference + '-' + selectedTank?.product_service_station?.product?.name : '' }}</div>
                         </ng-template>
                         <ng-template let-tank pTemplate="item">
-                            <div class="flex flex-row justify-content-around">
-                                <span>
-                                    {{ tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name }}
-                                </span>
-                            </div>
+                            <div>{{ tank?.sensor_reference + '-' + tank?.product_service_station?.product?.name }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="float-label">Selectionnez la cuve</label>
-                    </span>
+                    </p-dropdown>
                 </div>
-               <div class="col-2 text-center">
-                  <!-- <button 
-                    pTooltip="exporter les données au format excel"
-                    class=" ">
-                    <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(67, 225, 109);"></i>
-                  </button> -->
-                  <button 
-                    class=" "
-                    pTooltip="exporter les données au format pdf" 
-                    (click)="generateTankOutputPdf()">
-                    <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
-                  </button>
+
+                <div class="lo-field lo-field--fixed">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button type="button" class="lo-icon-action"
+                        pTooltip="Exporter les données au format PDF"
+                        tooltipPosition="bottom"
+                        (click)="generateTankOutputPdf()">
+                        <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="row" *ngIf="dataOutputs && hasOutputRows()">
-                <app-table-dumpings-outputs [listOutputs] = "dataOutputs" [tank]="selectedTank" [timezone]="stationTimezone">
+            <div *ngIf="dataOutputs && hasOutputRows()">
+                <app-table-dumpings-outputs [listOutputs]="dataOutputs" [tank]="selectedTank" [timezone]="stationTimezone">
                 </app-table-dumpings-outputs>
             </div>
-            <div class="row justify-content-center" *ngIf="dataOutputs && !hasOutputRows()">
-                <div class="col text-center">
-                    Aucune données disponible dans la période
+            <div class="lo-card" *ngIf="dataOutputs && !hasOutputRows()">
+                <div class="lo-state">
+                    <div class="lo-state-icon"><i class="pi pi-upload"></i></div>
+                    <h4>Aucune sortie</h4>
+                    <p>Aucune donnée disponible dans la période sélectionnée.</p>
                 </div>
             </div>
-
         </p-tabPanel>
-        <p-tabPanel header="DEPOTAGES">
-            <div class="row justify-content-around">
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-calendar
-                            [(ngModel)]="rangeDatesDep"
-                            selectionMode="range"
-                            dateFormat="dd/mm/yy"
-                            [readonlyInput]="true"
-                            [showIcon]="true"
-                            (onSelect)="onDateSelectDep($event)"
-                            [maxDate]="maxDate"
-                            >
-                        </p-calendar>
-                        <label for="float-label text-white">Selectionnez la periode</label>
-                    </span>
+        <p-tabPanel header="Dépotages">
+            <div class="lo-filterbar">
+                <div class="lo-field">
+                    <label for="hbt-in-period">Période</label>
+                    <p-calendar
+                        inputId="hbt-in-period"
+                        [(ngModel)]="rangeDatesDep"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        [readonlyInput]="true"
+                        [showIcon]="true"
+                        (onSelect)="onDateSelectDep($event)"
+                        [maxDate]="maxDate">
+                    </p-calendar>
                 </div>
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listTanks"
-                            [(ngModel)]="selectedTankDep"
-                            [showClear]="true"
-                            placeholder="Selectionnez la cuve"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeTankDep($event)"
-                            [styleClass]="'w-100'"
-                        >
+                <div class="lo-field">
+                    <label for="hbt-in-tank">Cuve</label>
+                    <p-dropdown
+                        inputId="hbt-in-tank"
+                        [options]="listTanks"
+                        [(ngModel)]="selectedTankDep"
+                        [showClear]="true"
+                        placeholder="Sélectionnez la cuve"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeTankDep($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
-                            <div>{{ selectedTankDep ? selectedTankDep?.sensor_reference+'-'+selectedTankDep?.product_service_station?.product?.name : '' }}</div>
+                            <div>{{ selectedTankDep ? selectedTankDep?.sensor_reference + '-' + selectedTankDep?.product_service_station?.product?.name : '' }}</div>
                         </ng-template>
                         <ng-template let-tank pTemplate="item">
-                            <div class="flex flex-row justify-content-around">
-                                <span>
-                                    {{ tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name }}
-                                </span>
-
-                            </div>
+                            <div>{{ tank?.sensor_reference + '-' + tank?.product_service_station?.product?.name }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="float-label">Selectionnez la cuve</label>
-                    </span>
+                    </p-dropdown>
                 </div>
 
-                <div class="col-2 text-center">
-                    <!-- <button 
-                        pTooltip="exporter les données au format excel"
-                        class=" ">
-                        <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(67, 225, 109);"></i>
-                    </button> -->
-                    <button 
-                        class=" "
-                        pTooltip="exporter les données au format pdf" 
+                <div class="lo-field lo-field--fixed">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button type="button" class="lo-icon-action"
+                        pTooltip="Exporter les données au format PDF"
+                        tooltipPosition="bottom"
                         (click)="generateTankInputPdf()">
-                        <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
+                        <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
                     </button>
                 </div>
             </div>
-            <div class="row" *ngIf="dataInputs && dataInputs?.periodInputs?.length > 0">
-                <app-table-dumpings-intputs [listInputs] = "dataInputs" [tank]="selectedTankDep">
+
+            <div *ngIf="dataInputs && dataInputs?.periodInputs?.length > 0">
+                <app-table-dumpings-intputs [listInputs]="dataInputs" [tank]="selectedTankDep">
                 </app-table-dumpings-intputs>
             </div>
-            <div class="row justify-content-center" *ngIf="dataInputs && dataInputs?.periodInputs?.length <= 0">
-                <div class="col text-center">
-                    Aucune données disponible dans la période
+            <div class="lo-card" *ngIf="dataInputs && dataInputs?.periodInputs?.length <= 0">
+                <div class="lo-state">
+                    <div class="lo-state-icon"><i class="pi pi-download"></i></div>
+                    <h4>Aucun dépôtage</h4>
+                    <p>Aucune donnée disponible dans la période sélectionnée.</p>
                 </div>
             </div>
         </p-tabPanel>
-        <p-tabPanel header="RAPPORTS">
-            <div class="row justify-content-evenly">
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-calendar
-                            [(ngModel)]="rangeDatesRap"
-                            selectionMode="range"
-                            dateFormat="dd/mm/yy"
-                            [readonlyInput]="true"
-                            [showIcon]="true"
-                            (onSelect)="onDateSelectRap($event)"
-                            [maxDate]="maxDate"
-                            >
-                        </p-calendar>
-                        <label for="float-label text-white">Selectionnez la periode</label>
-                    </span>
+
+        <p-tabPanel header="Rapports">
+            <div class="lo-filterbar">
+                <div class="lo-field">
+                    <label for="hbt-rep-period">Période</label>
+                    <p-calendar
+                        inputId="hbt-rep-period"
+                        [(ngModel)]="rangeDatesRap"
+                        selectionMode="range"
+                        dateFormat="dd/mm/yy"
+                        [readonlyInput]="true"
+                        [showIcon]="true"
+                        (onSelect)="onDateSelectRap($event)"
+                        [maxDate]="maxDate">
+                    </p-calendar>
                 </div>
 
-                <div class="col">
-                    <span class="p-float-label">
-                        <p-dropdown
-                            [options]="listTanks"
-                            [(ngModel)]="selectedTankRap"
-                            [showClear]="true"
-                            placeholder="Selectionnez la cuve"
-                            optionLabel="sensor_reference" inputId="float-label"
-                            (onChange)="onDropDownChangeTankRap($event)"
-                            [styleClass]="'w-100'"
-                        >
+                <div class="lo-field">
+                    <label for="hbt-rep-tank">Cuve</label>
+                    <p-dropdown
+                        inputId="hbt-rep-tank"
+                        [options]="listTanks"
+                        [(ngModel)]="selectedTankRap"
+                        [showClear]="true"
+                        placeholder="Sélectionnez la cuve"
+                        optionLabel="sensor_reference"
+                        (onChange)="onDropDownChangeTankRap($event)"
+                        styleClass="w-full">
                         <ng-template pTemplate="selectedItem">
-                            <div>{{ selectedTankRap ? selectedTankRap?.sensor_reference+'-'+selectedTankRap?.product_service_station?.product?.name : '' }}</div>
+                            <div>{{ selectedTankRap ? selectedTankRap?.sensor_reference + '-' + selectedTankRap?.product_service_station?.product?.name : '' }}</div>
                         </ng-template>
                         <ng-template let-tank pTemplate="item">
-                            <div class="flex flex-row justify-content-around">
-                                <span>
-                                    {{ tank?.sensor_reference+'-'+tank?.product_service_station?.product?.name }}
-                                </span>
-
-                            </div>
+                            <div>{{ tank?.sensor_reference + '-' + tank?.product_service_station?.product?.name }}</div>
                         </ng-template>
-                        </p-dropdown>
-                        <label for="float-label">Selectionnez la cuve</label>
-                    </span>
+                    </p-dropdown>
                 </div>
 
-                <div class="col-2 text-center">
-                    <!-- <button 
-                        pTooltip="exporter les données au format excel"
-                        class=" ">
-                        <i class=" pi pi-file-excel" style="font-size: 2.5rem; color: rgb(67, 225, 109);"></i>
-                    </button> -->
-                    <button 
-                        class=" "
-                        pTooltip="exporter les données au format pdf" 
+                <div class="lo-field lo-field--fixed">
+                    <label aria-hidden="true">&nbsp;</label>
+                    <button type="button" class="lo-icon-action"
+                        pTooltip="Exporter les données au format PDF"
+                        tooltipPosition="bottom"
                         (click)="generateTankReportPdf()">
-                        <i class=" pi pi-file-pdf" style="font-size: 2.5rem; color: red;"></i>
+                        <i class="pi pi-file-pdf" style="color: #dc2626;"></i>
                     </button>
                 </div>
             </div>
-            <div class="row" *ngIf="dataReport?.listDayRecord?.length > 0">
-                <app-table-dumpings-report [listReport] = "dataReport" [tank]="selectedTankRap">
+
+            <div *ngIf="dataReport?.listDayRecord?.length > 0">
+                <app-table-dumpings-report [listReport]="dataReport" [tank]="selectedTankRap">
                 </app-table-dumpings-report>
             </div>
-            <div class="row justify-content-center" *ngIf="dataReport && dataReport?.listDayRecord?.length <= 0">
-                <div class="col text-center">
-                    Aucune données disponible dans la période
+            <div class="lo-card" *ngIf="dataReport && dataReport?.listDayRecord?.length <= 0">
+                <div class="lo-state">
+                    <div class="lo-state-icon"><i class="pi pi-file"></i></div>
+                    <h4>Aucun rapport</h4>
+                    <p>Aucune donnée disponible dans la période sélectionnée.</p>
                 </div>
             </div>
-
         </p-tabPanel>
     </p-tabView>
 </div>

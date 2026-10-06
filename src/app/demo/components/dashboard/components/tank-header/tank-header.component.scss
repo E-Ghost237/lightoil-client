@@ -1,51 +1,63 @@
-
-.anim-clip{
-    animation: 1s linear 0s infinite alternate both animationClip;
+:host {
+    display: block;
 }
 
+.tank-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding-bottom: 0.7rem;
+    margin-bottom: 0.7rem;
+    border-bottom: 1px solid var(--lo-border-soft, #e7edf8);
+}
 
-@keyframes animationClip {
-    0% {
-      opacity: 1;
-    }
+.tank-card-head .lo-dot {
+    width: 0.7rem;
+    height: 0.7rem;
+}
 
-    10% {
-        opacity: 0.9;
-    }
+.tank-card-title {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 auto;
 
-    20% {
-        opacity: 0.8;
+    strong {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--lo-navy-900, #0b1f45);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
+}
 
-    30% {
-        opacity: 0.7;
-    }
+.tank-card-product {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--lo-navy-700, #1e55af);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
 
-    40% {
-        opacity: 0.6;
-    }
+.tank-card-head .lo-chip {
+    flex: none;
+}
 
-    50% {
-        opacity: 0.5;
-    }
+.tank-card-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--lo-warn, #b45309);
+    background: var(--lo-warn-bg, #fdf1de);
+    border: 1px solid var(--lo-warn-border, #f3d9ac);
+    border-radius: 10px;
+    padding: 0.45rem 0.65rem;
+    margin-bottom: 0.7rem;
 
-    60% {
-        opacity: 0.6;
+    i {
+        margin-top: 0.1rem;
     }
-
-    70% {
-        opacity: 0.7;
-    }
-
-    80% {
-        opacity: 0.8;
-    }
-
-    90% {
-        opacity: 0.9;
-    }
-
-    100% {
-        opacity: 1;
-    }
-  }
+}

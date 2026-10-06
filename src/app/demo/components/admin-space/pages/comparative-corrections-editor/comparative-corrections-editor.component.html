@@ -1,15 +1,20 @@
 <p-toast></p-toast>
 
-<div class="card">
-    <h4>Corrections des données d'analyse comparative</h4>
-    <p class="text-500">
-        Sélectionnez une station pour corriger les données saisies par le client. La modification n'est possible que
-        lorsque l'accès a été accordé.
-    </p>
+<div class="lo-page-header">
+    <div>
+        <span class="lo-eyebrow">Espace administrateur</span>
+        <h1 class="lo-page-title">Corrections des données d'analyse comparative</h1>
+        <p class="lo-page-subtitle">
+            Sélectionnez une station pour corriger les données saisies par le client. La modification n'est possible que
+            lorsque l'accès a été accordé.
+        </p>
+    </div>
+</div>
 
+<div class="lo-card">
     <form [formGroup]="filtersForm" class="grid">
-        <div class="col-12 md:col-4" *ngIf="isPlatformSuperAdmin">
-            <label class="block text-sm mb-1">Compagnie</label>
+        <div class="col-12 md:col-4 lo-field" *ngIf="isPlatformSuperAdmin">
+            <label>Compagnie</label>
             <p-dropdown
                 [options]="companyOptions"
                 formControlName="company_id"
@@ -17,12 +22,12 @@
                 optionValue="value"
                 [showClear]="true"
                 placeholder="Sélectionnez une compagnie"
-                styleClass="w-100"
+                styleClass="w-full"
                 (onChange)="onCompanyChange($event.value)"
             ></p-dropdown>
         </div>
-        <div class="col-12 md:col-4">
-            <label class="block text-sm mb-1">Station service</label>
+        <div class="col-12 md:col-4 lo-field">
+            <label>Station service</label>
             <p-dropdown
                 [options]="stationOptions"
                 formControlName="station_id"
@@ -30,7 +35,7 @@
                 optionValue="value"
                 [showClear]="true"
                 placeholder="Sélectionnez une station"
-                styleClass="w-100"
+                styleClass="w-full"
                 (onChange)="onStationChange($event.value)"
             ></p-dropdown>
         </div>
@@ -74,10 +79,11 @@
 </div>
 
 <!-- Sessions list (paginated) -->
-<div class="card mt-3" *ngIf="selectedStationId">
-    <h5>Rapports de la station</h5>
+<div class="lo-card mt-3" *ngIf="selectedStationId">
+    <h3 class="lo-card-title">Rapports de la station</h3>
 
-    <p-table [value]="sessions" [loading]="sessionsLoading" styleClass="mt-3" responsiveLayout="scroll">
+    <div class="lo-table-card mt-3">
+    <p-table [value]="sessions" [loading]="sessionsLoading" responsiveLayout="scroll">
         <ng-template pTemplate="header">
             <tr>
                 <th>Session</th>
@@ -206,10 +212,11 @@
                 ></p-tag>
             </div>
 
-            <div *ngIf="hasFlags(entry.row)" class="p-2 mt-2 mb-2 border-round" style="background:#fff7ed;">
-                <div *ngFor="let message of flagMessages(entry.row)" class="text-orange-700 text-sm">
-                    <i class="pi pi-exclamation-triangle"></i> {{ message }}
-                </div>
+            <div *ngIf="hasFlags(entry.row)" class="lo-banner warn mt-2 mb-2">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>
+                    <span *ngFor="let message of flagMessages(entry.row)" class="block">{{ message }}</span>
+                </span>
             </div>
 
             <form [formGroup]="entry.form" class="grid mt-2">
@@ -292,10 +299,11 @@
                 ></p-tag>
             </div>
 
-            <div *ngIf="hasFlags(entry.row)" class="p-2 mt-2 mb-2 border-round" style="background:#fff7ed;">
-                <div *ngFor="let message of flagMessages(entry.row)" class="text-orange-700 text-sm">
-                    <i class="pi pi-exclamation-triangle"></i> {{ message }}
-                </div>
+            <div *ngIf="hasFlags(entry.row)" class="lo-banner warn mt-2 mb-2">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>
+                    <span *ngFor="let message of flagMessages(entry.row)" class="block">{{ message }}</span>
+                </span>
             </div>
 
             <p class="text-500 text-sm" *ngIf="readingEntries.length > 0">
@@ -326,7 +334,7 @@
                     <p-inputNumber [ngModel]="entry.row.liquid_volume" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
                 </div>
                 <div class="col-6 md:col-2">
-                    <label class="block text-sm mb-1">Qte sortie déclarée</label>
+                    <label class="block text-sm mb-1">Qté sortie déclarée</label>
                     <p-inputNumber [ngModel]="entry.row.declared_outing_quantity" [ngModelOptions]="{standalone: true}" mode="decimal" [maxFractionDigits]="3" [useGrouping]="false" [disabled]="true" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
                 </div>
             </form>
@@ -379,10 +387,11 @@
                 ></p-tag>
             </div>
 
-            <div *ngIf="hasFlags(entry.row)" class="p-2 mt-2 mb-2 border-round" style="background:#fff7ed;">
-                <div *ngFor="let message of flagMessages(entry.row)" class="text-orange-700 text-sm">
-                    <i class="pi pi-exclamation-triangle"></i> {{ message }}
-                </div>
+            <div *ngIf="hasFlags(entry.row)" class="lo-banner warn mt-2 mb-2">
+                <i class="pi pi-exclamation-triangle"></i>
+                <span>
+                    <span *ngFor="let message of flagMessages(entry.row)" class="block">{{ message }}</span>
+                </span>
             </div>
 
             <form [formGroup]="entry.form" class="grid mt-2">
@@ -407,7 +416,7 @@
                     <p-inputNumber formControlName="liquid_volume" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
                 </div>
                 <div class="col-6 md:col-2">
-                    <label class="block text-sm mb-1">Qte sortie déclarée</label>
+                    <label class="block text-sm mb-1">Qté sortie déclarée</label>
                     <p-inputNumber formControlName="declared_outing_quantity" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="3" [useGrouping]="false" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
                 </div>
             </form>
@@ -463,22 +472,22 @@
             Aperçu calculé à partir des lectures actuellement enregistrées -- rien n'a été modifié ni sauvegardé.
         </p>
 
-        <div class="grid">
-            <div class="col-6 md:col-3">
-                <label class="block text-sm text-500 mb-1">Stock initial</label>
-                <div class="font-semibold">{{ preview.initial_stock ?? '---' }}</div>
+        <div class="lo-spec">
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Stock initial</span>
+                <span class="lo-spec-value">{{ preview.initial_stock ?? '---' }}</span>
             </div>
-            <div class="col-6 md:col-3">
-                <label class="block text-sm text-500 mb-1">Stock final</label>
-                <div class="font-semibold">{{ preview.final_stock ?? '---' }}</div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Stock final</span>
+                <span class="lo-spec-value">{{ preview.final_stock ?? '---' }}</span>
             </div>
-            <div class="col-6 md:col-3">
-                <label class="block text-sm text-500 mb-1">Hauteur liquide</label>
-                <div class="font-semibold">{{ preview.liquid_height ?? '---' }}</div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Hauteur liquide</span>
+                <span class="lo-spec-value">{{ preview.liquid_height ?? '---' }}</span>
             </div>
-            <div class="col-6 md:col-3">
-                <label class="block text-sm text-500 mb-1">Qte sortie déclarée</label>
-                <div class="font-semibold">{{ preview.declared_outing_quantity ?? '---' }}</div>
+            <div class="lo-spec-row">
+                <span class="lo-spec-label">Qté sortie déclarée</span>
+                <span class="lo-spec-value">{{ preview.declared_outing_quantity ?? '---' }}</span>
             </div>
         </div>
 

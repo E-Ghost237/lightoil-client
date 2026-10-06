@@ -1,28 +1,33 @@
 <p-toast key="tst"></p-toast>
 
 <div class="detail-page" *ngIf="!loading; else loadingTpl">
-  <div class="hero card">
+  <div class="lo-page-header">
     <div>
-      <p-tag [value]="station?.status || 'unknown'" [severity]="station?.status === 'enabled' ? 'success' : 'danger'"></p-tag>
-      <h1>{{ station?.name || 'Station' }}</h1>
-      <p>{{ station?.company?.name || 'Entreprise inconnue' }} · {{ station?.town?.name || '-' }}</p>
+      <span class="lo-eyebrow">Espace administrateur · Stations</span>
+      <h1 class="lo-page-title">{{ station?.name || 'Station' }}</h1>
+      <p class="lo-page-subtitle">{{ station?.company?.name || 'Entreprise inconnue' }} · {{ station?.town?.name || '-' }}</p>
     </div>
+    <div class="lo-page-actions">
+      <p-tag [value]="station?.status || 'unknown'" [severity]="station?.status === 'enabled' ? 'success' : 'danger'"></p-tag>
+    </div>
+  </div>
+  <div class="lo-card detail-actions-card">
     <div class="actions">
       <p-button label="Modifier la station" [text]="true" (onClick)="showEditStation = !showEditStation"></p-button>
       <p-button label="Attacher un produit" [text]="true" severity="secondary" (onClick)="showAttachProducts = !showAttachProducts"></p-button>
       <p-button label="Ajouter une cuve" [text]="true" severity="secondary" (onClick)="showAddTank = !showAddTank"></p-button>
       <p-button label="Assigner une jauge" [text]="true" severity="secondary" (onClick)="showAssignGauge = !showAssignGauge"></p-button>
-      <p-button [label]="station?.status === 'enabled' ? 'Suspendre' : 'Reactiver'" severity="warning" (onClick)="toggleStationStatus()"></p-button>
+      <p-button [label]="station?.status === 'enabled' ? 'Suspendre' : 'Réactiver'" severity="warning" (onClick)="toggleStationStatus()"></p-button>
       <p-button label="Rappel paiement" severity="help" (onClick)="sendPaymentReminder()"></p-button>
     </div>
   </div>
 
   <div class="grid-two">
-    <div class="card section-card" *ngIf="showEditStation">
-      <h2>Edit station</h2>
+    <div class="lo-card section-card" *ngIf="showEditStation">
+      <h3 class="lo-card-title">Modifier la station</h3>
       <form [formGroup]="stationForm" class="form-grid">
         <p class="required-hint field-span-2">
-          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
+          Les champs marqués <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
         </p>
         <div class="field">
           <label>Nom <span class="required-indicator">*</span></label>
@@ -47,10 +52,10 @@
           <textarea pInputTextarea rows="3" formControlName="description"></textarea>
         </div>
         <div class="field">
-          <label>Region <span class="required-indicator">*</span></label>
+          <label>Région <span class="required-indicator">*</span></label>
           <p-dropdown [options]="regions" optionLabel="name" optionValue="id" formControlName="region_id"></p-dropdown>
           <small class="field-error" *ngIf="showControlError(stationForm.get('region_id'))">
-            La region est obligatoire.
+            La région est obligatoire.
           </small>
         </div>
         <div class="field">
@@ -94,11 +99,11 @@
       </div>
     </div>
 
-    <div class="card section-card" *ngIf="showAttachProducts">
-      <h2>Attach products</h2>
+    <div class="lo-card section-card" *ngIf="showAttachProducts">
+      <h3 class="lo-card-title">Attacher des produits</h3>
       <form [formGroup]="productsForm">
         <p class="required-hint">
-          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
+          Les champs marqués <span class="required-indicator">*</span> sont obligatoires pour enregistrer.
         </p>
         <div formArrayName="items" class="stack-grid">
           <div class="line-card" *ngFor="let row of productItems.controls; index as i" [formGroupName]="i">
@@ -121,7 +126,7 @@
                   Le nombre de pistolets est obligatoire.
                 </small>
                 <small class="field-error" *ngIf="controlHasError(row.get('pistolets'), 'min')">
-                  La valeur ne peut pas etre negative.
+                  La valeur ne peut pas être négative.
                 </small>
               </div>
               <div class="field">
@@ -131,7 +136,7 @@
                   Le prix est obligatoire.
                 </small>
                 <small class="field-error" *ngIf="controlHasError(row.get('product_price'), 'min')">
-                  Le prix ne peut pas etre negatif.
+                  Le prix ne peut pas être négatif.
                 </small>
               </div>
             </div>
@@ -146,11 +151,11 @@
   </div>
 
   <div class="grid-two">
-    <div class="card section-card" *ngIf="showAddTank">
-      <h2>Add tank</h2>
+    <div class="lo-card section-card" *ngIf="showAddTank">
+      <h3 class="lo-card-title">Ajouter une cuve</h3>
       <form [formGroup]="tankForm">
         <p class="required-hint">
-          Les champs marques <span class="required-indicator">*</span> sont obligatoires pour creer la cuve.
+          Les champs marqués <span class="required-indicator">*</span> sont obligatoires pour créer la cuve.
         </p>
         <div class="field selector-field">
           <label>Produit de la station <span class="required-indicator">*</span></label>
@@ -186,7 +191,7 @@
                 </small>
               </div>
               <div class="field">
-                <label>Reference capteur</label>
+                <label>Référence capteur</label>
                 <input pInputText formControlName="sensor_reference" />
               </div>
               <div class="field">
@@ -197,7 +202,7 @@
                 </small>
               </div>
               <div class="field">
-                <label>Diametre</label>
+                <label>Diamètre</label>
                 <p-inputNumber formControlName="diameter" mode="decimal" [minFractionDigits]="0" [maxFractionDigits]="2"></p-inputNumber>
               </div>
               <div class="field">
@@ -210,14 +215,14 @@
       </form>
       <div class="footer-actions">
         <p-button label="Ajouter une ligne" [text]="true" icon="pi pi-plus" (onClick)="addTankRow()"></p-button>
-        <p-button label="Creer la cuve" [loading]="submitting" (onClick)="addTank()"></p-button>
+        <p-button label="Créer la cuve" [loading]="submitting" (onClick)="addTank()"></p-button>
       </div>
     </div>
 
-    <div class="card section-card" *ngIf="showAssignGauge">
-      <h2>Assign gauge</h2>
+    <div class="lo-card section-card" *ngIf="showAssignGauge">
+      <h3 class="lo-card-title">Assigner une jauge</h3>
       <p class="required-hint">
-        Le champ <span class="required-indicator">*</span> doit etre renseigne avant l'affectation.
+        Le champ <span class="required-indicator">*</span> doit être renseigné avant l'affectation.
       </p>
       <div [formGroup]="gaugeForm" formArrayName="assignments" class="stack-grid">
         <div class="gauge-row" *ngFor="let assignment of gaugeAssignments.controls; index as i" [formGroupName]="i">
@@ -242,9 +247,9 @@
   </div>
 
   <div class="grid-two">
-    <div class="card section-card">
-      <h2>Produits rattaches</h2>
-      <p-table [value]="stationProducts" styleClass="p-datatable-striped">
+    <div class="lo-card section-card">
+      <h3 class="lo-card-title">Produits rattachés</h3>
+      <div class="lo-table-card"><p-table [value]="stationProducts" styleClass="p-datatable-striped">
         <ng-template pTemplate="header">
           <tr>
             <th>Produit</th>
@@ -260,14 +265,15 @@
           </tr>
         </ng-template>
       </p-table>
+      </div>
     </div>
 
-    <div class="card section-card">
-      <h2>Cuves</h2>
-      <p-table [value]="tanks" styleClass="p-datatable-striped">
+    <div class="lo-card section-card">
+      <h3 class="lo-card-title">Cuves</h3>
+      <div class="lo-table-card"><p-table [value]="tanks" styleClass="p-datatable-striped">
         <ng-template pTemplate="header">
           <tr>
-            <th>Reference capteur</th>
+            <th>Référence capteur</th>
             <th>Produit</th>
             <th>Jauge</th>
           </tr>
@@ -281,19 +287,18 @@
         </ng-template>
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="3">Aucune cuve trouvee pour cette station.</td>
+            <td colspan="3">Aucune cuve trouvée pour cette station.</td>
           </tr>
         </ng-template>
       </p-table>
+      </div>
     </div>
   </div>
 </div>
 
 <ng-template #loadingTpl>
-  <div class="loading-card card">
-    <div class="lightgroup-loader">
-      <img class="lightgroup-loader__image" src="assets/img/logos/loading-oil-logo.gif" alt="Chargement..." />
-      <p class="lightgroup-loader__text">Chargement des donnees de la station...</p>
-    </div>
+  <div class="lo-state">
+    <img src="assets/img/logos/loading-oil-logo.gif" width="110" alt="Chargement..." />
+    <p>Chargement des données de la station…</p>
   </div>
 </ng-template>

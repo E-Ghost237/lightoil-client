@@ -1,42 +1,18 @@
-<div class="row card-title">
-    <div class="col-1 my-auto ml-3">
-        <ng-container *ngIf="getOnlineStatuSensor(); else elseTemplate">
-            <div class="spinner-grow text-success" role="status" pTooltip="Jauge active">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </ng-container>
-        <ng-template #elseTemplate>
-            <div class="spinner-grow text-secondary" role="status" pTooltip="Jauge inactive">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </ng-template>
-
-
+<div class="tank-card-head">
+    <span class="lo-dot" [ngClass]="getOnlineStatuSensor() ? 'live' : 'idle'"
+        [pTooltip]="getOnlineStatuSensor() ? 'Jauge active' : 'Jauge inactive'"
+        tooltipPosition="bottom"></span>
+    <div class="tank-card-title">
+        <strong>Cuve {{dataFromTankList?.tank?.sensor_reference}}</strong>
+        <span class="tank-card-product">{{dataFromTankList?.product?.name}}</span>
     </div>
-    <div class="col-1 ">
-        <div class="d-flex" style="height: 50px;">
-            <div class="vr"></div>
-          </div>
-    </div>
-
-    <div class="col-3 d-flex flex-column justify-content-between ">
-        <div class="h6 mb-1 ">
-            {{dataFromTankList?.tank?.sensor_reference}}
-        </div>
-        <div class="text-red-300 ">
-            {{getTotalNotification()+' notifications'}}
-        </div>
-    </div>
-    <div class="col-1">
-        <div class="d-flex" style="height: 50px;">
-            <div class="vr"></div>
-          </div>
-    </div>
-    <div class="col d-flex flex-column justify-content-center">
-        <span class="text-center h6">{{dataFromTankList?.product?.name}}</span>
-        <small *ngIf="getDepMessage()" class="text-danger anim-clip">
-            {{getDepMessage()}}
-        </small>
-
-    </div>
+    <span class="lo-chip" [ngClass]="getTotalNotification() > 0 ? 'warn' : 'offline'"
+        pTooltip="Notifications de la journée" tooltipPosition="bottom">
+        <i class="pi pi-bell"></i>
+        {{getTotalNotification()}}
+    </span>
+</div>
+<div class="tank-card-alert" *ngIf="getDepMessage()">
+    <i class="pi pi-exclamation-circle"></i>
+    <span>{{getDepMessage()}}</span>
 </div>
