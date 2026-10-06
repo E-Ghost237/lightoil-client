@@ -4,7 +4,7 @@
     <h4>Corrections des données d'analyse comparative</h4>
     <p class="text-500">
         Sélectionnez une station pour corriger les données saisies par le client. La modification n'est possible que
-        lorsque l'accès a été accordé par le Super Admin.
+        lorsque l'accès a été accordé.
     </p>
 
     <form [formGroup]="filtersForm" class="grid">
@@ -63,7 +63,7 @@
                 *ngIf="!isAccessOpen"
                 pButton
                 type="button"
-                label="Demander l'accès au Super Admin"
+                label="Demander l'accès"
                 icon="pi pi-send"
                 class="p-button-sm"
                 (click)="requestAccess()"
@@ -71,10 +71,6 @@
             ></button>
         </div>
     </div>
-    <p class="text-sm text-500 mt-2 mb-0" *ngIf="!isAccessOpen">
-        L'accès doit être accordé par un Super Admin (onglet "Corrections des données clients" &gt; "Gestion de
-        l'accès") avant de pouvoir corriger les données de cette station.
-    </p>
 </div>
 
 <!-- Sessions list (paginated) -->
@@ -192,7 +188,7 @@
             <i class="pi pi-clock"></i> Lectures horaires
         </h6>
         <p class="text-500 text-sm mt-0 mb-3">
-            Chaque lecture correspond à une saisie faite par le client à une heure donnée. La première lecture du jour
+            Chaque lecture correspond à une saisie à une heure donnée. La première lecture du jour
             sert d'état initial et la dernière d'état final dans le récapitulatif — corrigez les valeurs saisies par
             erreur, "Enregistrer toutes les modifications" ci-dessus, puis prévisualisez ou générez le récapitulatif.
         </p>
